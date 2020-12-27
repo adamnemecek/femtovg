@@ -14,6 +14,9 @@ use crate::{
     // Size,
 };
 
+mod wgpuvec;
+pub use wgpuvec::*;
+
 pub struct GPUCommandEncoder {
     rps: wgpu::RenderPipeline,
 }
@@ -1219,13 +1222,14 @@ impl WebGPU {
 //a     clear_color: Color,
 //a     stencil_texture: &mut MtlStencilTexture,
 //a     // view_size: Size,
-//a     vertex_buffer: &GPUVec<Vertex>,
+//a     vertex_buffer: &WGPUVec<Vertex>,
 //a     // view_size_buffer: &GPUVar<Size>,
 //a     view_size: Size,
 //a     // index_buffer: &IndexBuffer,
 //a     // uniform_buffer: &GPUVec<Params>,
 //a     // clear_buffer_on_flush: bool,
 //a ) -> &'a metal::RenderCommandEncoderRef {
+//a     todo!()
 //a     if true {
 //a         let desc = metal::RenderPassDescriptor::new();
 //a
