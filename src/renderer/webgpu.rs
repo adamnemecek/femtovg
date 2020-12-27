@@ -232,12 +232,15 @@ impl WebGPU {
 //a     }
 //a }
 //a
-//a impl Mtl {
-//a     pub fn new(
-//a         device: &metal::DeviceRef,
-//a         command_queue: &metal::CommandQueueRef,
-//a         layer: &metal::MetalLayerRef,
-//a     ) -> Self {
+impl WebGPU {
+    pub fn new1(
+        device: &wgpu::Device,
+        command_queue: &wgpu::Queue,
+//a        layer: &metal::MetalLayerRef,
+    ) -> Self {
+    todo!()
+    }
+}
 //a         let debug = cfg!(debug_assertions);
 //a         let antialias = true;
 //a

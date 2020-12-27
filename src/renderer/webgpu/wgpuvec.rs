@@ -15,6 +15,34 @@ impl<T: Copy> WGPUVec<T> {
         // }
         todo!()
     }
+
+    pub fn inner(&self) -> &wgpu::Buffer {
+        &self.inner
+    }
+
+    pub fn len(&self) -> usize {
+        todo!()
+    }
+
+    pub fn resize(&mut self, size: usize) {
+        todo!()
+    }
+
+    pub fn clear(&mut self) {
+        todo!()
+    }
+
+    pub fn extend_from_slice(&mut self, slice: &[T]) {
+        todo!()
+    }
+
+
+}
+
+impl<T: Copy> AsRef<T> for WGPUVec<T> {
+    fn as_ref(&self) -> &T {
+        todo!()
+    }
 }
 
 impl<T: Copy> std::ops::Index<usize> for WGPUVec<T> {
