@@ -1,7 +1,3 @@
-use wgpu::{
-
-};
-
 use super::{Command, CommandType, Params, RenderTarget, Renderer};
 use crate::{
     // image::ImageFlags,
@@ -19,7 +15,7 @@ use crate::{
 };
 
 pub struct GPUCommandEncoder {
-    rps: wgpu::RenderPipeline
+    rps: wgpu::RenderPipeline,
 }
 // pu bn
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
@@ -29,7 +25,6 @@ pub struct WGBlend {
     pub src_alpha: wgpu::BlendFactor,
     pub dst_alpha: wgpu::BlendFactor,
 }
-
 
 impl From<BlendFactor> for wgpu::BlendFactor {
     fn from(a: BlendFactor) -> Self {
@@ -61,7 +56,6 @@ impl From<CompositeOperationState> for WGBlend {
 }
 
 pub struct WebGPU {
-
     device: wgpu::Device, // not present in metalnanovg
     // metal has debug and antialias in the flags, opengl
     // has them as properties
@@ -77,7 +71,7 @@ pub struct WebGPU {
     // int flags?
     clear_color: Color,
     // view_size_buffer: GPUVar<Size>,
-//a    view_size: Size,
+    //a    view_size: Size,
     multiple_buffering: usize,
     // screen_view: [f32; 2],
     // vertex_descriptor: metal::VertexDescriptor,
@@ -87,56 +81,125 @@ pub struct WebGPU {
     //
     // each of fill and stroke have: stencil, anti_alias_stencil and shape_stencil
     //
-//a    default_stencil_state: metal::DepthStencilState,
-//a
-//a    fill_shape_stencil_state: metal::DepthStencilState,
-//a    fill_anti_alias_stencil_state_nonzero: wgpu::DepthStencilState,
-//a    fill_anti_alias_stencil_state_evenodd: metal::DepthStencilState,
-//a    fill_stencil_state_nonzero: metal::DepthStencilState,
-//a    fill_stencil_state_evenodd: metal::DepthStencilState,
-//a
-//a    stroke_shape_stencil_state: metal::DepthStencilState,
-//a    stroke_anti_alias_stencil_state: metal::DepthStencilState,
-//a    stroke_clear_stencil_state: metal::DepthStencilState,
-//a
-//a    // clear_rect_stencil_state: metal::DepthStencilState,
-//a    rps_cache: RPSCache,
-//a    current_rps: Option<Rc<RPS>>,
-//a    clear_stencil_rps: metal::RenderPipelineState,
-//a    // vert_func: metal::Function,
-//a    // frag_func: metal::Function,
-//a
-//a    // pipeline_pixel_format: metal::MTLPixelFormat,
-//a
-//a    // pipeline_state: Option<metal::RenderPipelineState>,
-//a    // stencil_only_pipeline_state: Option<metal::RenderPipelineState>,
-//a
-//a    // these are from mvgbuffer
-//a    stencil_texture: MtlStencilTexture,
-//a    index_buffer: GPUVec<u32>,
-//a    vertex_buffer: GPUVec<Vertex>,
-//a    // uniform_buffer: GPUVec<Params>,
-//a    render_target: RenderTarget,
-//a
-//a    // todo
-//a    pseudo_texture: MtlTexture,
-//a    gpu_encoder: GPUCommandEncoder,
-//a    // buffers_cache: MtlBuffersCache,
-//a
-//a    // // we render into this texture and blit with into the target texture
-//a    // // as opposed to the target texture directly in order to avoid creating
-//a    // // multiple encoders
-//a    // pseudo_sampler:
-//a
-//a    // clear_rect
-//a    // clear_rect_vert_func: metal::Function,
-//a    // clear_rect_frag_func: metal::Function,
-//a    // clear_rect_pipeline_state: Option<metal::RenderPipelineState>,
-//a
-//a    // Needed for screenshoting,
-//a    //
-//a    // last_rendered_texture: Option<metal::Texture>,
-//a    frame: usize,
+    //a    default_stencil_state: metal::DepthStencilState,
+    //a
+    //a    fill_shape_stencil_state: metal::DepthStencilState,
+    //a    fill_anti_alias_stencil_state_nonzero: wgpu::DepthStencilState,
+    //a    fill_anti_alias_stencil_state_evenodd: metal::DepthStencilState,
+    //a    fill_stencil_state_nonzero: metal::DepthStencilState,
+    //a    fill_stencil_state_evenodd: metal::DepthStencilState,
+    //a
+    //a    stroke_shape_stencil_state: metal::DepthStencilState,
+    //a    stroke_anti_alias_stencil_state: metal::DepthStencilState,
+    //a    stroke_clear_stencil_state: metal::DepthStencilState,
+    //a
+    //a    // clear_rect_stencil_state: metal::DepthStencilState,
+    //a    rps_cache: RPSCache,
+    //a    current_rps: Option<Rc<RPS>>,
+    //a    clear_stencil_rps: metal::RenderPipelineState,
+    //a    // vert_func: metal::Function,
+    //a    // frag_func: metal::Function,
+    //a
+    //a    // pipeline_pixel_format: metal::MTLPixelFormat,
+    //a
+    //a    // pipeline_state: Option<metal::RenderPipelineState>,
+    //a    // stencil_only_pipeline_state: Option<metal::RenderPipelineState>,
+    //a
+    //a    // these are from mvgbuffer
+    //a    stencil_texture: MtlStencilTexture,
+    //a    index_buffer: GPUVec<u32>,
+    //a    vertex_buffer: GPUVec<Vertex>,
+    //a    // uniform_buffer: GPUVec<Params>,
+    //a    render_target: RenderTarget,
+    //a
+    //a    // todo
+    //a    pseudo_texture: MtlTexture,
+    //a    gpu_encoder: GPUCommandEncoder,
+    //a    // buffers_cache: MtlBuffersCache,
+    //a
+    //a    // // we render into this texture and blit with into the target texture
+    //a    // // as opposed to the target texture directly in order to avoid creating
+    //a    // // multiple encoders
+    //a    // pseudo_sampler:
+    //a
+    //a    // clear_rect
+    //a    // clear_rect_vert_func: metal::Function,
+    //a    // clear_rect_frag_func: metal::Function,
+    //a    // clear_rect_pipeline_state: Option<metal::RenderPipelineState>,
+    //a
+    //a    // Needed for screenshoting,
+    //a    //
+    //a    // last_rendered_texture: Option<metal::Texture>,
+    //a    frame: usize,
+}
+
+impl WebGPU {
+    pub fn new(device: &wgpu::Device) -> Self {
+        //a    default_stencil_state: metal::DepthStencilState,
+        //a
+        //a    fill_shape_stencil_state: metal::DepthStencilState,
+        //a    fill_anti_alias_stencil_state_nonzero: wgpu::DepthStencilState,
+        //a    fill_anti_alias_stencil_state_evenodd: metal::DepthStencilState,
+        //a    fill_stencil_state_nonzero: metal::DepthStencilState,
+        //a    fill_stencil_state_evenodd: metal::DepthStencilState,
+        //a
+        //a    stroke_shape_stencil_state: metal::DepthStencilState,
+        //a    stroke_anti_alias_stencil_state: metal::DepthStencilState,
+        //a    stroke_clear_stencil_state: metal::DepthStencilState,
+        // let vs_src = include_str!("shader.vert");
+        // let fs_src = include_str!("shader.frag");
+        // let mut compiler = shaderc::Compiler::new().unwrap();
+        // let vs_spirv = compiler.compile_into_spirv(vs_src, shaderc::ShaderKind::Vertex, "shader.vert", "main", None).unwrap();
+        // let fs_spirv = compiler.compile_into_spirv(fs_src, shaderc::ShaderKind::Fragment, "shader.frag", "main", None).unwrap();
+        // let vs_module = device.create_shader_module(wgpu::util::make_spirv(&vs_spirv.as_binary_u8()));
+        // let fs_module = device.create_shader_module(wgpu::util::make_spirv(&fs_spirv.as_binary_u8()));
+        let vs_module: wgpu::ShaderModule = { todo!() };
+        let fs_module: wgpu::ShaderModule = { todo!() };
+        let sc_desc: wgpu::SwapChainDescriptor = { todo!() };
+
+        let render_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: Some("Render Pipeline Layout"),
+            bind_group_layouts: &[],
+            push_constant_ranges: &[],
+        });
+        let default_state = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("label"),
+            layout: Some(&render_pipeline_layout),
+            vertex_stage: wgpu::ProgrammableStageDescriptor {
+                module: &vs_module,
+                entry_point: "main", // 1.
+            },
+            fragment_stage: Some(wgpu::ProgrammableStageDescriptor {
+                // 2.
+                module: &fs_module,
+                entry_point: "main",
+            }),
+            rasterization_state: Some(wgpu::RasterizationStateDescriptor {
+                front_face: wgpu::FrontFace::Ccw,
+                cull_mode: wgpu::CullMode::Back,
+                depth_bias: 0,
+                depth_bias_slope_scale: 0.0,
+                depth_bias_clamp: 0.0,
+                clamp_depth: false,
+            }),
+            primitive_topology: wgpu::PrimitiveTopology::TriangleList,
+            color_states: &[wgpu::ColorStateDescriptor {
+                format: sc_desc.format,
+                color_blend: wgpu::BlendDescriptor::REPLACE,
+                alpha_blend: wgpu::BlendDescriptor::REPLACE,
+                write_mask: wgpu::ColorWrite::ALL,
+            }],
+            depth_stencil_state: None,
+            vertex_state: wgpu::VertexStateDescriptor {
+                index_format: wgpu::IndexFormat::Uint16, // 3.
+                vertex_buffers: &[],                     // 4.
+            },
+            sample_count: 1,
+            sample_mask: !0,
+            alpha_to_coverage_enabled: true,
+        });
+        todo!()
+    }
 }
 
 //a impl From<CGSize> for Size {
