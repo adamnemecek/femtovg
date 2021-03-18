@@ -48,7 +48,7 @@ impl WGPU {
         let default_stencil_state = 0;
 
         let clear_stencil_state = {
-            let stencil_state = wgpu::StencilFaceState {
+            let front = wgpu::StencilFaceState {
                 compare: wgpu::CompareFunction::Always,
                 fail_op: wgpu::StencilOperation::Keep,
                 depth_fail_op: wgpu::StencilOperation::Keep,
@@ -59,8 +59,14 @@ impl WGPU {
                 format: wgpu::TextureFormat::Depth32Float,
                 depth_write_enabled: false,
                 depth_compare: wgpu::CompareFunction::LessEqual,
-                stencil: wgpu::StencilState::default(),
-                bias: wgpu::DepthBiasState::default(),
+                stencil: wgpu::StencilState {
+                    front,
+                    //todo: is default the as None?
+                    back: Default::default(),
+                    read_mask: 0,
+                    write_mask: 0,
+                },
+                bias: Default::default(),
                 clamp_depth: false,
             };
         };
