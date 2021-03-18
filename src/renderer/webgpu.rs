@@ -1,4 +1,5 @@
 mod wgpu_vec;
+use wgpu::util::RenderEncoder;
 pub use wgpu_vec::*;
 
 mod wgpu_queue;
@@ -49,6 +50,9 @@ pub struct WGPU {
     stroke_shape_stencil_state: wgpu::RenderPipeline,
     stroke_anti_alias_stencil_state: wgpu::RenderPipeline,
     stroke_clear_stencil_state: wgpu::RenderPipeline,
+
+    convex_fill1: wgpu::RenderPipeline,
+    convex_fill2: wgpu::RenderPipeline,
 
     stencil_texture: WGPUStencilTexture,
     index_buffer: WGPUVec<u32>,
@@ -106,6 +110,74 @@ impl WGPU {
         // }
     }
 
+    fn convex_fill<'a>(
+        &'a mut self,
+        pass: &mut wgpu::RenderPass<'a>,
+        images: &ImageStore<WGPUTexture>,
+        cmd: &Command,
+        paint: Params,
+    ) {
+        // encoder.push_debug_group("convex_fill");
+
+        for drawable in &cmd.drawables {
+            if let Some((start, count)) = drawable.fill_verts {
+                //
+                pass.set_pipeline(&self.convex_fill1);
+
+                let offset = self.index_buffer.len();
+                let triangle_fan_index_count = self
+                    .index_buffer
+                    .extend_with_triange_fan_indices_cw(start as u32, count as u32);
+
+                // encoder.begin_render_pass(desc)
+                // render_pass.draw_indexed(indices, base_vertex, instances)
+                // pass.set_index_buffer(buffer_slice, );
+                let fmt = wgpu::IndexFormat::Uint32;
+                // pass.set_index_buffer(self.index_buffer, fmt);
+                pass.draw_indexed(0..0, 0, 0..0);
+            }
+
+            if let Some((start, count)) = drawable.stroke_verts {
+                pass.set_pipeline(&self.convex_fill2);
+                let vertex_range = start as _..(start + count) as _;
+                pass.draw(vertex_range, 0..0);
+            }
+        }
+    }
+
+    fn concave_fill<'a>(&'a mut self, pass: &mut wgpu::RenderPass<'a>, images: &ImageStore<WGPUTexture>) {}
+
+    fn stroke<'a>(
+        &'a mut self,
+        pass: &mut wgpu::RenderPass<'a>,
+        images: &ImageStore<WGPUTexture>,
+        cmd: &Command,
+        paint: Params,
+    ) {
+        //
+    }
+
+    fn stencil_stroke<'a>(
+        &'a mut self,
+        pass: &mut wgpu::RenderPass<'a>,
+        images: &ImageStore<WGPUTexture>,
+        cmd: &Command,
+        paint1: Params,
+        paint2: Params,
+    ) {
+        //
+    }
+
+    fn triangles<'a>(
+        &'a mut self,
+        pass: &mut wgpu::RenderPass<'a>,
+        images: &ImageStore<WGPUTexture>,
+        cmd: &Command,
+        paint: Params,
+    ) {
+        //
+    }
+
     fn set_uniforms(
         &self,
         encoder: &wgpu::CommandEncoder,
@@ -115,19 +187,9 @@ impl WGPU {
     ) {
     }
 
-    fn convex_fill(
-        &mut self,
-        encoder: &mut wgpu::CommandEncoder,
-        images: &ImageStore<WGPUTexture>,
-        cmd: &Command,
-        paint: Params,
-    ) {
-        // encoder.push_debug_group("convex_fill");
+    fn clear_rect<'a>(&'a mut self, pass: &mut wgpu::RenderPass<'a>, images: &ImageStore<WGPUTexture>) {}
 
-        for drawable in &cmd.drawables {
-            if let Some((start, count)) = drawable.fill_verts {}
-        }
-    }
+    pub fn set_target(&mut self) {}
 }
 
 impl Renderer for WGPU {
