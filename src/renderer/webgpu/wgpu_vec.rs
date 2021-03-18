@@ -1,6 +1,6 @@
 use super::WGPUContext;
 
-pub struct WGPUVec<T> {
+pub struct WGPUVec<T: Copy> {
     cpu: Vec<T>,
     gpu: wgpu::Buffer,
     ph: std::marker::PhantomData<T>,
@@ -23,7 +23,15 @@ impl<T: Copy> WGPUVec<T> {
         self.cpu.extend_from_slice(other);
     }
 
-    pub fn upload(&mut self) {}
+    pub fn upload(&mut self) {
+        self.gpu.destroy()
+    }
+}
+
+impl<T: Copy> Drop for WGPUVec<T> {
+    fn drop(&mut self) {
+        self.gpu.destroy()
+    }
 }
 
 impl WGPUVec<u32> {

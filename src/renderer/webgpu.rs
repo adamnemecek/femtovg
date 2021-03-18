@@ -145,7 +145,15 @@ impl WGPU {
         }
     }
 
-    fn concave_fill<'a>(&'a mut self, pass: &mut wgpu::RenderPass<'a>, images: &ImageStore<WGPUTexture>) {}
+    fn concave_fill<'a>(
+        &'a mut self,
+        pass: &mut wgpu::RenderPass<'a>,
+        images: &ImageStore<WGPUTexture>,
+        cmd: &Command,
+        stencil_paint: Params,
+        fill_paint: Params,
+    ) {
+    }
 
     fn stroke<'a>(
         &'a mut self,
