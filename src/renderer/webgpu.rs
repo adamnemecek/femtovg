@@ -7,6 +7,9 @@ pub use wgpu_queue::*;
 mod wgpu_texture;
 pub use wgpu_texture::*;
 
+mod wgpu_stencil_texture;
+pub use wgpu_stencil_texture::*;
+
 use crate::{
     renderer::{
         ImageId,
@@ -35,7 +38,24 @@ use imgref::ImgVec;
 use rgb::RGBA8;
 use std::borrow::Cow;
 
-pub struct WGPU {}
+pub struct WGPU {
+    default_stencil_state: wgpu::RenderPipeline,
+    fill_shape_stencil_state: wgpu::RenderPipeline,
+    fill_anti_alias_stencil_state_nonzero: wgpu::RenderPipeline,
+    fill_anti_alias_stencil_state_evenodd: wgpu::RenderPipeline,
+    fill_stencil_state_nonzero: wgpu::RenderPipeline,
+    fill_stencil_state_evenodd: wgpu::RenderPipeline,
+
+    stroke_shape_stencil_state: wgpu::RenderPipeline,
+    stroke_anti_alias_stencil_state: wgpu::RenderPipeline,
+    stroke_clear_stencil_state: wgpu::RenderPipeline,
+
+    stencil_texture: WGPUStencilTexture,
+    index_buffer: WGPUVec<u32>,
+    vertex_buffer: WGPUVec<Vertex>,
+    render_target: RenderTarget,
+    pseudo_texture: WGPUTexture,
+}
 
 impl WGPU {
     pub fn new(device: &wgpu::Device) -> Self {
@@ -71,14 +91,44 @@ impl WGPU {
             };
         };
 
+        let fill_shape_stencil_state = 0;
+        let fill_anti_alias_stencil_state_nonzero = 0;
+        let fill_anti_alias_stencil_state_evenodd = 0;
+        let fill_stencil_state_nonzero = 0;
+        let fill_stencil_state_evenodd = 0;
+        let stroke_shape_stencil_state = 0;
+        let stroke_anti_alias_stencil_state = 0;
+        let stroke_clear_stencil_state = 0;
+
         todo!()
         // Self {
 
         // }
     }
-}
 
-pub struct WGPUTexture {}
+    fn set_uniforms(
+        &self,
+        encoder: &wgpu::CommandEncoder,
+        images: &ImageStore<WGPUTexture>,
+        image_tex: Option<ImageId>,
+        alpha_tex: Option<ImageId>,
+    ) {
+    }
+
+    fn convex_fill(
+        &mut self,
+        encoder: &mut wgpu::CommandEncoder,
+        images: &ImageStore<WGPUTexture>,
+        cmd: &Command,
+        paint: Params,
+    ) {
+        // encoder.push_debug_group("convex_fill");
+
+        for drawable in &cmd.drawables {
+            if let Some((start, count)) = drawable.fill_verts {}
+        }
+    }
+}
 
 impl Renderer for WGPU {
     type Image = WGPUTexture;
@@ -103,7 +153,7 @@ impl Renderer for WGPU {
     }
 
     fn delete_image(&mut self, image: Self::Image) {
-        todo!()
+        image.delete();
     }
 
     fn screenshot(&mut self) -> Result<ImgVec<RGBA8>, ErrorKind> {

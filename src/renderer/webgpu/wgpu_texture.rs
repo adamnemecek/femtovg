@@ -23,17 +23,17 @@ pub struct WGPUTexture {
     info: ImageInfo,
     tex: wgpu::Texture,
     sampler: wgpu::Sampler,
-    context: WGPUContext,
+    ctx: WGPUContext,
 }
 
 impl WGPUTexture {
-    pub fn new_pseudo_texture(device: &WGPUContext) -> Self {
+    pub fn new_pseudo_texture(ctx: &WGPUContext) -> Self {
         todo!()
     }
 
-    pub fn new(context: &WGPUContext, info: ImageInfo) -> Self {
+    pub fn new(ctx: &WGPUContext, info: ImageInfo) -> Self {
         assert!(info.format() != PixelFormat::Rgb8);
-        let context = context.clone();
+        let ctx = ctx.clone();
 
         let generate_mipmaps = info.flags().contains(ImageFlags::GENERATE_MIPMAPS);
         let nearest = info.flags().contains(ImageFlags::NEAREST);
@@ -45,7 +45,7 @@ impl WGPUTexture {
         let mip_level_count = if generate_mipmaps { 0 } else { 0 };
 
         // todo: what's the difference between texture and texture_view
-        let tex = context.device().create_texture(&wgpu::TextureDescriptor {
+        let tex = ctx.device().create_texture(&wgpu::TextureDescriptor {
             label: Some("Low Resolution Target"),
             size: wgpu::Extent3d {
                 width: 0,
@@ -90,11 +90,11 @@ impl WGPUTexture {
             wgpu::AddressMode::ClampToEdge
         };
 
-        let sampler = context.device().create_sampler(&sampler_desc);
+        let sampler = ctx.device().create_sampler(&sampler_desc);
 
         Self {
             sampler,
-            context,
+            ctx,
             info,
             tex,
         }
@@ -108,5 +108,9 @@ impl WGPUTexture {
 
     pub fn resize(&mut self) {
         todo!()
+    }
+
+    pub fn delete(&self) {
+        self.tex.destroy()
     }
 }
