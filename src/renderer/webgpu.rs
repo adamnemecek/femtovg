@@ -230,3 +230,19 @@ impl Renderer for WGPU {
         todo!()
     }
 }
+
+
+fn new_render_command_encoder<'a>(
+    command_buffer: &'a wgpu::CommandBuffer,
+    clear_color: Color,
+    stencil_texture: &mut WGPUStencilTexture,
+    vertex_buffer: &WGPUVec<Vertex>,
+) {
+    let desc = wgpu::RenderPassDescriptor {
+        label: None,
+        color_attachments: &[],
+        depth_stencil_attachment: None
+    };
+
+    
+}

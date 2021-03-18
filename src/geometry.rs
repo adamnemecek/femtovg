@@ -226,6 +226,50 @@ impl IndexMut<usize> for Transform2D {
     }
 }
 
+
+#[repr(C)]
+#[derive(Copy, Clone, Default, Debug, PartialEq, PartialOrd)]
+pub struct Size {
+    pub w: f32,
+    pub h: f32,
+}
+
+impl Size {
+    pub fn new(w: f32, h: f32) -> Self {
+        Self { w, h }
+    }
+
+    pub fn contains(&self, other: &Self) -> bool {
+        self.w >= other.w && self.h >= other.h
+        // self.w > other.w && self.h > other.h
+    }
+
+    pub fn zero() -> Self {
+        Self { w: 0.0, h: 0.0 }
+    }
+
+    pub fn max(&self, other: &Self) -> Self {
+        Self {
+            w: self.w.max(other.w),
+            h: self.h.max(other.h),
+        }
+    }
+}
+
+impl std::ops::Mul<f32> for Size {
+    type Output = Self;
+    fn mul(self, rhs: f32) -> Self::Output {
+        Self::new(self.w * rhs, self.h * rhs)
+    }
+}
+
+impl std::ops::Div<f32> for Size {
+    type Output = Self;
+    fn div(self, rhs: f32) -> Self::Output {
+        Self::new(self.w / rhs, self.h / rhs)
+    }
+}
+
 #[derive(Copy, Clone, Default, Debug, PartialEq, PartialOrd)]
 pub struct Rect {
     pub x: f32,
