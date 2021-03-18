@@ -24,6 +24,8 @@ use crate::{
     ImageInfo,
     ImageSource,
     ImageStore,
+    Rect,
+    Size,
 };
 
 use super::{
@@ -59,6 +61,8 @@ pub struct WGPU {
     vertex_buffer: WGPUVec<Vertex>,
     render_target: RenderTarget,
     pseudo_texture: WGPUTexture,
+
+    view_size: Size,
 }
 
 impl WGPU {
@@ -163,6 +167,12 @@ impl WGPU {
         paint: Params,
     ) {
         //
+        self.set_uniforms(pass, images, cmd.image, cmd.alpha_mask);
+        for drawable in &cmd.drawables {
+            if let Some((start, count)) = drawable.stroke_verts {
+                // pass.draw()
+            }
+        }
     }
 
     fn stencil_stroke<'a>(
@@ -174,6 +184,7 @@ impl WGPU {
         paint2: Params,
     ) {
         //
+        // pass.set_pipeline(pipeline);
     }
 
     fn triangles<'a>(
@@ -186,28 +197,61 @@ impl WGPU {
         //
     }
 
-    fn set_uniforms(
+    fn set_uniforms<'a>(
         &self,
-        encoder: &wgpu::CommandEncoder,
+        pass: &wgpu::RenderPass<'a>,
         images: &ImageStore<WGPUTexture>,
         image_tex: Option<ImageId>,
         alpha_tex: Option<ImageId>,
     ) {
     }
 
-    fn clear_rect<'a>(&'a mut self, pass: &mut wgpu::RenderPass<'a>, images: &ImageStore<WGPUTexture>) {}
+    fn clear_rect<'a>(
+        &'a mut self,
+        pass: &mut wgpu::RenderPass<'a>,
+        images: &ImageStore<WGPUTexture>,
+        x: u32,
+        y: u32,
+        width: u32,
+        height: u32,
+        color: Color,
+    ) {
+        //
+        let ndc_rect = Rect {
+            x: -1.0,
+            y: -1.0,
+            w: 2.0,
+            h: 2.0,
+        };
+    }
 
-    pub fn set_target(&mut self) {}
+    pub fn set_target(&mut self, images: &ImageStore<WGPUTexture>, target: RenderTarget) {
+        //
+        if self.render_target == target {}
+
+        let size = match target {
+            RenderTarget::Screen => todo!(),
+            RenderTarget::Image(id) => {
+                let texture = images.get(id).unwrap();
+                texture.size()
+            }
+        };
+        self.render_target = target;
+        self.view_size = size;
+    }
 }
 
 impl Renderer for WGPU {
     type Image = WGPUTexture;
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
-        todo!()
+        let size = Size::new(width as f32, height as f32);
+        self.view_size = size;
     }
+
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         todo!()
     }
+
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
         todo!()
     }
@@ -231,18 +275,67 @@ impl Renderer for WGPU {
     }
 }
 
+impl From<Color> for wgpu::Color {
+    fn from(a: Color) -> Self {
+        todo!()
+    }
+}
+
+pub struct RenderPass<'a> {
+    inner: wgpu::RenderPass<'a>,
+}
+
+impl<'a> RenderPass<'a> {
+    pub fn new() -> Self {
+        todo!()
+    }
+
+    pub fn set_viewport(&self) {
+        // self.inner.set_viewport(x, y, w, h, min_depth, max_depth)
+    }
+
+    pub fn set_fragment(&self) {
+        todo!()
+        // self.inner.set_push_constants(stages, offset, data)
+    }
+}
 
 fn new_render_command_encoder<'a>(
+    ctx: WGPUContext,
+    target: &wgpu::TextureView,
     command_buffer: &'a wgpu::CommandBuffer,
     clear_color: Color,
     stencil_texture: &mut WGPUStencilTexture,
     vertex_buffer: &WGPUVec<Vertex>,
-) {
+) -> wgpu::CommandEncoder {
     let desc = wgpu::RenderPassDescriptor {
         label: None,
-        color_attachments: &[],
-        depth_stencil_attachment: None
+        color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
+            attachment: target,
+            resolve_target: None,
+            ops: wgpu::Operations {
+                load: wgpu::LoadOp::Clear(clear_color.into()),
+                store: false,
+            },
+        }],
+        depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachmentDescriptor {
+            attachment: stencil_texture.tex(), //&'a TextureView,
+            depth_ops: Some(wgpu::Operations {
+                load: wgpu::LoadOp::Load,
+                store: false,
+            }), //Option<Operations<f32>>,
+            stencil_ops: None,                 //Option<Operations<u32>>,
+        }),
     };
 
-    
+    // todo set cull mode on the
+
+    let encoder = ctx
+        .device()
+        .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+
+    // encoder.set_vertex_buffer(0, vertex_buffer.as_slice());
+    // encoder
+
+    encoder
 }

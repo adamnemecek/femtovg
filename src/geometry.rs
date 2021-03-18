@@ -226,7 +226,6 @@ impl IndexMut<usize> for Transform2D {
     }
 }
 
-
 #[repr(C)]
 #[derive(Copy, Clone, Default, Debug, PartialEq, PartialOrd)]
 pub struct Size {

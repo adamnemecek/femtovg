@@ -26,10 +26,20 @@ impl<T: Copy> WGPUVec<T> {
     pub fn upload(&mut self) {
         self.gpu.destroy()
     }
+
+    pub fn as_slice<'a>(&'a self) -> wgpu::BufferSlice<'a> {
+        self.gpu.slice(0..0)
+    }
+
+    // pub fn as_mut_slice<'a>(&'a mut self) -> wgpu::BufferMutSlice<'a> {
+    //     todo!()
+    // }
 }
 
 impl<T: Copy> Drop for WGPUVec<T> {
     fn drop(&mut self) {
+        let a = vec![1];
+
         self.gpu.destroy()
     }
 }

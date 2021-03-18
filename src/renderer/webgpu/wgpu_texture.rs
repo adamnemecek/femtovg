@@ -4,6 +4,7 @@ use crate::{
     ImageInfo,
     ImageSource,
     PixelFormat,
+    Size,
 };
 
 use super::WGPUContext;
@@ -107,6 +108,10 @@ impl WGPUTexture {
     }
 
     pub fn resize(&mut self) {
+        todo!()
+    }
+
+    pub fn size(&self) -> Size {
         todo!()
     }
 
