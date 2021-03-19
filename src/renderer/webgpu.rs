@@ -291,26 +291,26 @@ impl WGPU {
     //     }
     // }
 
-    fn stroke<'a>(
-        &'a mut self,
-        pass: &mut wgpu::RenderPass<'a>,
-        images: &ImageStore<WGPUTexture>,
-        cmd: &Command,
-        paint: Params,
-    ) {
-        //
-        // draws triangle strip
-        self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
-        for drawable in &cmd.drawables {
-            if let Some((start, count)) = drawable.stroke_verts {
-                // pass.draw()
-            }
-        }
-    }
+    // fn stroke<'a>(
+    //     &'a mut self,
+    //     pass: &mut wgpu::RenderPass<'a>,
+    //     images: &ImageStore<WGPUTexture>,
+    //     cmd: &Command,
+    //     paint: Params,
+    // ) {
+    //     //
+    //     // draws triangle strip
+    //     self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
+    //     for drawable in &cmd.drawables {
+    //         if let Some((start, count)) = drawable.stroke_verts {
+    //             // pass.draw()
+    //         }
+    //     }
+    // }
 
-    fn stencil_stroke<'a>(
+    fn stencil_stroke<'a, 'b>(
         &'a mut self,
-        pass: &mut wgpu::RenderPass<'a>,
+        pass: &'a mut wgpu::RenderPass<'b>,
         images: &ImageStore<WGPUTexture>,
         cmd: &Command,
         paint1: Params,
@@ -395,17 +395,6 @@ fn new_pass_descriptor<'a, 'b>() -> wgpu::RenderPassDescriptor<'a, 'b> {
     todo!()
 }
 
-// fn convex_fill<'a>(
-//     pass: &mut wgpu::RenderPass<'a>,
-//     images: &ImageStore<WGPUTexture>,
-//     cmd: &Command,
-//     paint: Params,
-//     vertex: &WGPUVec<Vertex>,
-//     index_buffer: &WGPUVec<u32>,
-//     // state: &wgpu::RenderPipeline,
-// ) {
-// }
-
 fn convex_fill<'a, 'b>(
     // &'a mut self,
     pass: &'a mut wgpu::RenderPass<'b>,
@@ -443,6 +432,40 @@ fn convex_fill<'a, 'b>(
             pass.draw(vertex_range, 0..0);
         }
     }
+}
+
+fn stroke<'a, 'b>(
+    pass: &'a mut wgpu::RenderPass<'b>,
+    images: &ImageStore<WGPUTexture>,
+    cmd: &Command,
+    paint: Params,
+    vertex: &WGPUVec<Vertex>,
+    index_buffer: &mut WGPUVec<u32>,
+    state: &'b std::rc::Rc<WGPUPipelineState>,
+) {
+    //
+    // draws triangle strip
+    // self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
+    // for drawable in &cmd.drawables {
+    //     if let Some((start, count)) = drawable.stroke_verts {
+    //         // pass.draw()
+    //     }
+    // }
+}
+
+fn stencil_stroke<'a, 'b>(
+    pass: &'a mut wgpu::RenderPass<'b>,
+    images: &ImageStore<WGPUTexture>,
+    cmd: &Command,
+    paint1: Params,
+    paint2: Params,
+    vertex: &WGPUVec<Vertex>,
+    index_buffer: &mut WGPUVec<u32>,
+    state: &'b std::rc::Rc<WGPUPipelineState>,
+) {
+    //
+    // pass.set_pipeline(pipeline);
+    // self.set_uniforms(pass, images, image_tex, alpha_tex)
 }
 
 fn concave_fill<'a, 'b>(
@@ -516,9 +539,29 @@ impl Renderer for WGPU {
                         stencil_params,
                         fill_params,
                     } => {
-                        todo!()
+                        // self.stencil_stroke(&mut pass, images, cmd, *stencil_params, *fill_params);
                     }
                     CommandType::Stroke { params } => {
+                        stroke(
+                            &mut pass,
+                            images,
+                            cmd,
+                            *params,
+                            &self.vertex_buffer,
+                            &mut self.index_buffer,
+                            self.cache.any(),
+                        );
+                    }
+                    CommandType::StencilStroke { params1, params2 } => {
+                        todo!()
+                    }
+                    CommandType::Triangles { params } => {
+                        todo!()
+                    }
+                    CommandType::ClearRect { .. } => {
+                        todo!()
+                    }
+                    CommandType::SetRenderTarget(target) => {
                         todo!()
                     }
                     _ => todo!(),
@@ -554,8 +597,13 @@ impl Renderer for WGPU {
 }
 
 impl From<Color> for wgpu::Color {
-    fn from(a: Color) -> Self {
-        todo!()
+    fn from(c: Color) -> Self {
+        Self {
+            r: c.r as _,
+            g: c.g as _,
+            b: c.b as _,
+            a: c.a as _,
+        }
     }
 }
 
