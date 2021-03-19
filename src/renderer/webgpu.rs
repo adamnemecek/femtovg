@@ -254,13 +254,12 @@ impl WGPU {
     }
 
     fn convex_fill<'a, 'b>(
-        &'a mut self,
-        pass: &'b mut wgpu::RenderPass<'b>,
+        &'b mut self,
+        pass: &'a mut wgpu::RenderPass<'b>,
         images: &ImageStore<WGPUTexture>,
         cmd: &Command,
         paint: Params,
-    ) where
-        'a: 'b,
+    ) where 'b : 'a
     {
         // encoder.push_debug_group("convex_fill");
 
@@ -404,14 +403,52 @@ fn new_pass_descriptor<'a, 'b>() -> wgpu::RenderPassDescriptor<'a, 'b> {
     todo!()
 }
 
-fn convex_fill3<'a>(
-    pass: &mut wgpu::RenderPass<'a>,
+// fn convex_fill<'a>(
+//     pass: &mut wgpu::RenderPass<'a>,
+//     images: &ImageStore<WGPUTexture>,
+//     cmd: &Command,
+//     paint: Params,
+//     vertex: &WGPUVec<Vertex>,
+//     index_buffer: &WGPUVec<u32>,
+//     // state: &wgpu::RenderPipeline,
+// ) {
+// }
+
+fn convex_fill<'a, 'b>(
+    // &'a mut self,
+    pass: &'a mut wgpu::RenderPass<'b>,
     images: &ImageStore<WGPUTexture>,
     cmd: &Command,
     paint: Params,
     vertex: &WGPUVec<Vertex>,
-    // state: &wgpu::RenderPipeline,
-) {
+    index_buffer: &mut WGPUVec<u32>,
+    convex_fill_pipeline: &'b wgpu::RenderPipeline,
+    convex_fill2_pipeline: &'b wgpu::RenderPipeline,
+) where 'b : 'a {
+    // encoder.push_debug_group("convex_fill");
+
+    for drawable in &cmd.drawables {
+        if let Some((start, count)) = drawable.fill_verts {
+            //
+            pass.set_pipeline(&convex_fill_pipeline);
+
+            let offset = index_buffer.len();
+            let triangle_fan_index_count = index_buffer.extend_with_triange_fan_indices_cw(start as u32, count as u32);
+
+            // encoder.begin_render_pass(desc)
+            // render_pass.draw_indexed(indices, base_vertex, instances)
+            // pass.set_index_buffer(buffer_slice, );
+            let fmt = wgpu::IndexFormat::Uint32;
+            // pass.set_index_buffer(self.index_buffer, fmt);
+            pass.draw_indexed(0..0, 0, 0..0);
+        }
+
+        if let Some((start, count)) = drawable.stroke_verts {
+            pass.set_pipeline(&convex_fill2_pipeline);
+            let vertex_range = start as _..(start + count) as _;
+            pass.draw(vertex_range, 0..0);
+        }
+    }
 }
 
 impl Renderer for WGPU {
@@ -457,12 +494,23 @@ impl Renderer for WGPU {
                 match &cmd.cmd_type {
                     CommandType::ConvexFill { params } => {
                         // self.convex_fill(&mut pass, images, cmd, *params);
-                        convex_fill3(&mut pass, images, cmd, *params, &self.vertex_buffer);
+                        convex_fill(
+                            &mut pass,
+                            images,
+                            cmd,
+                            *params,
+                            &self.vertex_buffer,
+                            &mut self.index_buffer,
+                            &self.convex_fill1,
+                            &self.convex_fill2,
+                        );
+                        // self.convex_fill(&mut pass, images, cmd, *params);
                     }
                     CommandType::ConcaveFill {
                         stencil_params,
                         fill_params,
                     } => {
+                        
                         todo!()
                     }
                     CommandType::Stroke { params } => {
