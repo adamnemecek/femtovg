@@ -215,13 +215,14 @@ fn stroke_anti_alias_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthSt
         depth_compare: wgpu::CompareFunction::Less,
         stencil: wgpu::StencilState {
             front: wgpu::StencilFaceState {
-                compare: wgpu::CompareFunction::NotEqual,
-                fail_op: wgpu::StencilOperation::Zero,
-                depth_fail_op: wgpu::StencilOperation::Zero,
-                pass_op: wgpu::StencilOperation::Zero,
+                // compare: wgpu::CompareFunction::NotEqual,
+                // fail_op: wgpu::StencilOperation::Zero,
+                // depth_fail_op: wgpu::StencilOperation::Zero,
+                pass_op: wgpu::StencilOperation::Keep,
+                ..Default::default()
             },
             back: wgpu::StencilFaceState::default(),
-            read_mask: 0x1,
+            read_mask: 0xff,
             write_mask: 0xff,
         },
         bias: wgpu::DepthBiasState::default(),
@@ -233,7 +234,7 @@ fn stroke_clear_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencil
     wgpu::DepthStencilState {
         format,
         depth_write_enabled: false,
-        depth_compare: wgpu::CompareFunction::Less,
+        depth_compare: wgpu::CompareFunction::Always,
         stencil: wgpu::StencilState {
             front: wgpu::StencilFaceState {
                 compare: wgpu::CompareFunction::Always,
@@ -242,7 +243,7 @@ fn stroke_clear_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencil
                 pass_op: wgpu::StencilOperation::Zero,
             },
             back: wgpu::StencilFaceState::default(),
-            read_mask: 0x1,
+            read_mask: 0xff,
             write_mask: 0xff,
         },
         bias: wgpu::DepthBiasState::default(),
@@ -250,12 +251,10 @@ fn stroke_clear_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencil
     }
 }
 
-
 pub struct WGPUPipelineState {
     blend_func: WGPUBlend,
     texture_format: wgpu::TextureFormat,
 }
-
 
 impl WGPUPipelineState {
     pub fn new(
@@ -265,7 +264,6 @@ impl WGPUPipelineState {
         shader: &wgpu::ShaderModule,
         // vertex_desc: &wgpu::VertexBufferLayout,
     ) -> Self {
-
         let antialias = create_pipeline(
             ctx,
             None,
