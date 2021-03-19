@@ -29,7 +29,9 @@ pub struct WGPUTexture {
 
 impl WGPUTexture {
     pub fn new_pseudo_texture(ctx: &WGPUContext) -> Self {
-        todo!()
+        let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
+        Self::new(ctx, info)
+
     }
 
     pub fn new(ctx: &WGPUContext, info: ImageInfo) -> Self {
@@ -49,8 +51,8 @@ impl WGPUTexture {
         let tex = ctx.device().create_texture(&wgpu::TextureDescriptor {
             label: Some("Low Resolution Target"),
             size: wgpu::Extent3d {
-                width: 0,
-                height: 0,
+                width: info.width() as _,
+                height: info.height() as _,
                 depth_or_array_layers: 1,
             },
             mip_level_count,
@@ -67,6 +69,7 @@ impl WGPUTexture {
         } else {
             wgpu::FilterMode::Linear
         };
+
 
         let mut sampler_desc = wgpu::SamplerDescriptor {
             label: Some("Nearest Neighbor Sampler"),
@@ -92,6 +95,7 @@ impl WGPUTexture {
         };
 
         let sampler = ctx.device().create_sampler(&sampler_desc);
+
 
         Self {
             sampler,

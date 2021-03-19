@@ -10,7 +10,7 @@ impl WGPUContext {
     }
 
     pub fn queue(&self) -> &std::rc::Rc<wgpu::Queue> {
-        todo!()
+        &self.queue
     }
 }
 // #[derive(Clone)]
