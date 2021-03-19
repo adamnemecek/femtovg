@@ -212,7 +212,7 @@ fn stroke_anti_alias_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthSt
     wgpu::DepthStencilState {
         format,
         depth_write_enabled: false,
-        depth_compare: wgpu::CompareFunction::Less,
+        depth_compare: wgpu::CompareFunction::Always,
         stencil: wgpu::StencilState {
             front: wgpu::StencilFaceState {
                 // compare: wgpu::CompareFunction::NotEqual,
