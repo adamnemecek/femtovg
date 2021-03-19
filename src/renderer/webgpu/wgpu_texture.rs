@@ -10,6 +10,7 @@ use crate::{
 use super::{
     WGPUContext,
     WGPUDeviceExt,
+    WGPUExtentExt,
     WGPUTextureExt,
 };
 
@@ -48,16 +49,23 @@ impl WGPUTexture {
 
         let format = info.format().into();
 
-        let mip_level_count = if generate_mipmaps { 0 } else { 0 };
+        let size = wgpu::Extent3d {
+            width: info.width() as _,
+            height: info.height() as _,
+            depth_or_array_layers: 1,
+        };
 
+        let mip_level_count = if generate_mipmaps {
+            size.mip_mipmap_level_count()
+        } else {
+            1
+        };
+
+        // let sample_count = if generate_mipmaps { } else { 1 };
         // todo: what's the difference between texture and texture_view
         let tex = ctx.device().create_texture(&wgpu::TextureDescriptor {
             label: Some("Low Resolution Target"),
-            size: wgpu::Extent3d {
-                width: info.width() as _,
-                height: info.height() as _,
-                depth_or_array_layers: 1,
-            },
+            size,
             mip_level_count,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
@@ -81,8 +89,8 @@ impl WGPUTexture {
         };
 
         if generate_mipmaps {
-            // tex.generate
-            sampler_desc.mipmap_filter = filter;
+            tex.generate_mipmaps(ctx.device());
+            // sampler_desc.mipmap_filter = filter;
         }
 
         sampler_desc.address_mode_u = if repeatx {

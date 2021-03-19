@@ -9,12 +9,28 @@ impl WGPUDeviceExt for wgpu::CommandEncoder {
     }
 }
 
+pub trait WGPUExtentExt {
+    fn mip_mipmap_level_count(&self) -> u32;
+}
+
+impl WGPUExtentExt for wgpu::Extent3d {
+    fn mip_mipmap_level_count(&self) -> u32 {
+        let Self {
+            width,
+            height,
+            depth_or_array_layers: depth,
+        } = self;
+        (*(width.max(height).max(depth)) as u64 as f64).log2().ceil() as u32
+    }
+}
+
 pub trait WGPUTextureExt {
-    fn generate_mipmaps(&self, device: &wgpu::Device, encoder: &mut wgpu::CommandEncoder, texture: &wgpu::Texture);
+    fn generate_mipmaps(&self, device: &wgpu::Device); //, encoder: &mut wgpu::CommandEncoder);
 }
 
 impl WGPUTextureExt for wgpu::Texture {
-    fn generate_mipmaps(&self, device: &wgpu::Device, encoder: &mut wgpu::CommandEncoder, texture: &wgpu::Texture) {
+    fn generate_mipmaps(&self, device: &wgpu::Device) {
+        //, encoder: &mut wgpu::CommandEncoder) {
         todo!()
         // assert_eq!(texture.descriptor.array_layer_count, 1);
         // assert!(texture.descriptor.mip_level_count > 1);
