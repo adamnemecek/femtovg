@@ -92,6 +92,7 @@ impl WGPUStates {
     }
 }
 
+/// the things that
 pub struct WGPU {
     default_stencil_state: wgpu::RenderPipeline,
     fill_shape_stencil_state: wgpu::RenderPipeline,
@@ -243,6 +244,7 @@ impl WGPU {
         paint: Params,
     ) {
         //
+        // draws triangle strip
         self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {

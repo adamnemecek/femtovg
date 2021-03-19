@@ -23,6 +23,41 @@ impl crate::Vertex {
     }
 }
 
+fn create_pipeline(
+    ctx: &WGPUContext,
+    label: Option<&str>,
+    shader: &wgpu::ShaderModule,
+    format: wgpu::TextureFormat,
+    topology: wgpu::PrimitiveTopology,
+    front_face: wgpu::FrontFace,
+    cull_mode: Option<wgpu::Face>,
+) -> wgpu::RenderPipeline {
+    ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label,
+        layout: None,
+        vertex: wgpu::VertexState {
+            module: shader,
+            entry_point: "vs_main",
+            buffers: &[],
+        },
+        fragment: Some(wgpu::FragmentState {
+            module: shader,
+            entry_point: "fs_main",
+            //todo!
+            targets: &[format.into()],
+        }),
+        primitive: wgpu::PrimitiveState {
+            topology,
+            front_face,
+            cull_mode,
+            ..Default::default()
+        },
+        depth_stencil: None,
+        multisample: wgpu::MultisampleState::default(),
+    });
+    todo!()
+}
+
 impl WGPUPipelineState {
     pub fn new(
         ctx: &WGPUContext,
@@ -31,7 +66,7 @@ impl WGPUPipelineState {
         shader: &wgpu::ShaderModule,
         // vertex_desc: &wgpu::VertexBufferLayout,
     ) -> Self {
-        let format = wgpu::TextureFormat::Astc10x10RgbaUnorm;
+
         // let stencil = ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
 
         // });
@@ -81,7 +116,10 @@ impl WGPUPipelineCache {
     }
 
     pub fn get(&mut self, blend_func: WGPUBlend, texture_format: wgpu::TextureFormat) -> Rc<WGPUPipelineState> {
-        let key = PipelineCacheKey { blend_func, texture_format };
+        let key = PipelineCacheKey {
+            blend_func,
+            texture_format,
+        };
 
         if !self.inner.contains_key(&key) {
             let ps = WGPUPipelineState::new(
