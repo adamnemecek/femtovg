@@ -1,13 +1,19 @@
-
-pub trait WGPUExt {
+pub trait WGPUDeviceExt {
+    // fn create_buffer(&self)
     fn blit(&self);
+}
+
+impl WGPUDeviceExt for wgpu::CommandEncoder {
+    fn blit(&self) {
+        todo!()
+    }
+}
+
+pub trait WGPUTextureExt {
     fn generate_mipmaps(&self, device: &wgpu::Device, encoder: &mut wgpu::CommandEncoder, texture: &wgpu::Texture);
 }
 
-impl WGPUExt for wgpu::CommandEncoder {
-    fn blit(&self) {
-        
-    }
+impl WGPUTextureExt for wgpu::Texture {
     fn generate_mipmaps(&self, device: &wgpu::Device, encoder: &mut wgpu::CommandEncoder, texture: &wgpu::Texture) {
         todo!()
         // assert_eq!(texture.descriptor.array_layer_count, 1);

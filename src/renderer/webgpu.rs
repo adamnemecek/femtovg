@@ -44,15 +44,11 @@ use imgref::ImgVec;
 use rgb::RGBA8;
 use std::borrow::Cow;
 
-pub struct WGPUStates {
-
-}
+pub struct WGPUStates {}
 
 impl WGPUStates {
     pub fn new() -> Self {
-        Self {
-            
-        }
+        Self {}
     }
 }
 

@@ -7,7 +7,11 @@ use crate::{
     Size,
 };
 
-use super::WGPUContext;
+use super::{
+    WGPUContext,
+    WGPUDeviceExt,
+    WGPUTextureExt,
+};
 
 impl From<PixelFormat> for wgpu::TextureFormat {
     fn from(a: PixelFormat) -> Self {
@@ -31,7 +35,6 @@ impl WGPUTexture {
     pub fn new_pseudo_texture(ctx: &WGPUContext) -> Self {
         let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
         Self::new(ctx, info)
-
     }
 
     pub fn new(ctx: &WGPUContext, info: ImageInfo) -> Self {
@@ -70,7 +73,6 @@ impl WGPUTexture {
             wgpu::FilterMode::Linear
         };
 
-
         let mut sampler_desc = wgpu::SamplerDescriptor {
             label: Some("Nearest Neighbor Sampler"),
             mag_filter: filter,
@@ -79,6 +81,7 @@ impl WGPUTexture {
         };
 
         if generate_mipmaps {
+            // tex.generate
             sampler_desc.mipmap_filter = filter;
         }
 
@@ -95,7 +98,6 @@ impl WGPUTexture {
         };
 
         let sampler = ctx.device().create_sampler(&sampler_desc);
-
 
         Self {
             sampler,
