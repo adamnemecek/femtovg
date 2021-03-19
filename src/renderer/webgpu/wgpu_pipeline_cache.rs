@@ -58,50 +58,48 @@ fn create_pipeline(
     })
 }
 
-fn clear_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencilState {
-    wgpu::DepthStencilState {
-        format,
-        depth_write_enabled: false,
-        depth_compare: wgpu::CompareFunction::Less,
-        stencil: wgpu::StencilState {
-            front: wgpu::StencilFaceState {
-                compare: wgpu::CompareFunction::Less,
-                fail_op: wgpu::StencilOperation::Keep,
-                depth_fail_op: wgpu::StencilOperation::Keep,
-                pass_op: wgpu::StencilOperation::Keep,
-            },
-            back: wgpu::StencilFaceState {
-                compare: wgpu::CompareFunction::Less,
-                fail_op: wgpu::StencilOperation::Keep,
-                depth_fail_op: wgpu::StencilOperation::Keep,
-                pass_op: wgpu::StencilOperation::Keep,
-            },
-            read_mask: 0xff,
-            write_mask: 0xff,
-        },
-        bias: wgpu::DepthBiasState::default(),
-        clamp_depth: false,
-        // ..Default::default()
-    }
-}
+// fn clear_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencilState {
+//     wgpu::DepthStencilState {
+//         format,
+//         depth_write_enabled: false,
+//         depth_compare: wgpu::CompareFunction::Less,
+//         stencil: wgpu::StencilState {
+//             front: wgpu::StencilFaceState {
+//                 compare: wgpu::CompareFunction::Less,
+//                 fail_op: wgpu::StencilOperation::Keep,
+//                 depth_fail_op: wgpu::StencilOperation::Keep,
+//                 pass_op: wgpu::StencilOperation::Keep,
+//             },
+//             back: wgpu::StencilFaceState {
+//                 compare: wgpu::CompareFunction::Less,
+//                 fail_op: wgpu::StencilOperation::Keep,
+//                 depth_fail_op: wgpu::StencilOperation::Keep,
+//                 pass_op: wgpu::StencilOperation::Keep,
+//             },
+//             read_mask: 0xff,
+//             write_mask: 0xff,
+//         },
+//         bias: wgpu::DepthBiasState::default(),
+//         clamp_depth: false,
+//         // ..Default::default()
+//     }
+// }
 
 fn fill_shape_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencilState {
     wgpu::DepthStencilState {
         format,
         depth_write_enabled: false,
-        depth_compare: wgpu::CompareFunction::Less,
+        depth_compare: wgpu::CompareFunction::Always,
         stencil: wgpu::StencilState {
             front: wgpu::StencilFaceState {
-                compare: wgpu::CompareFunction::Less,
-                fail_op: wgpu::StencilOperation::Keep,
-                depth_fail_op: wgpu::StencilOperation::Keep,
-                pass_op: wgpu::StencilOperation::Keep,
+                compare: wgpu::CompareFunction::Always,
+                pass_op: wgpu::StencilOperation::IncrementWrap,
+                ..Default::default()
             },
             back: wgpu::StencilFaceState {
-                compare: wgpu::CompareFunction::Less,
-                fail_op: wgpu::StencilOperation::Keep,
-                depth_fail_op: wgpu::StencilOperation::Keep,
-                pass_op: wgpu::StencilOperation::Keep,
+                compare: wgpu::CompareFunction::Always,
+                pass_op: wgpu::StencilOperation::DecrementWrap,
+                ..Default::default()
             },
             read_mask: 0xff,
             write_mask: 0xff,
