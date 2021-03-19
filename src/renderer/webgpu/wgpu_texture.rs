@@ -108,7 +108,12 @@ impl WGPUTexture {
     }
 
     pub fn resize(&mut self) {
+        // self.tex.destroy()
         todo!()
+    }
+
+    pub fn sampler(&self) -> &wgpu::Sampler {
+        &self.sampler
     }
 
     pub fn size(&self) -> Size {

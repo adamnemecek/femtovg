@@ -11,6 +11,9 @@ pub use wgpu_texture::*;
 mod wgpu_stencil_texture;
 pub use wgpu_stencil_texture::*;
 
+mod wgpu_ext;
+pub use wgpu_ext::*;
+
 use crate::{
     renderer::{
         ImageId,
@@ -40,6 +43,18 @@ use fnv::FnvHashMap;
 use imgref::ImgVec;
 use rgb::RGBA8;
 use std::borrow::Cow;
+
+pub struct WGPUStates {
+
+}
+
+impl WGPUStates {
+    pub fn new() -> Self {
+        Self {
+            
+        }
+    }
+}
 
 pub struct WGPU {
     default_stencil_state: wgpu::RenderPipeline,
@@ -98,6 +113,31 @@ impl WGPU {
                 clamp_depth: false,
             };
         };
+
+        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: None,
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStage::FRAGMENT,
+                ty: wgpu::BindingType::Texture {
+                    sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                    view_dimension: wgpu::TextureViewDimension::D2,
+                    multisampled: false,
+                },
+                count: std::num::NonZeroU32::new(2),
+            }],
+        });
+
+        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: None,
+            layout: &bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: wgpu::BindingResource::TextureViewArray(&[]),
+            }],
+        });
+
+        // bind_group.destroy();
 
         let fill_shape_stencil_state = 0;
         let fill_anti_alias_stencil_state_nonzero = 0;
@@ -167,7 +207,7 @@ impl WGPU {
         paint: Params,
     ) {
         //
-        self.set_uniforms(pass, images, cmd.image, cmd.alpha_mask);
+        self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
                 // pass.draw()
@@ -185,6 +225,7 @@ impl WGPU {
     ) {
         //
         // pass.set_pipeline(pipeline);
+        // self.set_uniforms(pass, images, image_tex, alpha_tex)
     }
 
     fn triangles<'a>(
@@ -195,15 +236,27 @@ impl WGPU {
         paint: Params,
     ) {
         //
+        self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
+        // pass.set_pipeline(pipeline)
+        if let Some((start, count)) = cmd.triangles_verts {
+            // pass.draw(vertices, instances)
+        }
     }
 
     fn set_uniforms<'a>(
         &self,
         pass: &wgpu::RenderPass<'a>,
         images: &ImageStore<WGPUTexture>,
+        paint: Params,
         image_tex: Option<ImageId>,
         alpha_tex: Option<ImageId>,
     ) {
+        let tex = if let Some(id) = image_tex {
+            images.get(id).unwrap()
+        } else {
+            &self.pseudo_texture
+        };
+        // pass.set_viewport(x, y, w, h, min_depth, max_depth)
     }
 
     fn clear_rect<'a>(
