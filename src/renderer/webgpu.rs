@@ -87,11 +87,11 @@ impl From<CompositeOperationState> for WGPUBlend {
     }
 }
 
-fn new_render_command_encoder<'a>(
+fn new_render_pass<'a>(
     // ctx: WGPUContext,
     encoder: &mut wgpu::CommandEncoder,
     target: &wgpu::TextureView,
-    command_buffer: &'a wgpu::CommandBuffer,
+    // command_buffer: &'a wgpu::CommandBuffer,
     clear_color: Color,
     stencil_texture: &mut WGPUStencilTexture,
     vertex_buffer: &WGPUVec<Vertex>,
@@ -150,6 +150,8 @@ impl WGPUStates {
 
 /// the things that
 pub struct WGPU {
+    ctx: WGPUContext,
+
     default_stencil_state: wgpu::RenderPipeline,
     fill_shape_stencil_state: wgpu::RenderPipeline,
     fill_anti_alias_stencil_state_nonzero: wgpu::RenderPipeline,
@@ -173,9 +175,7 @@ pub struct WGPU {
     view_size: Size,
 }
 
-fn create_bind_group() {
-
-}
+fn create_bind_group() {}
 
 impl WGPU {
     pub fn new(device: &wgpu::Device) -> Self {
@@ -245,11 +245,7 @@ impl WGPU {
         let stroke_anti_alias_stencil_state = 0;
         let stroke_clear_stencil_state = 0;
 
-
-        let encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: None
-        });
-
+        let encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
         // Self {
 
@@ -257,13 +253,13 @@ impl WGPU {
         todo!();
     }
 
-    fn convex_fill<'a>(
+    fn convex_fill<'a, 'b>(
         &'a mut self,
-        pass: &mut wgpu::RenderPass<'a>,
+        pass: &'b mut wgpu::RenderPass<'b>,
         images: &ImageStore<WGPUTexture>,
         cmd: &Command,
         paint: Params,
-    ) {
+    ) where 'a : 'b {
         // encoder.push_debug_group("convex_fill");
 
         for drawable in &cmd.drawables {
@@ -398,6 +394,22 @@ impl WGPU {
     }
 }
 
+fn new_pass<'a>() -> wgpu::RenderPass<'a> {
+    todo!()
+}
+
+fn convex_fill3<'a>(
+    pass: &mut wgpu::RenderPass<'a>,
+    images: &ImageStore<WGPUTexture>,
+    cmd: &Command,
+    paint: Params,
+    vertex: &WGPUVec<Vertex>,
+    // state: &wgpu::RenderPipeline,
+
+) {
+
+}
+
 impl Renderer for WGPU {
     type Image = WGPUTexture;
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
@@ -408,8 +420,39 @@ impl Renderer for WGPU {
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         self.vertex_buffer.clear();
         self.vertex_buffer.extend_from_slice(verts);
-        todo!();
 
+        self.index_buffer.clear();
+        self.index_buffer.resize(verts.len() * 3);
+
+        // let mut encoder = self.ctx.device().create_command_encoder(&wgpu::CommandEncoderDescriptor {
+        //     label: None,
+        // });
+
+        // let pass = new_render_pass(
+        //     &mut encoder,
+        //     target,
+        //     command_buffer,
+        //     clear_color,
+        //     stencil_texture,
+        //     vertex_buffer,
+        //     view_size,
+        // );
+        let mut pass = new_pass();
+        
+
+        let mut pass = new_pass();
+
+        for cmd in commands {
+            // let r = &mut pass;
+
+            match &cmd.cmd_type {
+                CommandType::ConvexFill { params} => {
+                    // self.convex_fill(&mut pass, images, cmd, *params);
+                    convex_fill3(&mut pass, images, cmd, *params, &self.vertex_buffer);
+                }
+                _ => todo!()
+            }
+        }
     }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
@@ -423,10 +466,7 @@ impl Renderer for WGPU {
         x: usize,
         y: usize,
     ) -> Result<(), ErrorKind> {
-
- 
         todo!()
-
     }
 
     fn delete_image(&mut self, image: Self::Image) {
