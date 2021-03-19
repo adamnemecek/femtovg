@@ -90,7 +90,7 @@ impl WGPUTexture {
 
         if generate_mipmaps {
             tex.generate_mipmaps(ctx.device());
-            // sampler_desc.mipmap_filter = filter;
+            sampler_desc.mipmap_filter = filter;
         }
 
         sampler_desc.address_mode_u = if repeatx {
@@ -126,12 +126,16 @@ impl WGPUTexture {
         todo!()
     }
 
+    pub fn tex(&self) -> &wgpu::Texture {
+        &self.tex
+    }
+
     pub fn sampler(&self) -> &wgpu::Sampler {
         &self.sampler
     }
 
     pub fn size(&self) -> Size {
-        todo!()
+        self.info.size()
     }
 
     pub fn delete(&self) {

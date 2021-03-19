@@ -16,6 +16,7 @@ use std::convert::TryFrom;
 use crate::{
     ErrorKind,
     Renderer,
+    Size,
 };
 
 /// An image handle.
@@ -147,6 +148,13 @@ impl ImageInfo {
             width,
             height,
             format,
+        }
+    }
+
+    pub fn size(&self) -> Size {
+        Size {
+            w: self.width() as _,
+            h: self.height() as _,
         }
     }
 

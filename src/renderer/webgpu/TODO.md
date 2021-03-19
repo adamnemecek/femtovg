@@ -10,3 +10,5 @@
     dss: fill_shape_stencil_state
 
     
+* stencil_stroke
+    
