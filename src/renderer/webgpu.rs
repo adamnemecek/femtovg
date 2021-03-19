@@ -87,6 +87,47 @@ impl From<CompositeOperationState> for WGPUBlend {
     }
 }
 
+fn new_render_command_encoder<'a>(
+    ctx: WGPUContext,
+    target: &wgpu::TextureView,
+    command_buffer: &'a wgpu::CommandBuffer,
+    clear_color: Color,
+    stencil_texture: &mut WGPUStencilTexture,
+    vertex_buffer: &WGPUVec<Vertex>,
+) -> wgpu::CommandEncoder {
+    let desc = wgpu::RenderPassDescriptor {
+        label: None,
+        color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
+            attachment: target,
+            resolve_target: None,
+            ops: wgpu::Operations {
+                load: wgpu::LoadOp::Clear(clear_color.into()),
+                store: false,
+            },
+        }],
+        depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachmentDescriptor {
+            attachment: stencil_texture.tex(), //&'a TextureView,
+            depth_ops: Some(wgpu::Operations {
+                load: wgpu::LoadOp::Load,
+                store: false,
+            }), //Option<Operations<f32>>,
+            stencil_ops: None,                 //Option<Operations<u32>>,
+        }),
+    };
+
+    // todo set cull mode on the
+
+    let encoder = ctx
+        .device()
+        .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+
+    // encoder.set_vertex_buffer(0, vertex_buffer.as_slice());
+    // encoder
+
+    encoder
+}
+
+
 pub struct WGPUStates {}
 
 impl WGPUStates {
@@ -375,61 +416,22 @@ impl From<Color> for wgpu::Color {
     }
 }
 
-pub struct RenderPass<'a> {
-    inner: wgpu::RenderPass<'a>,
-}
+// pub struct RenderPass<'a> {
+//     inner: wgpu::RenderPass<'a>,
+// }
 
-impl<'a> RenderPass<'a> {
-    pub fn new() -> Self {
-        todo!()
-    }
+// impl<'a> RenderPass<'a> {
+//     pub fn new() -> Self {
+//         todo!()
+//     }
 
-    pub fn set_viewport(&self) {
-        // self.inner.set_viewport(x, y, w, h, min_depth, max_depth)
-    }
+//     pub fn set_viewport(&self) {
+//         // self.inner.set_viewport(x, y, w, h, min_depth, max_depth)
+//     }
 
-    pub fn set_fragment(&self) {
-        todo!()
-        // self.inner.set_push_constants(stages, offset, data)
-    }
-}
+//     pub fn set_fragment(&self) {
+//         todo!()
+//         // self.inner.set_push_constants(stages, offset, data)
+//     }
+// }
 
-fn new_render_command_encoder<'a>(
-    ctx: WGPUContext,
-    target: &wgpu::TextureView,
-    command_buffer: &'a wgpu::CommandBuffer,
-    clear_color: Color,
-    stencil_texture: &mut WGPUStencilTexture,
-    vertex_buffer: &WGPUVec<Vertex>,
-) -> wgpu::CommandEncoder {
-    let desc = wgpu::RenderPassDescriptor {
-        label: None,
-        color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
-            attachment: target,
-            resolve_target: None,
-            ops: wgpu::Operations {
-                load: wgpu::LoadOp::Clear(clear_color.into()),
-                store: false,
-            },
-        }],
-        depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachmentDescriptor {
-            attachment: stencil_texture.tex(), //&'a TextureView,
-            depth_ops: Some(wgpu::Operations {
-                load: wgpu::LoadOp::Load,
-                store: false,
-            }), //Option<Operations<f32>>,
-            stencil_ops: None,                 //Option<Operations<u32>>,
-        }),
-    };
-
-    // todo set cull mode on the
-
-    let encoder = ctx
-        .device()
-        .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
-
-    // encoder.set_vertex_buffer(0, vertex_buffer.as_slice());
-    // encoder
-
-    encoder
-}
