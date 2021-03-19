@@ -259,7 +259,9 @@ impl WGPU {
         images: &ImageStore<WGPUTexture>,
         cmd: &Command,
         paint: Params,
-    ) where 'a : 'b {
+    ) where
+        'a: 'b,
+    {
         // encoder.push_debug_group("convex_fill");
 
         for drawable in &cmd.drawables {
@@ -398,6 +400,10 @@ fn new_pass<'a>() -> wgpu::RenderPass<'a> {
     todo!()
 }
 
+fn new_pass_descriptor<'a, 'b>() -> wgpu::RenderPassDescriptor<'a, 'b> {
+    todo!()
+}
+
 fn convex_fill3<'a>(
     pass: &mut wgpu::RenderPass<'a>,
     images: &ImageStore<WGPUTexture>,
@@ -405,9 +411,7 @@ fn convex_fill3<'a>(
     paint: Params,
     vertex: &WGPUVec<Vertex>,
     // state: &wgpu::RenderPipeline,
-
 ) {
-
 }
 
 impl Renderer for WGPU {
@@ -424,9 +428,10 @@ impl Renderer for WGPU {
         self.index_buffer.clear();
         self.index_buffer.resize(verts.len() * 3);
 
-        // let mut encoder = self.ctx.device().create_command_encoder(&wgpu::CommandEncoderDescriptor {
-        //     label: None,
-        // });
+        let mut encoder = self
+            .ctx
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
         // let pass = new_render_pass(
         //     &mut encoder,
@@ -437,22 +442,39 @@ impl Renderer for WGPU {
         //     vertex_buffer,
         //     view_size,
         // );
-        let mut pass = new_pass();
-        
+        // let mut pass = new_pass();
 
-        let mut pass = new_pass();
+        let pass_desc = new_pass_descriptor();
+        {
+            let mut pass = encoder.begin_render_pass(&pass_desc);
+            // encoder.begin_render_pass(desc)
 
-        for cmd in commands {
-            // let r = &mut pass;
+            // pass.set_viewport(x, y, w, h, min_depth, max_depth)
 
-            match &cmd.cmd_type {
-                CommandType::ConvexFill { params} => {
-                    // self.convex_fill(&mut pass, images, cmd, *params);
-                    convex_fill3(&mut pass, images, cmd, *params, &self.vertex_buffer);
+            for cmd in commands {
+                // let r = &mut pass;
+
+                match &cmd.cmd_type {
+                    CommandType::ConvexFill { params } => {
+                        // self.convex_fill(&mut pass, images, cmd, *params);
+                        convex_fill3(&mut pass, images, cmd, *params, &self.vertex_buffer);
+                    }
+                    CommandType::ConcaveFill {
+                        stencil_params,
+                        fill_params,
+                    } => {
+                        todo!()
+                    }
+                    CommandType::Stroke { params } => {
+                        todo!()
+                    }
+                    _ => todo!(),
                 }
-                _ => todo!()
             }
         }
+
+        let buffer = encoder.finish();
+        self.ctx.queue().submit(Some(buffer));
     }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
