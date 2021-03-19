@@ -254,9 +254,19 @@ fn stroke_clear_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencil
 pub struct WGPUPipelineState {
     blend_func: WGPUBlend,
     texture_format: wgpu::TextureFormat,
+    convex_fill1: wgpu::RenderPipeline,
+    convex_fill2: wgpu::RenderPipeline,
 }
 
 impl WGPUPipelineState {
+    pub fn convex_fill1(&self) -> &wgpu::RenderPipeline {
+        &self.convex_fill1
+    }
+
+    pub fn convex_fill2(&self) -> &wgpu::RenderPipeline {
+        &self.convex_fill2
+    }
+
     pub fn new(
         ctx: &WGPUContext,
         blend_func: WGPUBlend,
@@ -313,6 +323,10 @@ pub struct WGPUPipelineCache {
 }
 
 impl WGPUPipelineCache {
+    pub fn any(&self) -> &Rc<WGPUPipelineState> {
+        todo!()
+    }
+
     pub fn new(
         ctx: &WGPUContext,
         shader_module: wgpu::ShaderModule, // vert: &wgpu::

@@ -172,6 +172,8 @@ pub struct WGPU {
     render_target: RenderTarget,
     pseudo_texture: WGPUTexture,
 
+    cache: WGPUPipelineCache,
+
     view_size: Size,
 }
 
@@ -253,51 +255,41 @@ impl WGPU {
         todo!();
     }
 
-    fn convex_fill<'a, 'b>(
-        &'b mut self,
-        pass: &'a mut wgpu::RenderPass<'b>,
-        images: &ImageStore<WGPUTexture>,
-        cmd: &Command,
-        paint: Params,
-    ) where 'b : 'a
-    {
-        // encoder.push_debug_group("convex_fill");
+    // fn convex_fill<'a, 'b>(
+    //     &'b mut self,
+    //     pass: &'a mut wgpu::RenderPass<'b>,
+    //     images: &ImageStore<WGPUTexture>,
+    //     cmd: &Command,
+    //     paint: Params,
+    // ) where 'b : 'a
+    // {
+    //     // encoder.push_debug_group("convex_fill");
 
-        for drawable in &cmd.drawables {
-            if let Some((start, count)) = drawable.fill_verts {
-                //
-                pass.set_pipeline(&self.convex_fill1);
+    //     for drawable in &cmd.drawables {
+    //         if let Some((start, count)) = drawable.fill_verts {
+    //             //
+    //             pass.set_pipeline(&self.convex_fill1);
 
-                let offset = self.index_buffer.len();
-                let triangle_fan_index_count = self
-                    .index_buffer
-                    .extend_with_triange_fan_indices_cw(start as u32, count as u32);
+    //             let offset = self.index_buffer.len();
+    //             let triangle_fan_index_count = self
+    //                 .index_buffer
+    //                 .extend_with_triange_fan_indices_cw(start as u32, count as u32);
 
-                // encoder.begin_render_pass(desc)
-                // render_pass.draw_indexed(indices, base_vertex, instances)
-                // pass.set_index_buffer(buffer_slice, );
-                let fmt = wgpu::IndexFormat::Uint32;
-                // pass.set_index_buffer(self.index_buffer, fmt);
-                pass.draw_indexed(0..0, 0, 0..0);
-            }
+    //             // encoder.begin_render_pass(desc)
+    //             // render_pass.draw_indexed(indices, base_vertex, instances)
+    //             // pass.set_index_buffer(buffer_slice, );
+    //             let fmt = wgpu::IndexFormat::Uint32;
+    //             // pass.set_index_buffer(self.index_buffer, fmt);
+    //             pass.draw_indexed(0..0, 0, 0..0);
+    //         }
 
-            if let Some((start, count)) = drawable.stroke_verts {
-                pass.set_pipeline(&self.convex_fill2);
-                let vertex_range = start as _..(start + count) as _;
-                pass.draw(vertex_range, 0..0);
-            }
-        }
-    }
-
-    fn concave_fill<'a>(
-        &'a mut self,
-        pass: &mut wgpu::RenderPass<'a>,
-        images: &ImageStore<WGPUTexture>,
-        cmd: &Command,
-        stencil_paint: Params,
-        fill_paint: Params,
-    ) {
-    }
+    //         if let Some((start, count)) = drawable.stroke_verts {
+    //             pass.set_pipeline(&self.convex_fill2);
+    //             let vertex_range = start as _..(start + count) as _;
+    //             pass.draw(vertex_range, 0..0);
+    //         }
+    //     }
+    // }
 
     fn stroke<'a>(
         &'a mut self,
@@ -422,15 +414,17 @@ fn convex_fill<'a, 'b>(
     paint: Params,
     vertex: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
-    convex_fill_pipeline: &'b wgpu::RenderPipeline,
-    convex_fill2_pipeline: &'b wgpu::RenderPipeline,
-) where 'b : 'a {
+    state: &'b std::rc::Rc<WGPUPipelineState>,
+    // convex_fill_pipeline: &'b wgpu::RenderPipeline,
+    // convex_fill2_pipeline: &'b wgpu::RenderPipeline,
+) {
     // encoder.push_debug_group("convex_fill");
 
     for drawable in &cmd.drawables {
         if let Some((start, count)) = drawable.fill_verts {
             //
-            pass.set_pipeline(&convex_fill_pipeline);
+            // pass.set_pipeline(&convex_fill_pipeline);
+            pass.set_pipeline(&state.convex_fill1());
 
             let offset = index_buffer.len();
             let triangle_fan_index_count = index_buffer.extend_with_triange_fan_indices_cw(start as u32, count as u32);
@@ -444,11 +438,22 @@ fn convex_fill<'a, 'b>(
         }
 
         if let Some((start, count)) = drawable.stroke_verts {
-            pass.set_pipeline(&convex_fill2_pipeline);
+            pass.set_pipeline(&state.convex_fill2());
             let vertex_range = start as _..(start + count) as _;
             pass.draw(vertex_range, 0..0);
         }
     }
+}
+
+fn concave_fill<'a, 'b>(
+    pass: &'a mut wgpu::RenderPass<'b>,
+    images: &ImageStore<WGPUTexture>,
+    cmd: &Command,
+    stencil_paint: Params,
+    fill_paint: Params,
+    vertex: &WGPUVec<Vertex>,
+    index_buffer: &mut WGPUVec<u32>,
+) {
 }
 
 impl Renderer for WGPU {
@@ -501,8 +506,9 @@ impl Renderer for WGPU {
                             *params,
                             &self.vertex_buffer,
                             &mut self.index_buffer,
-                            &self.convex_fill1,
-                            &self.convex_fill2,
+                            self.cache.any(),
+                            // &self.convex_fill1,
+                            // &self.convex_fill2,
                         );
                         // self.convex_fill(&mut pass, images, cmd, *params);
                     }
@@ -510,7 +516,6 @@ impl Renderer for WGPU {
                         stencil_params,
                         fill_params,
                     } => {
-                        
                         todo!()
                     }
                     CommandType::Stroke { params } => {
