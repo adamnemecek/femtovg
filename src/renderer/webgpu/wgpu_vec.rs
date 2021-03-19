@@ -1,13 +1,15 @@
-use super::WGPUContext;
+use super::{MemAlign, WGPUContext};
+
 
 pub struct WGPUVec<T: Copy> {
-    cpu: Vec<T>,
-    gpu: wgpu::Buffer,
-    ph: std::marker::PhantomData<T>,
+    // cpu: Vec<T>,
+    inner: wgpu::Buffer,
+    len: usize,
+    mem_align: MemAlign<T>,
 }
 
 impl<T: Copy> WGPUVec<T> {
-    pub fn new(ctx: WGPUContext) -> Self {
+    pub fn new(ctx: &WGPUContext) -> Self {
         // Self {
         //     cpu: vec![],
         //     gpu:
@@ -16,19 +18,48 @@ impl<T: Copy> WGPUVec<T> {
     }
 
     pub fn len(&self) -> usize {
-        self.cpu.len()
+        // self.cpu.len()
+        todo!()
     }
 
     pub fn extend_from_slice(&mut self, other: &[T]) {
-        self.cpu.extend_from_slice(other);
+        // self.cpu.extend_from_slice(other);
+        todo!()
+    }
+
+    pub fn resize(&mut self, capacity: usize) {
+        if capacity <= self.capacity() {
+            return;
+        }
+        let mem_align = MemAlign::<T>::new(capacity);
+        // let inner = self.device.new_mem(
+        //     mem_align,
+        //     metal::MTLResourceOptions::CPUCacheModeDefaultCache,
+        // );
+        // unsafe {
+        //     std::ptr::copy(
+        //         self.as_ptr(),
+        //         // inner.contents() as *mut T,
+        //         inner.as_mut_ptr(),
+        //         self.len(),
+        //     );
+        // }
+        self.mem_align = mem_align;
+        // self.inner = inner;
+    }
+
+    pub fn capacity(&self) -> usize {
+        self.mem_align.capacity
     }
 
     pub fn upload(&mut self) {
-        self.gpu.destroy()
+        // self.gpu.destroy()
+        todo!()
     }
 
     pub fn as_slice<'a>(&'a self) -> wgpu::BufferSlice<'a> {
-        self.gpu.slice(0..0)
+        // self.gpu.slice(0..0)
+        todo!()
     }
 
     // pub fn as_mut_slice<'a>(&'a mut self) -> wgpu::BufferMutSlice<'a> {
@@ -38,9 +69,7 @@ impl<T: Copy> WGPUVec<T> {
 
 impl<T: Copy> Drop for WGPUVec<T> {
     fn drop(&mut self) {
-        let a = vec![1];
-
-        self.gpu.destroy()
+        self.inner.destroy()
     }
 }
 

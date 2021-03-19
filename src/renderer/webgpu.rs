@@ -17,6 +17,9 @@ pub use wgpu_ext::*;
 mod wgpu_pipeline_cache;
 pub use wgpu_pipeline_cache::*;
 
+mod mem_align;
+pub use mem_align::*;
+
 use crate::{
     renderer::{
         ImageId,
