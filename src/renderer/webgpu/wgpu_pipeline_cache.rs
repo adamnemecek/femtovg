@@ -76,7 +76,6 @@ fn create_pipeline(
 //         },
 //         bias: wgpu::DepthBiasState::default(),
 //         clamp_depth: false,
-//         // ..Default::default()
 //     }
 // }
 
@@ -101,7 +100,6 @@ fn fill_shape_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencilSt
         },
         bias: wgpu::DepthBiasState::default(),
         clamp_depth: false,
-        // ..Default::default()
     }
 }
 
@@ -123,7 +121,6 @@ fn fill_anti_alias_stencil_state_nonzero(format: wgpu::TextureFormat) -> wgpu::D
         },
         bias: wgpu::DepthBiasState::default(),
         clamp_depth: false,
-        // ..Default::default()
     }
 }
 
@@ -131,21 +128,20 @@ fn fill_anti_alias_stencil_state_evenodd(format: wgpu::TextureFormat) -> wgpu::D
     wgpu::DepthStencilState {
         format,
         depth_write_enabled: false,
-        depth_compare: wgpu::CompareFunction::Less,
+        depth_compare: wgpu::CompareFunction::Always,
         stencil: wgpu::StencilState {
             front: wgpu::StencilFaceState {
-                compare: wgpu::CompareFunction::Less,
+                compare: wgpu::CompareFunction::Equal,
                 fail_op: wgpu::StencilOperation::Keep,
                 depth_fail_op: wgpu::StencilOperation::Keep,
                 pass_op: wgpu::StencilOperation::Keep,
             },
             back: wgpu::StencilFaceState::default(),
-            read_mask: 0xff,
+            read_mask: 0x1,
             write_mask: 0xff,
         },
         bias: wgpu::DepthBiasState::default(),
         clamp_depth: false,
-        // ..Default::default()
     }
 }
 
@@ -153,13 +149,13 @@ fn fill_stencil_state_nonzero(format: wgpu::TextureFormat) -> wgpu::DepthStencil
     wgpu::DepthStencilState {
         format,
         depth_write_enabled: false,
-        depth_compare: wgpu::CompareFunction::Less,
+        depth_compare: wgpu::CompareFunction::Always,
         stencil: wgpu::StencilState {
             front: wgpu::StencilFaceState {
-                compare: wgpu::CompareFunction::Less,
-                fail_op: wgpu::StencilOperation::Keep,
-                depth_fail_op: wgpu::StencilOperation::Keep,
-                pass_op: wgpu::StencilOperation::Keep,
+                compare: wgpu::CompareFunction::NotEqual,
+                fail_op: wgpu::StencilOperation::Zero,
+                depth_fail_op: wgpu::StencilOperation::Zero,
+                pass_op: wgpu::StencilOperation::Zero,
             },
             back: wgpu::StencilFaceState::default(),
             read_mask: 0xff,
@@ -167,7 +163,6 @@ fn fill_stencil_state_nonzero(format: wgpu::TextureFormat) -> wgpu::DepthStencil
         },
         bias: wgpu::DepthBiasState::default(),
         clamp_depth: false,
-        // ..Default::default()
     }
 }
 
@@ -175,7 +170,7 @@ fn fill_stencil_state_evenodd(format: wgpu::TextureFormat) -> wgpu::DepthStencil
     wgpu::DepthStencilState {
         format,
         depth_write_enabled: false,
-        depth_compare: wgpu::CompareFunction::Less,
+        depth_compare: wgpu::CompareFunction::Always,
         stencil: wgpu::StencilState {
             front: wgpu::StencilFaceState {
                 compare: wgpu::CompareFunction::NotEqual,
@@ -189,7 +184,6 @@ fn fill_stencil_state_evenodd(format: wgpu::TextureFormat) -> wgpu::DepthStencil
         },
         bias: wgpu::DepthBiasState::default(),
         clamp_depth: false,
-        // ..Default::default()
     }
 }
 
@@ -197,21 +191,20 @@ fn stroke_shape_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencil
     wgpu::DepthStencilState {
         format,
         depth_write_enabled: false,
-        depth_compare: wgpu::CompareFunction::Less,
+        depth_compare: wgpu::CompareFunction::Always,
         stencil: wgpu::StencilState {
             front: wgpu::StencilFaceState {
-                compare: wgpu::CompareFunction::NotEqual,
-                fail_op: wgpu::StencilOperation::Zero,
-                depth_fail_op: wgpu::StencilOperation::Zero,
-                pass_op: wgpu::StencilOperation::Zero,
+                compare: wgpu::CompareFunction::Equal,
+                fail_op: wgpu::StencilOperation::Keep,
+                depth_fail_op: wgpu::StencilOperation::Keep,
+                pass_op: wgpu::StencilOperation::IncrementClamp,
             },
             back: wgpu::StencilFaceState::default(),
-            read_mask: 0x1,
+            read_mask: 0xff,
             write_mask: 0xff,
         },
         bias: wgpu::DepthBiasState::default(),
         clamp_depth: false,
-        // ..Default::default()
     }
 }
 
@@ -233,7 +226,6 @@ fn stroke_anti_alias_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthSt
         },
         bias: wgpu::DepthBiasState::default(),
         clamp_depth: false,
-        // ..Default::default()
     }
 }
 
@@ -244,7 +236,7 @@ fn stroke_clear_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencil
         depth_compare: wgpu::CompareFunction::Less,
         stencil: wgpu::StencilState {
             front: wgpu::StencilFaceState {
-                compare: wgpu::CompareFunction::NotEqual,
+                compare: wgpu::CompareFunction::Always,
                 fail_op: wgpu::StencilOperation::Zero,
                 depth_fail_op: wgpu::StencilOperation::Zero,
                 pass_op: wgpu::StencilOperation::Zero,
@@ -255,7 +247,6 @@ fn stroke_clear_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencil
         },
         bias: wgpu::DepthBiasState::default(),
         clamp_depth: false,
-        // ..Default::default()
     }
 }
 
