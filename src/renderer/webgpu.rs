@@ -42,7 +42,7 @@ use super::{
     Renderer,
 };
 
-use fnv::FnvHashMap;
+// use fnv::FnvHashMap;
 use imgref::ImgVec;
 use rgb::RGBA8;
 use std::borrow::Cow;
@@ -73,16 +73,16 @@ impl From<BlendFactor> for wgpu::BlendFactor {
     }
 }
 
-// impl From<CompositeOperationState> for Blend {
-//     fn from(v: CompositeOperationState) -> Self {
-//         Self {
-//             src_rgb: v.src_rgb.into(),
-//             dst_rgb: v.dst_rgb.into(),
-//             src_alpha: v.src_alpha.into(),
-//             dst_alpha: v.dst_alpha.into(),
-//         }
-//     }
-// }
+impl From<CompositeOperationState> for WGPUBlend {
+    fn from(v: CompositeOperationState) -> Self {
+        Self {
+            src_rgb: v.src_rgb.into(),
+            dst_rgb: v.dst_rgb.into(),
+            src_alpha: v.src_alpha.into(),
+            dst_alpha: v.dst_alpha.into(),
+        }
+    }
+}
 
 pub struct WGPUStates {}
 
