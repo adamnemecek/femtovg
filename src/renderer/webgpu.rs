@@ -88,14 +88,20 @@ impl From<CompositeOperationState> for WGPUBlend {
 }
 
 fn new_render_command_encoder<'a>(
-    ctx: WGPUContext,
+    // ctx: WGPUContext,
+    encoder: &mut wgpu::CommandEncoder,
     target: &wgpu::TextureView,
     command_buffer: &'a wgpu::CommandBuffer,
     clear_color: Color,
     stencil_texture: &mut WGPUStencilTexture,
     vertex_buffer: &WGPUVec<Vertex>,
-) -> wgpu::CommandEncoder {
-    let desc = wgpu::RenderPassDescriptor {
+
+    view_size: Size,
+    // ) -> wgpu::CommandEncoder {
+) {
+    stencil_texture.resize(view_size);
+
+    let pass_desc = wgpu::RenderPassDescriptor {
         label: None,
         color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
             attachment: target,
@@ -117,16 +123,22 @@ fn new_render_command_encoder<'a>(
 
     // todo set cull mode on the
 
-    let encoder = ctx
-        .device()
-        .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+    // let mut encoder = ctx
+    //     .device()
+    //     .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+
+    let mut pass = encoder.begin_render_pass(&pass_desc);
+    pass.set_viewport(0.0, 0.0, view_size.w as _, view_size.h as _, 0.0, 1.0);
+
+    pass.set_vertex_buffer(0, vertex_buffer.slice());
+    // pass.set_vertex_buffer(1, buffer_slice)
+    todo!()
 
     // encoder.set_vertex_buffer(0, vertex_buffer.as_slice());
     // encoder
 
-    encoder
+    // encoder
 }
-
 
 pub struct WGPUStates {}
 
@@ -159,6 +171,10 @@ pub struct WGPU {
     pseudo_texture: WGPUTexture,
 
     view_size: Size,
+}
+
+fn create_bind_group() {
+
 }
 
 impl WGPU {
@@ -229,10 +245,16 @@ impl WGPU {
         let stroke_anti_alias_stencil_state = 0;
         let stroke_clear_stencil_state = 0;
 
-        todo!()
+
+        let encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: None
+        });
+
+
         // Self {
 
         // }
+        todo!();
     }
 
     fn convex_fill<'a>(
@@ -384,7 +406,10 @@ impl Renderer for WGPU {
     }
 
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
-        todo!()
+        self.vertex_buffer.clear();
+        self.vertex_buffer.extend_from_slice(verts);
+        todo!();
+
     }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
@@ -398,7 +423,10 @@ impl Renderer for WGPU {
         x: usize,
         y: usize,
     ) -> Result<(), ErrorKind> {
+
+ 
         todo!()
+
     }
 
     fn delete_image(&mut self, image: Self::Image) {
@@ -434,4 +462,3 @@ impl From<Color> for wgpu::Color {
 //         // self.inner.set_push_constants(stages, offset, data)
 //     }
 // }
-

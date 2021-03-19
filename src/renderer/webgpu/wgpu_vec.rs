@@ -1,7 +1,7 @@
-use super::{MemAlign, WGPUContext};
-
-
-
+use super::{
+    MemAlign,
+    WGPUContext,
+};
 
 pub struct WGPUVec<T: Copy> {
     // cpu: Vec<T>,
@@ -65,8 +65,16 @@ impl<T: Copy> WGPUVec<T> {
         todo!()
     }
 
-    pub fn slice<S: std::ops::RangeBounds<wgpu::BufferAddress>>(&self, bounds: S) -> wgpu::BufferSlice {
+    pub fn as_slice<S: std::ops::RangeBounds<wgpu::BufferAddress>>(&self, bounds: S) -> wgpu::BufferSlice {
         self.inner.slice(bounds)
+    }
+
+    pub fn slice(&self) -> wgpu::BufferSlice {
+        todo!()
+    }
+
+    pub fn clear(&mut self) {
+        todo!()
     }
 
     // pub fn as_slice<'a>(&'a self) -> wgpu::BufferSlice<'a> {
