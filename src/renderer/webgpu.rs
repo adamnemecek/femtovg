@@ -556,7 +556,7 @@ fn stencil_stroke<'a, 'b>(
     paint2: Params,
     vertex: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
-    state: &'b WGPUPipelineStates,
+    states: &'b WGPUPipelineStates,
 ) {
     //
     // pass.set_pipeline(pipeline);
@@ -571,6 +571,7 @@ fn concave_fill<'a, 'b>(
     fill_paint: Params,
     vertex: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
+    state: &'b WGPUPipelineStates,
 ) {
 }
 
@@ -672,6 +673,17 @@ impl Renderer for WGPU {
                         stencil_params,
                         fill_params,
                     } => {
+                        concave_fill(
+                            &mut pass,
+                            images,
+                            cmd,
+                            *stencil_params,
+                            *fill_params,
+                            &self.vertex_buffer,
+                            &mut self.index_buffer,
+                            state,
+                        );
+
                         // self.stencil_stroke(&mut pass, images, cmd, *stencil_params, *fill_params);
                     }
                     CommandType::Stroke { params } => {
