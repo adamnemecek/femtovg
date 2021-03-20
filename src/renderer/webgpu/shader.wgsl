@@ -33,8 +33,12 @@ struct Uniforms {
 };
 
 
-fn scissorMask(u: Uniforms, p: vec2<f32>) -> f32 {
+fn scissor_mask(u: Uniforms, p: vec2<f32>) -> f32 {
 
+    return 0.0;
+}
+
+fn stroke_mask(u: Uniforms, p: vec2<f32>) -> f32 {
     return 0.0;
 }
 
@@ -91,12 +95,15 @@ fn fragment_shader_aa(
 
     var result: vec4<f32>;
 
-    const scissor = scissorMask(u, rd.fpos);
+    const scissor = scissor_mask(u, rd.fpos);
 
-    // const strokeAlpha = strokeMask(uniforms, rd.ftcoord);
+    const stroke_alpha = stroke_mask(u, rd.ftcoord);
     // if (strokeAlpha < uniforms.strokeThr) {
         // discard_fragment();
     // }
+    if (true) {
+        discard;
+    }
 
 
 
