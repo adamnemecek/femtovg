@@ -135,7 +135,7 @@ fn fragment_shader_aa(
         // const color = textureSample(tex, samplr, pt);
         var color: vec4<f32>;
         color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
-        // const colo1r = textureSample(tex, samplr, vec2<f32>(0.0,0.0));
+        // color = textureSample(tex, samplr, vec2<f32>(0.0,0.0));
         // const color = texture.sample(samplr, pt);
         if (u.tex_type == 1.0) {
             color = vec4<f32>(color.xyz * color.w, color.w);
@@ -143,11 +143,11 @@ fn fragment_shader_aa(
         elseif (u.tex_type == 2.0) {
             color = vec4<f32>(color.x, color.x, color.x, color.x);
         }
-        // result = color * u.inner_col;
+        result = color * u.inner_col;
     } else {
     //     // stencil
     //     // MNVG_SHADER_FILLIMG
-    //     result = float4(1.0);
+        result = vec4<f32>(1.0, 1.0, 1.0, 1.0);
     }
 
     // if (u.has_mask == 1.0) {
