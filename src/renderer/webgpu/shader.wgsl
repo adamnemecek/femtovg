@@ -1,3 +1,4 @@
+// alias b="convert shader.wgsl shader.metal"
 [[block]]
 struct Vertex {
     pos: vec2<f32>;// [[attribute(0)]];
@@ -156,8 +157,8 @@ fn fragment_shader_aa(
         // const mask = float4(alpha_texture.sample(samplr, ftcoord).r);
         // const mask = textureSample(alpha_tex, samplr, vec2<u32>(0,0));
 
-    //     mask *= scissor;
-    //     result *= mask;
+        // mask = mask * scissor;
+        // result = result * mask;
     }
     elseif (u.shader_type != 2.0) {
         result = result * stroke_alpha * scissor;
