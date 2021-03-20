@@ -334,7 +334,7 @@ pub struct WGPUPipelineCache {
     shader: wgpu::ShaderModule,
     // inner: std::rc::Rc<std::cell::RefCell<HashMap<PipelineCacheKey, WGPUPipelineState>>>,
     inner: std::cell::UnsafeCell<HashMap<PipelineCacheKey, WGPUPipelineStates>>,
-    context: WGPUContext,
+    ctx: WGPUContext,
     // ph: &'a std::marker::PhantomData<()>,
 }
 
@@ -342,11 +342,13 @@ impl WGPUPipelineCache {
 
     pub fn new(
         ctx: &WGPUContext,
-        shader_module: wgpu::ShaderModule, // vert: &wgpu::
+        shader: wgpu::ShaderModule, // vert: &wgpu::
     ) -> Self {
-        // ctx.device().create_render_pipeline(&);
-
-        todo!()
+        Self {
+            shader,
+            inner: Default::default(),
+            ctx: ctx.clone(),
+        }
     }
 
     pub fn get<'a>(
@@ -362,7 +364,7 @@ impl WGPUPipelineCache {
 
         if !r.contains_key(&key) {
             let ps = WGPUPipelineStates::new(
-                &self.context,
+                &self.ctx,
                 blend_func,
                 texture_format,
                 &self.shader,
