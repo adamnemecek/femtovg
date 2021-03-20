@@ -5,7 +5,7 @@ struct Vertex {
     tcoord: vec2<f32>;
 };
 
-[[block]]
+// [[block]]
 struct RasterizerData {
     [[builtin(position)]] pos: vec4<f32>;
     [[location(0)]] fpos: vec2<f32>;
@@ -38,11 +38,22 @@ fn scissorMask(u: Uniforms) -> f32 {
     return 0.0;
 }
 
+[[block]]
+struct ViewSize {
+    x: f32;
+    y: f32;
+};
+
+[[group(0), binding(0)]]
+var vert: Vertex;
+
+[[group(0), binding(1)]]
+var viewSize: ViewSize;
+
 [[stage(vertex)]]
 fn vertex_shader(
-    vert: Vertex,
-    viewSize: vec2<f32>,
-) {
+    // vert: Vertex,
+) -> RasterizerData {
     var ret: RasterizerData;
     ret.pos = vec4<f32>(
                     2.0 * vert.pos.x / viewSize.x - 1.0,
@@ -50,7 +61,7 @@ fn vertex_shader(
                     0.0,
                     1.0
             );
-    // return ret;
+    return ret;
 }
 
 
@@ -66,8 +77,8 @@ fn vertex_shader(
 
 [[stage(fragment)]]
 fn fragment_shader_aa(
-    in: RasterizerData,
-    u: Uniforms,
+    // in: RasterizerData,
+    // u: Uniforms,
     
 ) -> [[location(0)]] vec4<f32> {
 
