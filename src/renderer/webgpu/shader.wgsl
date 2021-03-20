@@ -81,10 +81,7 @@ fn vertex_shader(
 // [[group(0), binding(2)]]
 // var r_sampler: sampler;
 
-// var tex: texture,
-// var samplr: sampler,
-// var alpha_tex: texture,
-// var alpha_samplr: sampler
+// todo: ordering
 
 
 [[group(0), binding(1)]]
@@ -92,6 +89,15 @@ var i: RasterizerData;
 
 [[group(0), binding(2)]]
 var u: Uniforms;
+
+[[group(0), binding(1)]]
+var tex: texture_2d<f32>;
+[[group(0), binding(2)]]
+var samplr: sampler;
+[[group(0), binding(3)]]
+var alpha_tex: texture_2d<f32>;
+[[group(0), binding(4)]]
+var alpha_samplr: sampler;
 
 [[stage(fragment)]]
 fn fragment_shader_aa(
@@ -125,7 +131,7 @@ fn fragment_shader_aa(
         // this has to be fpos
         const pt = (u.paint_mat * vec3<f32>(i.fpos, 1.0)).xy / u.extent;
 
-        // float4 color = texture.sample(samplr, pt);
+        // const color = texture.sample(samplr, pt);
         // if (u.tex_type == 1) {
         //     color = float4(color.xyz * color.w, color.w);
         // }
