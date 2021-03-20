@@ -498,7 +498,7 @@ fn convex_fill<'a, 'b>(
     images: &ImageStore<WGPUTexture>,
     cmd: &Command,
     paint: Params,
-    vertex: &WGPUVec<Vertex>,
+    vertex_buffer: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
     state: &'b WGPUPipelineStates,
 ) {
@@ -534,7 +534,7 @@ fn stroke<'a, 'b>(
     images: &ImageStore<WGPUTexture>,
     cmd: &Command,
     paint: Params,
-    vertex: &WGPUVec<Vertex>,
+    vertex_buffer: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
     state: &'b WGPUPipelineStates,
 ) {
@@ -554,7 +554,7 @@ fn stencil_stroke<'a, 'b>(
     cmd: &Command,
     paint1: Params,
     paint2: Params,
-    vertex: &WGPUVec<Vertex>,
+    vertex_buffer: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
     states: &'b WGPUPipelineStates,
 ) {
@@ -569,10 +569,22 @@ fn concave_fill<'a, 'b>(
     cmd: &Command,
     stencil_paint: Params,
     fill_paint: Params,
-    vertex: &WGPUVec<Vertex>,
+    vertex_buffer: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
     state: &'b WGPUPipelineStates,
 ) {
+}
+
+fn triangles<'a, 'b>(
+    pass: &'a mut wgpu::RenderPass<'b>,
+    images: &ImageStore<WGPUTexture>,
+    cmd: &Command,
+    params: Params,
+    vertex_buffer: &WGPUVec<Vertex>,
+    index_buffer: &mut WGPUVec<u32>,
+    state: &'b WGPUPipelineStates,
+) {
+
 }
 
 impl WGPU {}
@@ -710,7 +722,15 @@ impl Renderer for WGPU {
                         // );
                     }
                     CommandType::Triangles { params } => {
-                        todo!()
+                        triangles(
+                            &mut pass,
+                            images,
+                            cmd,
+                            *params,
+                            &self.vertex_buffer,
+                            &mut self.index_buffer,
+                            states
+                        );
                     }
                     CommandType::ClearRect { .. } => {
                         todo!()
