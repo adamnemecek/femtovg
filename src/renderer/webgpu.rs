@@ -50,6 +50,37 @@ use imgref::ImgVec;
 use rgb::RGBA8;
 use std::borrow::Cow;
 
+struct States {
+    pub a: wgpu::RenderPipeline,
+    pub b: wgpu::RenderPipeline,
+}
+struct Renderer1 {
+    inner: std::collections::HashMap<u32, std::rc::Rc<States>>,
+}
+
+impl Renderer1 {
+    fn render<'a>(&'a mut self, pass: &mut wgpu::RenderPass<'a>, commands: &[u32]) {
+        // let encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+        //     label: None
+        // });
+        // let pass = encoder.begin_render_pass(&wgpu::PassDesc)
+
+        for e in commands {
+            match e {
+                0 => {
+                    let pipeline = &self.inner[&0];
+                    pass.set_pipeline(&pipeline.a);
+                }
+                1 => {
+                    let pipeline = &self.inner[&1];
+                    // pass.set_pipeline(pipeline.as_ref());
+                }
+                _ => todo!(),
+            }
+        }
+    }
+}
+
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct WGPUBlend {
     pub src_rgb: wgpu::BlendFactor,
@@ -149,7 +180,7 @@ impl WGPUStates {
 }
 
 /// the things that
-pub struct WGPU {
+pub struct WGPU<'wgpu> {
     ctx: WGPUContext,
 
     default_stencil_state: wgpu::RenderPipeline,
@@ -172,14 +203,14 @@ pub struct WGPU {
     render_target: RenderTarget,
     pseudo_texture: WGPUTexture,
 
-    cache: WGPUPipelineCache,
+    cache: WGPUPipelineCache<'wgpu>,
 
     view_size: Size,
 }
 
 fn create_bind_group() {}
 
-impl WGPU {
+impl<'wgpu> WGPU<'wgpu> {
     pub fn new(device: &wgpu::Device) -> Self {
         // let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
         //     label: None,
@@ -403,17 +434,17 @@ fn convex_fill<'a, 'b>(
     paint: Params,
     vertex: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
-    state: &'b std::rc::Rc<WGPUPipelineState>,
-    // convex_fill_pipeline: &'b wgpu::RenderPipeline,
-    // convex_fill2_pipeline: &'b wgpu::RenderPipeline,
+    // state: &'b std::rc::Rc<WGPUPipelineState>,
+    convex_fill_pipeline: &'b wgpu::RenderPipeline,
+    convex_fill2_pipeline: &'b wgpu::RenderPipeline,
 ) {
     // encoder.push_debug_group("convex_fill");
 
     for drawable in &cmd.drawables {
         if let Some((start, count)) = drawable.fill_verts {
             //
-            // pass.set_pipeline(&convex_fill_pipeline);
-            pass.set_pipeline(&state.convex_fill1());
+            pass.set_pipeline(&convex_fill_pipeline);
+            // pass.set_pipeline(&state.convex_fill1());
 
             let offset = index_buffer.len();
             let triangle_fan_index_count = index_buffer.extend_with_triange_fan_indices_cw(start as u32, count as u32);
@@ -427,7 +458,7 @@ fn convex_fill<'a, 'b>(
         }
 
         if let Some((start, count)) = drawable.stroke_verts {
-            pass.set_pipeline(&state.convex_fill2());
+            // pass.set_pipeline(&state.convex_fill2());
             let vertex_range = start as _..(start + count) as _;
             pass.draw(vertex_range, 0..0);
         }
@@ -479,7 +510,7 @@ fn concave_fill<'a, 'b>(
 ) {
 }
 
-impl Renderer for WGPU {
+impl<'wgpu> Renderer for WGPU<'wgpu> {
     type Image = WGPUTexture;
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
         let size = Size::new(width as f32, height as f32);
@@ -498,6 +529,22 @@ impl Renderer for WGPU {
             .device()
             .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
+        let mut target_texture = match self.render_target {
+            RenderTarget::Screen => {
+                // println!("render target: screen");
+                // let d = self.layer.next_drawable().unwrap().to_owned();
+                // let tex = d.texture().to_owned();
+                // drawable = Some(d);
+                // tex
+                todo!()
+            }
+            RenderTarget::Image(id) => {
+                // println!("render target: image: {:?}", id);
+                images.get(id).unwrap()
+            }
+        };
+
+        let mut texture_format = target_texture.format();
         // let pass = new_render_pass(
         //     &mut encoder,
         //     target,
@@ -508,6 +555,7 @@ impl Renderer for WGPU {
         //     view_size,
         // );
         // let mut pass = new_pass();
+        // let mut state: Option<WGPUPipelineState> = None;
 
         let pass_desc = new_pass_descriptor();
         {
@@ -516,24 +564,42 @@ impl Renderer for WGPU {
 
             // pass.set_viewport(x, y, w, h, min_depth, max_depth)
 
+            // let mut state = None;
             for cmd in commands {
+                // let blend: WGPUBlend = cmd.composite_operation.into();
+                // let s = if let Some(ref s) = state {
+                //     todo!()
+                //     // if s.blend_func() == blend {
+                //     //     s
+                //     // } else {
+
+                //     // }
+                // } else {
+                //     // self.cache.get(blend, pixel_format)
+                //     todo!()
+                // };
                 // let r = &mut pass;
+                let state = self.cache.get(cmd.composite_operation.into(), texture_format);
 
                 match &cmd.cmd_type {
                     CommandType::ConvexFill { params } => {
                         // self.convex_fill(&mut pass, images, cmd, *params);
-                        convex_fill(
-                            &mut pass,
-                            images,
-                            cmd,
-                            *params,
-                            &self.vertex_buffer,
-                            &mut self.index_buffer,
-                            self.cache.any(),
-                            // &self.convex_fill1,
-                            // &self.convex_fill2,
-                        );
+                        // convex_fill(
+                        //     &mut pass,
+                        //     images,
+                        //     cmd,
+                        //     *params,
+                        //     &self.vertex_buffer,
+                        //     &mut self.index_buffer,
+                        //     // &state,
+                        //     // s.convex_fill1(),
+                        //     // s.convex_fill2(),
+                        //     // &self.convex_fill1,
+                        //     // &self.convex_fill2,
+                        // );
                         // self.convex_fill(&mut pass, images, cmd, *params);
+
+                        pass.set_pipeline(state.convex_fill1());
                     }
                     CommandType::ConcaveFill {
                         stencil_params,
@@ -553,7 +619,16 @@ impl Renderer for WGPU {
                         );
                     }
                     CommandType::StencilStroke { params1, params2 } => {
-                        todo!()
+                        stencil_stroke(
+                            &mut pass,
+                            images,
+                            cmd,
+                            *params1,
+                            *params2,
+                            &self.vertex_buffer,
+                            &mut self.index_buffer,
+                            self.cache.any(),
+                        );
                     }
                     CommandType::Triangles { params } => {
                         todo!()

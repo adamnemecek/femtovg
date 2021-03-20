@@ -3,8 +3,11 @@ use super::{
     WGPUBlend,
     WGPUContext,
 };
-use std::collections::HashMap;
 use std::rc::Rc;
+use std::{
+    collections::HashMap,
+    pin::Pin,
+};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 struct PipelineCacheKey {
@@ -259,6 +262,10 @@ pub struct WGPUPipelineState {
 }
 
 impl WGPUPipelineState {
+    pub fn blend_func(&self) -> WGPUBlend {
+        self.blend_func
+    }
+
     pub fn convex_fill1(&self) -> &wgpu::RenderPipeline {
         &self.convex_fill1
     }
@@ -316,13 +323,15 @@ impl WGPUPipelineState {
 }
 
 // struct
-pub struct WGPUPipelineCache {
+pub struct WGPUPipelineCache<'a> {
     shader: wgpu::ShaderModule,
-    inner: HashMap<PipelineCacheKey, Rc<WGPUPipelineState>>,
+    // inner: std::rc::Rc<std::cell::RefCell<HashMap<PipelineCacheKey, Rc<WGPUPipelineState>>>>,
+    inner: HashMap<PipelineCacheKey, WGPUPipelineState>,
     context: WGPUContext,
+    ph: &'a std::marker::PhantomData<()>,
 }
 
-impl WGPUPipelineCache {
+impl<'a> WGPUPipelineCache<'a> {
     pub fn any(&self) -> &Rc<WGPUPipelineState> {
         todo!()
     }
@@ -336,7 +345,11 @@ impl WGPUPipelineCache {
         todo!()
     }
 
-    pub fn get(&mut self, blend_func: WGPUBlend, texture_format: wgpu::TextureFormat) -> Rc<WGPUPipelineState> {
+    pub fn get(
+        &'a mut self,
+        blend_func: WGPUBlend,
+        texture_format: wgpu::TextureFormat,
+    ) -> &'a WGPUPipelineState {
         let key = PipelineCacheKey {
             blend_func,
             texture_format,
@@ -350,9 +363,11 @@ impl WGPUPipelineCache {
                 &self.shader,
                 // crate::Vertex::desc(),
             );
-            self.inner.insert(key, Rc::new(ps));
+            // self.inner.insert(key, Rc::new(ps));
+            self.inner.insert(key, ps);
         }
 
-        self.inner.get(&key).unwrap().clone()
+        &self.inner[&key]
+        
     }
 }

@@ -141,4 +141,8 @@ impl WGPUTexture {
     pub fn delete(&self) {
         self.tex.destroy()
     }
+
+    pub fn format(&self) -> wgpu::TextureFormat {
+        self.info.format().into()
+    }
 }
