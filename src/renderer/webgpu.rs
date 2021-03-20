@@ -597,6 +597,21 @@ fn clear_rect<'a, 'b>(
 ) {
 }
 
+fn encode(encoder: &mut wgpu::CommandEncoder, pass_desc: &wgpu::RenderPassDescriptor, a: &[u32]) {
+    use std::cell::UnsafeCell;
+    let mut pass = encoder.begin_render_pass(pass_desc);
+    for e in a {
+        match e {
+            0 => {
+                // pass = None;
+                // pass = Some(encoder.begin_render_pass(pass_desc));
+            }
+            _ => {}
+        }
+    }
+
+}
+
 impl WGPU {}
 
 impl Renderer for WGPU {
@@ -760,6 +775,9 @@ impl Renderer for WGPU {
                         );
                     }
                     CommandType::SetRenderTarget(target) => {
+                        // let buffer = encoder.finish();
+                        // self.ctx.queue().submit(Some(buffer));
+                        // pass = encoder.begin_render_pass(&pass_desc);
                         todo!()
                     }
                     _ => todo!(),
