@@ -584,7 +584,17 @@ fn triangles<'a, 'b>(
     index_buffer: &mut WGPUVec<u32>,
     state: &'b WGPUPipelineStates,
 ) {
+}
 
+fn clear_rect<'a, 'b>(
+    pass: &'a mut wgpu::RenderPass<'b>,
+    images: &ImageStore<WGPUTexture>,
+    cmd: &Command,
+    // params: Params,
+    vertex_buffer: &WGPUVec<Vertex>,
+    index_buffer: &mut WGPUVec<u32>,
+    state: &'b WGPUPipelineStates,
+) {
 }
 
 impl WGPU {}
@@ -710,16 +720,16 @@ impl Renderer for WGPU {
                         );
                     }
                     CommandType::StencilStroke { params1, params2 } => {
-                        // stencil_stroke(
-                        //     &mut pass,
-                        //     images,
-                        //     cmd,
-                        //     *params1,
-                        //     *params2,
-                        //     &self.vertex_buffer,
-                        //     &mut self.index_buffer,
-                        //     self.cache.any(),
-                        // );
+                        stencil_stroke(
+                            &mut pass,
+                            images,
+                            cmd,
+                            *params1,
+                            *params2,
+                            &self.vertex_buffer,
+                            &mut self.index_buffer,
+                            states,
+                        );
                     }
                     CommandType::Triangles { params } => {
                         triangles(
@@ -729,11 +739,25 @@ impl Renderer for WGPU {
                             *params,
                             &self.vertex_buffer,
                             &mut self.index_buffer,
-                            states
+                            states,
                         );
                     }
-                    CommandType::ClearRect { .. } => {
-                        todo!()
+                    CommandType::ClearRect {
+                        x,
+                        y,
+                        width,
+                        height,
+                        color,
+                    } => {
+                        clear_rect(
+                            &mut pass,
+                            images,
+                            cmd,
+                            // *params,
+                            &self.vertex_buffer,
+                            &mut self.index_buffer,
+                            states,
+                        );
                     }
                     CommandType::SetRenderTarget(target) => {
                         todo!()
