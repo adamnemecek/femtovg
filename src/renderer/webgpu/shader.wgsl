@@ -116,7 +116,6 @@ fn fragment_shader_aa(
         discard;
     }
 
-
     if (u.shader_type == 0.0) {
         // // MNVG_SHADER_FILLGRAD
         const pt = (u.paint_mat * vec3<f32>(i.fpos, 1.0)).xy;
@@ -135,14 +134,14 @@ fn fragment_shader_aa(
 
         // const color = textureSample(tex, samplr, pt);
         const color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
-        // const color = textureSample(tex, samplr, vec2<f32>(0.0,0.0));
+        // const colo1r = textureSample(tex, samplr, vec2<f32>(0.0,0.0));
         // const color = texture.sample(samplr, pt);
-        // if (u.tex_type == 1) {
-        //     color = vec4<f32>(color.xyz * color.w, color.w);
-        // }
-        // else if (u.tex_type == 2) {
-        //     color = float4(color.x);
-        // }
+        if (u.tex_type == 1.0) {
+            // color = vec4<f32>(color.xyz * color.w, color.w);
+        }
+        elseif (u.tex_type == 2.0) {
+            // color = float4(color.x);
+        }
         // result = color * u.inner_col;
     } else {
     //     // stencil
