@@ -434,7 +434,7 @@ fn convex_fill<'a, 'b>(
     paint: Params,
     vertex: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
-    state: &'b std::rc::Rc<WGPUPipelineState>,
+    state: &'b WGPUPipelineState,
     // convex_fill_pipeline: &'b wgpu::RenderPipeline,
     // convex_fill2_pipeline: &'b wgpu::RenderPipeline,
 ) {
@@ -560,7 +560,7 @@ impl Renderer for WGPU {
         // );
         // let mut pass = new_pass();
         // let mut state: Option<WGPUPipelineState> = None;
-        let mut prev_state: Option<WGPUStates> = None;
+        let mut prev_state: Option<WGPUPipelineState> = None;
 
         let pass_desc = new_pass_descriptor();
         {
@@ -572,13 +572,15 @@ impl Renderer for WGPU {
             // let mut state = None;
             for cmd in commands {
                 let blend: WGPUBlend = cmd.composite_operation.into();
-                // let state = if let Some(prev_state) = prev_state {
-                //     if prev_state {
-
-                //     }
-                // } else {
-                //     todo!()
-                // };
+                let state = if let Some(ref prev_state) = prev_state {
+                    if prev_state.matches(blend, texture_format) {
+                        prev_state
+                    } else {
+                        self.cache.get(blend, texture_format)
+                    }
+                } else {
+                    self.cache.get(blend, texture_format)
+                };
                 // let s = if let Some(ref s) = state {
                 //     todo!()
                 //     // if s.blend_func() == blend {
@@ -591,7 +593,7 @@ impl Renderer for WGPU {
                 //     todo!()
                 // };
                 // let r = &mut pass;
-                let state = self.cache.get(cmd.composite_operation.into(), texture_format);
+                // let state = self.cache.get(cmd.composite_operation.into(), texture_format);
 
                 match &cmd.cmd_type {
                     CommandType::ConvexFill { params } => {

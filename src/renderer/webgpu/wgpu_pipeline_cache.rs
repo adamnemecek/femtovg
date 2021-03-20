@@ -265,6 +265,10 @@ pub struct WGPUPipelineState {
 }
 
 impl WGPUPipelineState {
+    pub fn matches(&self, blend_func: WGPUBlend, format: wgpu::TextureFormat) -> bool {
+        self.blend_func == blend_func && self.texture_format == format
+    }
+
     pub fn blend_func(&self) -> WGPUBlend {
         self.blend_func
     }
@@ -335,9 +339,6 @@ pub struct WGPUPipelineCache {
 }
 
 impl WGPUPipelineCache {
-    pub fn any(&self) -> &Rc<WGPUPipelineState> {
-        todo!()
-    }
 
     pub fn new(
         ctx: &WGPUContext,
