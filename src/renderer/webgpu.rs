@@ -636,22 +636,8 @@ impl Renderer for WGPU {
         // let texture_format = &self.swap_chain.format();
         // let format = texture_format.clone();
         let texture_format = self.swap_chain.format();
-        let target_texture = match self.render_target {
-            RenderTarget::Screen => {
-                self.swap_chain.get_current_frame().unwrap()
 
-                // println!("render target: screen");
-                // let d = self.layer.next_drawable().unwrap().to_owned();
-                // let tex = d.texture().to_owned();
-                // drawable = Some(d);
-                // tex
-            }
-            RenderTarget::Image(id) => {
-                // println!("render target: image: {:?}", id);
-                // images.get(id).unwrap()
-                todo!();
-            }
-        };
+        let mut render_target = self.render_target;
 
         // self.ctx.device().create_bind_group()
         // let mut texture_format = target_texture.format();
@@ -670,9 +656,26 @@ impl Renderer for WGPU {
         let mut prev_states: Option<&WGPUPipelineStates> = None;
         let mut i = 0;
 
-        let pass_desc = new_pass_descriptor();
-        {
-            'outer: while i < commands.len() {
+        'outer: while i < commands.len() {
+
+            let target_texture = match render_target {
+                RenderTarget::Screen => {
+                    self.swap_chain.get_current_frame().unwrap()
+
+                    // println!("render target: screen");
+                    // let d = self.layer.next_drawable().unwrap().to_owned();
+                    // let tex = d.texture().to_owned();
+                    // drawable = Some(d);
+                    // tex
+                }
+                RenderTarget::Image(id) => {
+                    // println!("render target: image: {:?}", id);
+                    // images.get(id).unwrap()
+                    todo!();
+                }
+            };
+            let pass_desc = new_pass_descriptor();
+            {
                 let mut pass = encoder.begin_render_pass(&pass_desc);
 
                 // pass.set_bind_group(index, bind_group, offsets)
@@ -778,6 +781,7 @@ impl Renderer for WGPU {
                             );
                         }
                         CommandType::SetRenderTarget(target) => {
+                            render_target = *target;
                             // let buffer = encoder.finish();
                             // self.ctx.queue().submit(Some(buffer));
                             // pass = encoder.begin_render_pass(&pass_desc);
