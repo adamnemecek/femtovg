@@ -399,8 +399,45 @@ fn new_pass_descriptor<'a, 'b>() -> wgpu::RenderPassDescriptor<'a, 'b> {
     todo!()
 }
 
+pub struct TextureBindings {
+    // tex_tex: 
+}
+
+fn set_uniforms<'a, 'b>(
+    ctx: &WGPUContext,
+    pass: &'a mut wgpu::RenderPass<'b>,
+    images: &ImageStore<WGPUTexture>,
+    paint: Params,
+    image_tex: Option<ImageId>,
+    alpha_tex: Option<ImageId>,
+    pseudo_texture: &WGPUTexture,
+) {
+    let tex = if let Some(id) = image_tex {
+        images.get(id).unwrap()
+    } else {
+        pseudo_texture
+    };
+
+    let layout = ctx.device().create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        label: None,
+        entries: &[
+            
+        ]
+    });
+
+    ctx.device().create_bind_group(&wgpu::BindGroupDescriptor {
+        label: None,
+        layout: &layout,
+        entries: &[
+
+        ]
+    });
+    // pass.set_tex
+}
+
 fn convex_fill<'a, 'b>(
     // &'a mut self,
+
     pass: &'a mut wgpu::RenderPass<'b>,
     images: &ImageStore<WGPUTexture>,
     cmd: &Command,
@@ -408,8 +445,6 @@ fn convex_fill<'a, 'b>(
     vertex: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
     state: &'b WGPUPipelineStates,
-    // convex_fill_pipeline: &'b wgpu::RenderPipeline,
-    // convex_fill2_pipeline: &'b wgpu::RenderPipeline,
 ) {
     // encoder.push_debug_group("convex_fill");
 
@@ -506,7 +541,7 @@ impl Renderer for WGPU {
 
         // let texture_format = &self.swap_chain.format();
         // let format = texture_format.clone();
-        let texture_format = wgpu::TextureFormat::Astc10x10RgbaUnorm;
+        let texture_format = self.swap_chain.format();
         let target_texture = match self.render_target {
             RenderTarget::Screen => {
                 self.swap_chain.get_current_frame().unwrap()
@@ -524,6 +559,8 @@ impl Renderer for WGPU {
             }
         };
 
+
+        // self.ctx.device().create_bind_group()
         // let mut texture_format = target_texture.format();
 
         // let pass = new_render_pass(
@@ -542,6 +579,9 @@ impl Renderer for WGPU {
         let pass_desc = new_pass_descriptor();
         {
             let mut pass = encoder.begin_render_pass(&pass_desc);
+            
+            // pass.set_bind_group(index, bind_group, offsets)
+            
             // encoder.begin_render_pass(desc)
 
             // pass.set_viewport(x, y, w, h, min_depth, max_depth)
