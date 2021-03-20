@@ -434,16 +434,16 @@ fn convex_fill<'a, 'b>(
     paint: Params,
     vertex: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
-    // state: &'b std::rc::Rc<WGPUPipelineState>,
-    convex_fill_pipeline: &'b wgpu::RenderPipeline,
-    convex_fill2_pipeline: &'b wgpu::RenderPipeline,
+    state: &'b std::rc::Rc<WGPUPipelineState>,
+    // convex_fill_pipeline: &'b wgpu::RenderPipeline,
+    // convex_fill2_pipeline: &'b wgpu::RenderPipeline,
 ) {
     // encoder.push_debug_group("convex_fill");
 
     for drawable in &cmd.drawables {
         if let Some((start, count)) = drawable.fill_verts {
             //
-            pass.set_pipeline(&convex_fill_pipeline);
+            pass.set_pipeline(&state.convex_fill1());
             // pass.set_pipeline(&state.convex_fill1());
 
             let offset = index_buffer.len();
@@ -458,7 +458,7 @@ fn convex_fill<'a, 'b>(
         }
 
         if let Some((start, count)) = drawable.stroke_verts {
-            // pass.set_pipeline(&state.convex_fill2());
+            pass.set_pipeline(&state.convex_fill2());
             let vertex_range = start as _..(start + count) as _;
             pass.draw(vertex_range, 0..0);
         }
@@ -550,6 +550,7 @@ impl<'wgpu> WGPU<'wgpu> {
         // );
         // let mut pass = new_pass();
         // let mut state: Option<WGPUPipelineState> = None;
+        let mut prev_state: Option<WGPUStates> = None;
 
         let pass_desc = new_pass_descriptor();
         {
@@ -560,7 +561,14 @@ impl<'wgpu> WGPU<'wgpu> {
 
             // let mut state = None;
             for cmd in commands {
-                // let blend: WGPUBlend = cmd.composite_operation.into();
+                let blend: WGPUBlend = cmd.composite_operation.into();
+                // let state = if let Some(prev_state) = prev_state {
+                //     if prev_state {
+
+                //     }
+                // } else {
+                //     todo!()
+                // };
                 // let s = if let Some(ref s) = state {
                 //     todo!()
                 //     // if s.blend_func() == blend {
@@ -578,22 +586,23 @@ impl<'wgpu> WGPU<'wgpu> {
                 match &cmd.cmd_type {
                     CommandType::ConvexFill { params } => {
                         // self.convex_fill(&mut pass, images, cmd, *params);
-                        // convex_fill(
-                        //     &mut pass,
-                        //     images,
-                        //     cmd,
-                        //     *params,
-                        //     &self.vertex_buffer,
-                        //     &mut self.index_buffer,
-                        //     // &state,
-                        //     // s.convex_fill1(),
-                        //     // s.convex_fill2(),
-                        //     // &self.convex_fill1,
-                        //     // &self.convex_fill2,
-                        // );
+                        convex_fill(
+                            &mut pass,
+                            images,
+                            cmd,
+                            *params,
+                            &self.vertex_buffer,
+                            &mut self.index_buffer,
+                            state
+                            // &state,
+                            // s.convex_fill1(),
+                            // s.convex_fill2(),
+                            // &self.convex_fill1,
+                            // &self.convex_fill2,
+                        );
                         // self.convex_fill(&mut pass, images, cmd, *params);
 
-                        pass.set_pipeline(state.convex_fill1());
+                        // pass.set_pipeline(state.convex_fill1());
                     }
                     CommandType::ConcaveFill {
                         stencil_params,
