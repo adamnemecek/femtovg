@@ -510,7 +510,7 @@ fn concave_fill<'a, 'b>(
 ) {
 }
 
-impl<'wgpu>  WGPU<'wgpu> {
+impl<'wgpu> WGPU<'wgpu> {
     fn render1(&'wgpu mut self, images: &ImageStore<WGPUTexture>, verts: &[Vertex], commands: &[Command]) {
         self.vertex_buffer.clear();
         self.vertex_buffer.extend_from_slice(verts);
@@ -602,27 +602,27 @@ impl<'wgpu>  WGPU<'wgpu> {
                         // self.stencil_stroke(&mut pass, images, cmd, *stencil_params, *fill_params);
                     }
                     CommandType::Stroke { params } => {
-                        stroke(
-                            &mut pass,
-                            images,
-                            cmd,
-                            *params,
-                            &self.vertex_buffer,
-                            &mut self.index_buffer,
-                            self.cache.any(),
-                        );
+                        // stroke(
+                        //     &mut pass,
+                        //     images,
+                        //     cmd,
+                        //     *params,
+                        //     &self.vertex_buffer,
+                        //     &mut self.index_buffer,
+                        //     ,
+                        // );
                     }
                     CommandType::StencilStroke { params1, params2 } => {
-                        stencil_stroke(
-                            &mut pass,
-                            images,
-                            cmd,
-                            *params1,
-                            *params2,
-                            &self.vertex_buffer,
-                            &mut self.index_buffer,
-                            self.cache.any(),
-                        );
+                        // stencil_stroke(
+                        //     &mut pass,
+                        //     images,
+                        //     cmd,
+                        //     *params1,
+                        //     *params2,
+                        //     &self.vertex_buffer,
+                        //     &mut self.index_buffer,
+                        //     self.cache.any(),
+                        // );
                     }
                     CommandType::Triangles { params } => {
                         todo!()
