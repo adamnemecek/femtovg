@@ -42,6 +42,13 @@ fn stroke_mask(u: Uniforms, p: vec2<f32>) -> f32 {
     return 0.0;
 }
 
+fn sdroundrect(u: Uniforms, pt: vec2<f32>) -> f32 {
+    // float2 ext2 = uniforms.extent - float2(uniforms.radius);
+    // float2 d = abs(pt) - ext2;
+    // return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - uniforms.radius;
+    return 0.0;
+}
+
 [[block]]
 struct ViewSize {
     x: f32;
@@ -81,7 +88,7 @@ fn vertex_shader(
 
 
 [[group(0), binding(1)]]
-var rd: RasterizerData;
+var i: RasterizerData;
 
 [[group(0), binding(2)]]
 var u: Uniforms;
@@ -95,14 +102,56 @@ fn fragment_shader_aa(
 
     var result: vec4<f32>;
 
-    const scissor = scissor_mask(u, rd.fpos);
+    const scissor = scissor_mask(u, i.fpos);
 
-    const stroke_alpha = stroke_mask(u, rd.ftcoord);
+    const stroke_alpha = stroke_mask(u, i.ftcoord);
     if (stroke_alpha < u.stroke_thr) {
         discard;
     }
 
+    if (u.shader_type == 0.0) {
+        // // MNVG_SHADER_FILLGRAD
+        // const pt = (u.paint_mat * vec3<f32>(i.fpos, 1.0)).xy;
+        // // revisit d
+        // const d = clamp((sdroundrect(u, pt) + u.feather*0.5) / u.feather, 0.0, 1.0);
+        // // float d = saturate((u.feather * 0.5 + sdroundrect(uniforms, pt))
+        // //                    / u.feather);
+        // const color = mix(u.inner_col, u.outer_col, d);
+        // // color *= scissor;
+        // // color *= strokeAlpha;
+        // result = color;
+    } elseif (u.shader_type == 1.0) {
+    //     // MNVG_SHADER_IMG
+    //     // this has to be fpos
+    //     float2 pt = (u.paint_mat * float3(in.fpos, 1.0)).xy / u.extent;
 
+    //     float4 color = texture.sample(samplr, pt);
+    //     if (u.tex_type == 1) {
+    //         color = float4(color.xyz * color.w, color.w);
+    //     }
+    //     else if (u.tex_type == 2) {
+    //         color = float4(color.x);
+    //     }
+    //     result = color * u.inner_col;
+    } else {
+    //     // stencil
+    //     // MNVG_SHADER_FILLIMG
+    //     result = float4(1.0);
+    }
+
+    // if (u.has_mask == 1.0) {
+    //     // revisit ftcoord
+    //     float2 ftcoord = float2(in.ftcoord.x, 1.0 - in.ftcoord.y);
+    //     float4 mask = float4(alpha_texture.sample(samplr, ftcoord).r);
+
+    //     mask *= scissor;
+    //     result *= mask;
+    // }
+    // else if (u.shader_type != 2.0) {
+    //     result *= strokeAlpha * scissor;
+    // }
+
+    // return result;
 
     // return textureSample(r_texture, r_sampler, in.uv);
     // return vec4<f32>(0.0, 0.0, 0.0, 0.0);
