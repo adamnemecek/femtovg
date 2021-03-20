@@ -90,20 +90,20 @@ var i: RasterizerData;
 [[group(0), binding(2)]]
 var u: Uniforms;
 
-[[group(0), binding(1)]]
-var tex: texture_2d<f32>;
-[[group(0), binding(2)]]
-var samplr: sampler;
 [[group(0), binding(3)]]
-var alpha_tex: texture_2d<f32>;
+var tex: texture_2d<f32>;
 [[group(0), binding(4)]]
+var samplr: sampler;
+[[group(0), binding(5)]]
+var alpha_tex: texture_2d<f32>;
+[[group(0), binding(6)]]
 var alpha_samplr: sampler;
 
 [[stage(fragment)]]
 fn fragment_shader_aa(
     // in: RasterizerData,
     // u: Uniforms,
-    
+
 ) -> [[location(0)]] vec4<f32> {
 
     var result: vec4<f32>;
@@ -111,29 +111,34 @@ fn fragment_shader_aa(
     const scissor = scissor_mask(u, i.fpos);
 
     const stroke_alpha = stroke_mask(u, i.ftcoord);
+
     if (stroke_alpha < u.stroke_thr) {
         discard;
     }
 
+
     if (u.shader_type == 0.0) {
         // // MNVG_SHADER_FILLGRAD
-        // const pt = (u.paint_mat * vec3<f32>(i.fpos, 1.0)).xy;
+        const pt = (u.paint_mat * vec3<f32>(i.fpos, 1.0)).xy;
         // // revisit d
-        // const d = clamp((sdroundrect(u, pt) + u.feather*0.5) / u.feather, 0.0, 1.0);
+        const d = clamp((sdroundrect(u, pt) + u.feather*0.5) / u.feather, 0.0, 1.0);
         // // float d = saturate((u.feather * 0.5 + sdroundrect(uniforms, pt))
         // //                    / u.feather);
-        // const color = mix(u.inner_col, u.outer_col, d);
+        const color = mix(u.inner_col, u.outer_col, d);
         // // color *= scissor;
         // // color *= strokeAlpha;
-        // result = color;
+        result = color;
     } elseif (u.shader_type == 1.0) {
         // MNVG_SHADER_IMG
         // this has to be fpos
         const pt = (u.paint_mat * vec3<f32>(i.fpos, 1.0)).xy / u.extent;
 
+        // const color = textureSample(tex, samplr, pt);
+        const color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        // const color = textureSample(tex, samplr, vec2<f32>(0.0,0.0));
         // const color = texture.sample(samplr, pt);
         // if (u.tex_type == 1) {
-        //     color = float4(color.xyz * color.w, color.w);
+        //     color = vec4<f32>(color.xyz * color.w, color.w);
         // }
         // else if (u.tex_type == 2) {
         //     color = float4(color.x);
