@@ -326,15 +326,15 @@ impl WGPUPipelineState {
 }
 
 // struct
-pub struct WGPUPipelineCache<'a> {
+pub struct WGPUPipelineCache {
     shader: wgpu::ShaderModule,
     // inner: std::rc::Rc<std::cell::RefCell<HashMap<PipelineCacheKey, WGPUPipelineState>>>,
     inner: std::cell::UnsafeCell<HashMap<PipelineCacheKey, std::rc::Rc<WGPUPipelineState>>>,
     context: WGPUContext,
-    ph: &'a std::marker::PhantomData<()>,
+    // ph: &'a std::marker::PhantomData<()>,
 }
 
-impl<'a> WGPUPipelineCache<'a> {
+impl WGPUPipelineCache {
     pub fn any(&self) -> &Rc<WGPUPipelineState> {
         todo!()
     }
@@ -348,7 +348,7 @@ impl<'a> WGPUPipelineCache<'a> {
         todo!()
     }
 
-    pub fn get(
+    pub fn get<'a>(
         &'a self,
         blend_func: WGPUBlend,
         texture_format: wgpu::TextureFormat,
