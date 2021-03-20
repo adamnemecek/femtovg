@@ -113,9 +113,6 @@ fn fragment_shader_aa(
 
     const stroke_alpha = stroke_mask(u, i.ftcoord);
 
-    if (stroke_alpha < u.stroke_thr) {
-        discard;
-    }
 
     if (u.shader_type == 0.0) {
         // // MNVG_SHADER_FILLGRAD
@@ -133,9 +130,10 @@ fn fragment_shader_aa(
         // this has to be fpos
         const pt = (u.paint_mat * vec3<f32>(i.fpos, 1.0)).xy / u.extent;
 
-        // const color = textureSample(tex, samplr, pt);
         var color: vec4<f32>;
-        color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        color = textureSample(tex, samplr, pt);
+
+        // color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
         // color = textureSample(tex, samplr, vec2<f32>(0.0,0.0));
         // const color = texture.sample(samplr, pt);
         if (u.tex_type == 1.0) {
@@ -150,6 +148,11 @@ fn fragment_shader_aa(
     //     // MNVG_SHADER_FILLIMG
         result = vec4<f32>(1.0, 1.0, 1.0, 1.0);
     }
+
+    if (stroke_alpha < u.stroke_thr) {
+        discard;
+    }
+
 
     if (u.has_mask == 1.0) {
     //     // revisit ftcoord
