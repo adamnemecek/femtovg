@@ -339,7 +339,6 @@ pub struct WGPUPipelineCache {
 }
 
 impl WGPUPipelineCache {
-
     pub fn new(
         ctx: &WGPUContext,
         shader: wgpu::ShaderModule, // vert: &wgpu::
@@ -351,11 +350,7 @@ impl WGPUPipelineCache {
         }
     }
 
-    pub fn get<'a>(
-        &'a self,
-        blend_func: WGPUBlend,
-        texture_format: wgpu::TextureFormat,
-    ) -> &'a WGPUPipelineStates {
+    pub fn get<'a>(&'a self, blend_func: WGPUBlend, texture_format: wgpu::TextureFormat) -> &'a WGPUPipelineStates {
         let key = PipelineCacheKey {
             blend_func,
             texture_format,

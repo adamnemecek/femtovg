@@ -20,6 +20,9 @@ pub use wgpu_pipeline_cache::*;
 mod mem_align;
 pub use mem_align::*;
 
+mod wgpu_swap_chain;
+pub use wgpu_swap_chain::*;
+
 use crate::{
     renderer::{
         ImageId,
@@ -49,37 +52,6 @@ use super::{
 use imgref::ImgVec;
 use rgb::RGBA8;
 use std::borrow::Cow;
-
-struct States {
-    pub a: wgpu::RenderPipeline,
-    pub b: wgpu::RenderPipeline,
-}
-struct Renderer1 {
-    inner: std::collections::HashMap<u32, std::rc::Rc<States>>,
-}
-
-impl Renderer1 {
-    fn render<'a>(&'a mut self, pass: &mut wgpu::RenderPass<'a>, commands: &[u32]) {
-        // let encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-        //     label: None
-        // });
-        // let pass = encoder.begin_render_pass(&wgpu::PassDesc)
-
-        for e in commands {
-            match e {
-                0 => {
-                    let pipeline = &self.inner[&0];
-                    pass.set_pipeline(&pipeline.a);
-                }
-                1 => {
-                    let pipeline = &self.inner[&1];
-                    // pass.set_pipeline(pipeline.as_ref());
-                }
-                _ => todo!(),
-            }
-        }
-    }
-}
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct WGPUBlend {
@@ -206,6 +178,7 @@ pub struct WGPU {
     cache: WGPUPipelineCache,
 
     view_size: Size,
+    swap_chain: WGPUSwapChain,
 }
 
 fn create_bind_group() {}
@@ -510,9 +483,7 @@ fn concave_fill<'a, 'b>(
 ) {
 }
 
-impl WGPU {
-
-}
+impl WGPU {}
 
 impl Renderer for WGPU {
     type Image = WGPUTexture;
@@ -533,22 +504,28 @@ impl Renderer for WGPU {
             .device()
             .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
-        let mut target_texture = match self.render_target {
+        // let texture_format = &self.swap_chain.format();
+        // let format = texture_format.clone();
+        let texture_format = wgpu::TextureFormat::Astc10x10RgbaUnorm;
+        let target_texture = match self.render_target {
             RenderTarget::Screen => {
+                self.swap_chain.get_current_frame().unwrap()
+
                 // println!("render target: screen");
                 // let d = self.layer.next_drawable().unwrap().to_owned();
                 // let tex = d.texture().to_owned();
                 // drawable = Some(d);
                 // tex
-                todo!()
             }
             RenderTarget::Image(id) => {
                 // println!("render target: image: {:?}", id);
-                images.get(id).unwrap()
+                // images.get(id).unwrap()
+                todo!();
             }
         };
 
-        let mut texture_format = target_texture.format();
+        // let mut texture_format = target_texture.format();
+
         // let pass = new_render_pass(
         //     &mut encoder,
         //     target,
@@ -593,7 +570,7 @@ impl Renderer for WGPU {
                             *params,
                             &self.vertex_buffer,
                             &mut self.index_buffer,
-                            state
+                            state,
                         );
                     }
                     CommandType::ConcaveFill {
