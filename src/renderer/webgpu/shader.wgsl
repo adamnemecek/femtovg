@@ -33,7 +33,7 @@ struct Uniforms {
 };
 
 
-fn scissorMask(u: Uniforms) -> f32 {
+fn scissorMask(u: Uniforms, p: vec2<f32>) -> f32 {
 
     return 0.0;
 }
@@ -75,6 +75,13 @@ fn vertex_shader(
 // var alpha_tex: texture,
 // var alpha_samplr: sampler
 
+
+[[group(0), binding(1)]]
+var rd: RasterizerData;
+
+[[group(0), binding(2)]]
+var u: Uniforms;
+
 [[stage(fragment)]]
 fn fragment_shader_aa(
     // in: RasterizerData,
@@ -82,7 +89,20 @@ fn fragment_shader_aa(
     
 ) -> [[location(0)]] vec4<f32> {
 
-    return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+    var result: vec4<f32>;
+
+    const scissor = scissorMask(u, rd.fpos);
+
+    // const strokeAlpha = strokeMask(uniforms, rd.ftcoord);
+    // if (strokeAlpha < uniforms.strokeThr) {
+        // discard_fragment();
+    // }
+
+
+
+    // return textureSample(r_texture, r_sampler, in.uv);
+    // return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+    return result;
 }
 
 // enum ShaderType {
