@@ -165,10 +165,6 @@ fn fragment_shader_aa(
         discard;
     }
 
-    // return result;
-
-    // return textureSample(r_texture, r_sampler, i.uv);
-    // return vec4<f32>(0.0, 0.0, 0.0, 0.0);
     return result;
 }
 
