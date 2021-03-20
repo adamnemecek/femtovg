@@ -19,9 +19,9 @@ struct Uniforms {
     paint_mat: mat3x4<f32>;
     inner_col: vec4<f32>;
     outer_col: vec4<f32>;
-    scissor_ext: vec4<f32>;
-    scissor_scale: vec4<f32>;
-    extent: vec4<f32>;
+    scissor_ext: vec2<f32>;
+    scissor_scale: vec2<f32>;
+    extent: vec2<f32>;
     radius: f32;
     feather: f32;
     stroke_mult: f32;
@@ -121,18 +121,18 @@ fn fragment_shader_aa(
         // // color *= strokeAlpha;
         // result = color;
     } elseif (u.shader_type == 1.0) {
-    //     // MNVG_SHADER_IMG
-    //     // this has to be fpos
-    //     float2 pt = (u.paint_mat * float3(in.fpos, 1.0)).xy / u.extent;
+        // MNVG_SHADER_IMG
+        // this has to be fpos
+        const pt = (u.paint_mat * vec3<f32>(i.fpos, 1.0)).xy / u.extent;
 
-    //     float4 color = texture.sample(samplr, pt);
-    //     if (u.tex_type == 1) {
-    //         color = float4(color.xyz * color.w, color.w);
-    //     }
-    //     else if (u.tex_type == 2) {
-    //         color = float4(color.x);
-    //     }
-    //     result = color * u.inner_col;
+        // float4 color = texture.sample(samplr, pt);
+        // if (u.tex_type == 1) {
+        //     color = float4(color.xyz * color.w, color.w);
+        // }
+        // else if (u.tex_type == 2) {
+        //     color = float4(color.x);
+        // }
+        // result = color * u.inner_col;
     } else {
     //     // stencil
     //     // MNVG_SHADER_FILLIMG
@@ -141,7 +141,7 @@ fn fragment_shader_aa(
 
     // if (u.has_mask == 1.0) {
     //     // revisit ftcoord
-    //     float2 ftcoord = float2(in.ftcoord.x, 1.0 - in.ftcoord.y);
+    //     float2 ftcoord = float2(i.ftcoord.x, 1.0 - i.ftcoord.y);
     //     float4 mask = float4(alpha_texture.sample(samplr, ftcoord).r);
 
     //     mask *= scissor;
@@ -153,7 +153,7 @@ fn fragment_shader_aa(
 
     // return result;
 
-    // return textureSample(r_texture, r_sampler, in.uv);
+    // return textureSample(r_texture, r_sampler, i.uv);
     // return vec4<f32>(0.0, 0.0, 0.0, 0.0);
     return result;
 }
