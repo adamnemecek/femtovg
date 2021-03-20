@@ -155,19 +155,19 @@ impl WGPUStates {
 pub struct WGPU {
     ctx: WGPUContext,
 
-    default_stencil_state: wgpu::RenderPipeline,
-    fill_shape_stencil_state: wgpu::RenderPipeline,
-    fill_anti_alias_stencil_state_nonzero: wgpu::RenderPipeline,
-    fill_anti_alias_stencil_state_evenodd: wgpu::RenderPipeline,
-    fill_stencil_state_nonzero: wgpu::RenderPipeline,
-    fill_stencil_state_evenodd: wgpu::RenderPipeline,
+    // default_stencil_state: wgpu::RenderPipeline,
+    // fill_shape_stencil_state: wgpu::RenderPipeline,
+    // fill_anti_alias_stencil_state_nonzero: wgpu::RenderPipeline,
+    // fill_anti_alias_stencil_state_evenodd: wgpu::RenderPipeline,
+    // fill_stencil_state_nonzero: wgpu::RenderPipeline,
+    // fill_stencil_state_evenodd: wgpu::RenderPipeline,
 
-    stroke_shape_stencil_state: wgpu::RenderPipeline,
-    stroke_anti_alias_stencil_state: wgpu::RenderPipeline,
-    stroke_clear_stencil_state: wgpu::RenderPipeline,
+    // stroke_shape_stencil_state: wgpu::RenderPipeline,
+    // stroke_anti_alias_stencil_state: wgpu::RenderPipeline,
+    // stroke_clear_stencil_state: wgpu::RenderPipeline,
 
-    convex_fill1: wgpu::RenderPipeline,
-    convex_fill2: wgpu::RenderPipeline,
+    // convex_fill1: wgpu::RenderPipeline,
+    // convex_fill2: wgpu::RenderPipeline,
 
     stencil_texture: WGPUStencilTexture,
     index_buffer: WGPUVec<u32>,
