@@ -257,14 +257,14 @@ fn stroke_clear_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencil
     }
 }
 
-pub struct WGPUPipelineState {
+pub struct WGPUPipelineStates {
     blend_func: WGPUBlend,
     texture_format: wgpu::TextureFormat,
     convex_fill1: wgpu::RenderPipeline,
     convex_fill2: wgpu::RenderPipeline,
 }
 
-impl WGPUPipelineState {
+impl WGPUPipelineStates {
     pub fn matches(&self, blend_func: WGPUBlend, format: wgpu::TextureFormat) -> bool {
         self.blend_func == blend_func && self.texture_format == format
     }
@@ -333,7 +333,7 @@ impl WGPUPipelineState {
 pub struct WGPUPipelineCache {
     shader: wgpu::ShaderModule,
     // inner: std::rc::Rc<std::cell::RefCell<HashMap<PipelineCacheKey, WGPUPipelineState>>>,
-    inner: std::cell::UnsafeCell<HashMap<PipelineCacheKey, std::rc::Rc<WGPUPipelineState>>>,
+    inner: std::cell::UnsafeCell<HashMap<PipelineCacheKey, WGPUPipelineStates>>,
     context: WGPUContext,
     // ph: &'a std::marker::PhantomData<()>,
 }
@@ -353,7 +353,7 @@ impl WGPUPipelineCache {
         &'a self,
         blend_func: WGPUBlend,
         texture_format: wgpu::TextureFormat,
-    ) -> &'a std::rc::Rc<WGPUPipelineState> {
+    ) -> &'a WGPUPipelineStates {
         let key = PipelineCacheKey {
             blend_func,
             texture_format,
@@ -361,14 +361,14 @@ impl WGPUPipelineCache {
         let r = unsafe { self.inner.get().as_mut().unwrap() };
 
         if !r.contains_key(&key) {
-            let ps = WGPUPipelineState::new(
+            let ps = WGPUPipelineStates::new(
                 &self.context,
                 blend_func,
                 texture_format,
                 &self.shader,
                 // crate::Vertex::desc(),
             );
-            r.insert(key, Rc::new(ps));
+            r.insert(key, ps);
             // self.inner.insert(key, Rc::new(ps));
             // self.inner.borrow_mut().insert(key, ps);
         }

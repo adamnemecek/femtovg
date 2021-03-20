@@ -434,7 +434,7 @@ fn convex_fill<'a, 'b>(
     paint: Params,
     vertex: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
-    state: &'b WGPUPipelineState,
+    state: &'b WGPUPipelineStates,
     // convex_fill_pipeline: &'b wgpu::RenderPipeline,
     // convex_fill2_pipeline: &'b wgpu::RenderPipeline,
 ) {
@@ -472,7 +472,7 @@ fn stroke<'a, 'b>(
     paint: Params,
     vertex: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
-    state: &'b std::rc::Rc<WGPUPipelineState>,
+    state: &'b WGPUPipelineStates,
 ) {
     //
     // draws triangle strip
@@ -492,7 +492,7 @@ fn stencil_stroke<'a, 'b>(
     paint2: Params,
     vertex: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
-    state: &'b std::rc::Rc<WGPUPipelineState>,
+    state: &'b WGPUPipelineStates,
 ) {
     //
     // pass.set_pipeline(pipeline);
@@ -560,7 +560,7 @@ impl Renderer for WGPU {
         // );
         // let mut pass = new_pass();
         // let mut state: Option<WGPUPipelineState> = None;
-        let mut prev_state: Option<WGPUPipelineState> = None;
+        let mut prev_state: Option<WGPUPipelineStates> = None;
 
         let pass_desc = new_pass_descriptor();
         {
