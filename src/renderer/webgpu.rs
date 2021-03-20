@@ -630,7 +630,7 @@ impl Renderer for WGPU {
         // );
         // let mut pass = new_pass();
         // let mut state: Option<WGPUPipelineState> = None;
-        let mut prev_state: Option<&WGPUPipelineStates> = None;
+        let mut prev_states: Option<&WGPUPipelineStates> = None;
 
         let pass_desc = new_pass_descriptor();
         {
@@ -645,16 +645,16 @@ impl Renderer for WGPU {
             // let mut state = None;
             for cmd in commands {
                 let blend: WGPUBlend = cmd.composite_operation.into();
-                let state = if let Some(prev_state) = prev_state {
-                    if prev_state.matches(blend, texture_format) {
-                        prev_state
+                let states = if let Some(prev_states) = prev_states {
+                    if prev_states.matches(blend, texture_format) {
+                        prev_states
                     } else {
                         self.cache.get(blend, texture_format)
                     }
                 } else {
                     self.cache.get(blend, texture_format)
                 };
-                prev_state = Some(state);
+                prev_states = Some(states);
 
                 match &cmd.cmd_type {
                     CommandType::ConvexFill { params } => {
@@ -666,7 +666,7 @@ impl Renderer for WGPU {
                             *params,
                             &self.vertex_buffer,
                             &mut self.index_buffer,
-                            state,
+                            states,
                         );
                     }
                     CommandType::ConcaveFill {
@@ -681,21 +681,21 @@ impl Renderer for WGPU {
                             *fill_params,
                             &self.vertex_buffer,
                             &mut self.index_buffer,
-                            state,
+                            states,
                         );
 
                         // self.stencil_stroke(&mut pass, images, cmd, *stencil_params, *fill_params);
                     }
                     CommandType::Stroke { params } => {
-                        // stroke(
-                        //     &mut pass,
-                        //     images,
-                        //     cmd,
-                        //     *params,
-                        //     &self.vertex_buffer,
-                        //     &mut self.index_buffer,
-                        //     ,
-                        // );
+                        stroke(
+                            &mut pass,
+                            images,
+                            cmd,
+                            *params,
+                            &self.vertex_buffer,
+                            &mut self.index_buffer,
+                            states,
+                        );
                     }
                     CommandType::StencilStroke { params1, params2 } => {
                         // stencil_stroke(
