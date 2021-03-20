@@ -1,11 +1,12 @@
 [[block]]
 struct Vertex {
-    
+    pos: vec2<f32>;// [[attribute(0)]];
+    // float2 tcoord [[attribute(1)]];
 };
 
 [[block]]
 struct RasterizerData {
-    [[builtin(position)]] position: vec4<f32>;
+    [[builtin(position)]] pos: vec4<f32>;
     [[location(0)]] fpos: vec2<f32>;
     [[location(1)]] ftcoord: vec2<f32>;
 };
@@ -29,3 +30,32 @@ struct Uniforms {
     hasMask: f32;
     padding: array<f32, 19>;
 };
+
+
+fn scissorMask(u: Uniforms) -> f32 {
+
+    return 0.0;
+}
+
+fn vertexShader(
+    vert: Vertex,
+    viewSize: vec2<f32>,
+) {
+    var ret: RasterizerData;
+    ret.pos = vec4<f32>(
+                    2.0 * vert.pos.x / viewSize.x - 1.0,
+                    1.0 - 2.0 * vert.pos.y / viewSize.y,
+                    0.0,
+                    1.0
+            );
+    // return ret;
+}
+
+fn fragmentShaderAA() -> f32 {
+
+    return 0.0;
+}
+
+// enum ShaderType {
+
+// };
