@@ -28,6 +28,7 @@ pub struct WGPUTexture {
     //
     info: ImageInfo,
     tex: wgpu::Texture,
+    view: wgpu::TextureView,
     sampler: wgpu::Sampler,
     ctx: WGPUContext,
 }
@@ -73,6 +74,8 @@ impl WGPUTexture {
             //todo!
             usage: wgpu::TextureUsage::SAMPLED | wgpu::TextureUsage::RENDER_ATTACHMENT,
         });
+
+        let view = tex.create_view(&wgpu::TextureViewDescriptor::default());
         // .create_view(&Default::default());
 
         let filter = if nearest {
@@ -108,6 +111,7 @@ impl WGPUTexture {
         let sampler = ctx.device().create_sampler(&sampler_desc);
 
         Self {
+            view,
             sampler,
             ctx,
             info,
@@ -128,6 +132,10 @@ impl WGPUTexture {
 
     pub fn tex(&self) -> &wgpu::Texture {
         &self.tex
+    }
+
+    pub fn view(&self) -> &wgpu::TextureView {
+        &self.view
     }
 
     pub fn sampler(&self) -> &wgpu::Sampler {

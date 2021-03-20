@@ -35,11 +35,10 @@ impl crate::Vertex {
                 //     shader_location: 1,
                 //     format: wgpu::VertexFormat::Float2, // NEW!
                 // },
-            ]
+            ],
         }
     }
 }
-
 
 fn create_pipeline(
     ctx: &WGPUContext,

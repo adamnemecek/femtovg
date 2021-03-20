@@ -222,14 +222,28 @@ impl WGPU {
             entries: &[wgpu::BindGroupLayoutEntry {
                 binding: 0,
                 visibility: wgpu::ShaderStage::FRAGMENT,
-                ty: wgpu::BindingType::Texture {
-                    sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                    view_dimension: wgpu::TextureViewDimension::D2,
-                    multisampled: false,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
                 },
-                count: std::num::NonZeroU32::new(2),
+                count: None,
             }],
         });
+
+        // let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        //     label: None,
+        //     entries: &[wgpu::BindGroupLayoutEntry {
+        //         binding: 0,
+        //         visibility: wgpu::ShaderStage::FRAGMENT,
+        //         ty: wgpu::BindingType::Texture {
+        //             sample_type: wgpu::TextureSampleType::Float { filterable: true },
+        //             view_dimension: wgpu::TextureViewDimension::D2,
+        //             multisampled: false,
+        //         },
+        //         count: std::num::NonZeroU32::new(2),
+        //     }],
+        // });
 
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: None,
@@ -400,7 +414,7 @@ fn new_pass_descriptor<'a, 'b>() -> wgpu::RenderPassDescriptor<'a, 'b> {
 }
 
 pub struct TextureBindings {
-    // tex_tex: 
+    // tex_tex:
 }
 
 fn set_uniforms<'a, 'b>(
@@ -411,6 +425,7 @@ fn set_uniforms<'a, 'b>(
     image_tex: Option<ImageId>,
     alpha_tex: Option<ImageId>,
     pseudo_texture: &WGPUTexture,
+    layout: wgpu::BindGroupLayout,
 ) {
     let tex = if let Some(id) = image_tex {
         images.get(id).unwrap()
@@ -418,26 +433,19 @@ fn set_uniforms<'a, 'b>(
         pseudo_texture
     };
 
-    let layout = ctx.device().create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-        label: None,
-        entries: &[
-            
-        ]
-    });
-
     ctx.device().create_bind_group(&wgpu::BindGroupDescriptor {
         label: None,
         layout: &layout,
-        entries: &[
-
-        ]
+        entries: &[wgpu::BindGroupEntry {
+            binding: 0,
+            resource: wgpu::BindingResource::TextureView(tex.view()),
+        }],
     });
     // pass.set_tex
 }
 
 fn convex_fill<'a, 'b>(
     // &'a mut self,
-
     pass: &'a mut wgpu::RenderPass<'b>,
     images: &ImageStore<WGPUTexture>,
     cmd: &Command,
@@ -559,7 +567,6 @@ impl Renderer for WGPU {
             }
         };
 
-
         // self.ctx.device().create_bind_group()
         // let mut texture_format = target_texture.format();
 
@@ -579,9 +586,9 @@ impl Renderer for WGPU {
         let pass_desc = new_pass_descriptor();
         {
             let mut pass = encoder.begin_render_pass(&pass_desc);
-            
+
             // pass.set_bind_group(index, bind_group, offsets)
-            
+
             // encoder.begin_render_pass(desc)
 
             // pass.set_viewport(x, y, w, h, min_depth, max_depth)
