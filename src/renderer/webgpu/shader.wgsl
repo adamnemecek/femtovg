@@ -2,6 +2,7 @@
 struct Vertex {
     pos: vec2<f32>;// [[attribute(0)]];
     // float2 tcoord [[attribute(1)]];
+    tcoord: vec2<f32>;
 };
 
 [[block]]
@@ -37,7 +38,8 @@ fn scissorMask(u: Uniforms) -> f32 {
     return 0.0;
 }
 
-fn vertexShader(
+[[stage(vertex)]]
+fn vertex_shader(
     vert: Vertex,
     viewSize: vec2<f32>,
 ) {
@@ -51,9 +53,25 @@ fn vertexShader(
     // return ret;
 }
 
-fn fragmentShaderAA() -> f32 {
 
-    return 0.0;
+// [[group(0), binding(1)]]
+// var r_texture: texture_cube<f32>;
+// [[group(0), binding(2)]]
+// var r_sampler: sampler;
+
+// var tex: texture,
+// var samplr: sampler,
+// var alpha_tex: texture,
+// var alpha_samplr: sampler
+
+[[stage(fragment)]]
+fn fragment_shader_aa(
+    in: RasterizerData,
+    u: Uniforms,
+    
+) -> [[location(0)]] vec4<f32> {
+
+    return vec4<f32>(0.0, 0.0, 0.0, 0.0);
 }
 
 // enum ShaderType {
