@@ -67,6 +67,8 @@ fn vertex_shader(
     // vert: Vertex,
 ) -> RasterizerData {
     var ret: RasterizerData;
+    ret.ftcoord = vert.tcoord;
+    ret.fpos = vert.pos;
     ret.pos = vec4<f32>(
                     2.0 * vert.pos.x / viewSize.x - 1.0,
                     1.0 - 2.0 * vert.pos.y / viewSize.y,
