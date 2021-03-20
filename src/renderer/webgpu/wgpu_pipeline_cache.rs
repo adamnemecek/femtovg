@@ -325,8 +325,7 @@ impl WGPUPipelineState {
 // struct
 pub struct WGPUPipelineCache<'a> {
     shader: wgpu::ShaderModule,
-    // inner: std::rc::Rc<std::cell::RefCell<HashMap<PipelineCacheKey, Rc<WGPUPipelineState>>>>,
-    inner: HashMap<PipelineCacheKey, WGPUPipelineState>,
+    inner: std::rc::Rc<std::cell::RefCell<HashMap<PipelineCacheKey, Rc<WGPUPipelineState>>>>,
     context: WGPUContext,
     ph: &'a std::marker::PhantomData<()>,
 }
@@ -346,16 +345,16 @@ impl<'a> WGPUPipelineCache<'a> {
     }
 
     pub fn get(
-        &'a mut self,
+        &'a self,
         blend_func: WGPUBlend,
         texture_format: wgpu::TextureFormat,
-    ) -> &'a WGPUPipelineState {
+    ) -> &'a std::rc::Rc<WGPUPipelineState> {
         let key = PipelineCacheKey {
             blend_func,
             texture_format,
         };
 
-        if !self.inner.contains_key(&key) {
+        if !self.inner.borrow().contains_key(&key) {
             let ps = WGPUPipelineState::new(
                 &self.context,
                 blend_func,
@@ -363,11 +362,11 @@ impl<'a> WGPUPipelineCache<'a> {
                 &self.shader,
                 // crate::Vertex::desc(),
             );
-            // self.inner.insert(key, Rc::new(ps));
-            self.inner.insert(key, ps);
+            self.inner.borrow_mut().insert(key, Rc::new(ps));
         }
 
-        &self.inner[&key]
+        // self.inner.borrow().get(&key).as_ref().unwrap()
+        todo!()
         
     }
 }

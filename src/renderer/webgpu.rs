@@ -510,14 +510,8 @@ fn concave_fill<'a, 'b>(
 ) {
 }
 
-impl<'wgpu> Renderer for WGPU<'wgpu> {
-    type Image = WGPUTexture;
-    fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
-        let size = Size::new(width as f32, height as f32);
-        self.view_size = size;
-    }
-
-    fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+impl<'wgpu>  WGPU<'wgpu> {
+    fn render1(&'wgpu mut self, images: &ImageStore<WGPUTexture>, verts: &[Vertex], commands: &[Command]) {
         self.vertex_buffer.clear();
         self.vertex_buffer.extend_from_slice(verts);
 
@@ -646,6 +640,19 @@ impl<'wgpu> Renderer for WGPU<'wgpu> {
 
         let buffer = encoder.finish();
         self.ctx.queue().submit(Some(buffer));
+    }
+}
+
+impl<'wgpu> Renderer for WGPU<'wgpu> {
+    type Image = WGPUTexture;
+    fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
+        let size = Size::new(width as f32, height as f32);
+        self.view_size = size;
+    }
+
+    fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+        // self.render1(images, verts, commands);
+        todo!()
     }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
