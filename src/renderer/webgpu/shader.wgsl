@@ -110,11 +110,8 @@ fn fragment_shader_aa(
 ) -> [[location(0)]] vec4<f32> {
 
     var result: vec4<f32>;
-
     const scissor = scissor_mask(u, i.fpos);
-
     const stroke_alpha = stroke_mask(u, i.ftcoord);
-
 
     if (u.shader_type == 0.0) {
         // // MNVG_SHADER_FILLGRAD
@@ -135,9 +132,6 @@ fn fragment_shader_aa(
         var color: vec4<f32>;
         color = textureSample(tex, samplr, pt);
 
-        // color = vec4<f32>(0.0, 0.0, 0.0, 0.0);
-        // color = textureSample(tex, samplr, vec2<f32>(0.0,0.0));
-        // const color = texture.sample(samplr, pt);
         if (u.tex_type == 1.0) {
             color = vec4<f32>(color.xyz * color.w, color.w);
         }
@@ -151,22 +145,24 @@ fn fragment_shader_aa(
         result = vec4<f32>(1.0, 1.0, 1.0, 1.0);
     }
 
-    if (stroke_alpha < u.stroke_thr) {
-        discard;
-    }
-
-
     if (u.has_mask == 1.0) {
     //     // revisit ftcoord
         const ftcoord = vec2<f32>(i.ftcoord.x, 1.0 - i.ftcoord.y);
-        // const mask = float4(alpha_texture.sample(samplr, ftcoord).r);
+        const r = textureSample(alpha_tex, samplr, ftcoord).r;
+        var mask: vec4<f32>;
+        mask = vec4<f32>(r, r, r, r);
+        // const mask = vec4<f32>(alpha_tex.sample(samplr, ftcoord).r);
         // const mask = textureSample(alpha_tex, samplr, vec2<u32>(0,0));
 
-        // mask = mask * scissor;
-        // result = result * mask;
+        mask = mask * scissor;
+        result = result * mask;
     }
     elseif (u.shader_type != 2.0) {
         result = result * stroke_alpha * scissor;
+    }
+
+    if (stroke_alpha < u.stroke_thr) {
+        discard;
     }
 
     // return result;
