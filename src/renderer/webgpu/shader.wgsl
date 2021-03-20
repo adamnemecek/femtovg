@@ -15,20 +15,20 @@ struct RasterizerData {
 [[block]]
 struct Uniforms {
 
-    scissorMat: mat3x4<f32>;
-    paintMat: mat3x4<f32>;
-    innerCol: vec4<f32>;
-    outerCol: vec4<f32>;
-    scissorExt: vec4<f32>;
-    scissorScale: vec4<f32>;
+    scissor_mat: mat3x4<f32>;
+    paint_mat: mat3x4<f32>;
+    inner_col: vec4<f32>;
+    outer_col: vec4<f32>;
+    scissor_ext: vec4<f32>;
+    scissor_scale: vec4<f32>;
     extent: vec4<f32>;
     radius: f32;
     feather: f32;
-    strokeMult: f32;
-    strokeThr: f32;
-    texType: f32;
-    shaderType: f32;
-    hasMask: f32;
+    stroke_mult: f32;
+    stroke_thr: f32;
+    tex_type: f32;
+    shader_type: f32;
+    has_mask: f32;
     padding: array<f32, 19>;
 };
 
@@ -98,10 +98,7 @@ fn fragment_shader_aa(
     const scissor = scissor_mask(u, rd.fpos);
 
     const stroke_alpha = stroke_mask(u, rd.ftcoord);
-    // if (strokeAlpha < uniforms.strokeThr) {
-        // discard_fragment();
-    // }
-    if (true) {
+    if (stroke_alpha < u.stroke_thr) {
         discard;
     }
 
