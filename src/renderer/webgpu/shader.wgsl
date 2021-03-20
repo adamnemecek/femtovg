@@ -150,17 +150,18 @@ fn fragment_shader_aa(
         result = vec4<f32>(1.0, 1.0, 1.0, 1.0);
     }
 
-    // if (u.has_mask == 1.0) {
+    if (u.has_mask == 1.0) {
     //     // revisit ftcoord
-    //     float2 ftcoord = float2(i.ftcoord.x, 1.0 - i.ftcoord.y);
-    //     float4 mask = float4(alpha_texture.sample(samplr, ftcoord).r);
+        const ftcoord = vec2<f32>(i.ftcoord.x, 1.0 - i.ftcoord.y);
+        // const mask = float4(alpha_texture.sample(samplr, ftcoord).r);
+        // const mask = textureSample(alpha_tex, samplr, vec2<u32>(0,0));
 
     //     mask *= scissor;
     //     result *= mask;
-    // }
-    // else if (u.shader_type != 2.0) {
-    //     result *= strokeAlpha * scissor;
-    // }
+    }
+    elseif (u.shader_type != 2.0) {
+        result = result * stroke_alpha * scissor;
+    }
 
     // return result;
 
