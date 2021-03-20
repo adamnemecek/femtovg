@@ -668,10 +668,11 @@ impl Renderer for WGPU {
         // let mut pass = new_pass();
         // let mut state: Option<WGPUPipelineState> = None;
         let mut prev_states: Option<&WGPUPipelineStates> = None;
+        let mut i = 0;
 
         let pass_desc = new_pass_descriptor();
         {
-            'outer: loop {
+            'outer: while i < commands.len() {
                 let mut pass = encoder.begin_render_pass(&pass_desc);
 
                 // pass.set_bind_group(index, bind_group, offsets)
@@ -681,7 +682,10 @@ impl Renderer for WGPU {
                 // pass.set_viewport(x, y, w, h, min_depth, max_depth)
 
                 // let mut state = None;
-                for cmd in commands {
+                while i < commands.len() {
+                    let cmd = &commands[i];
+                    i += 1;
+
                     let blend: WGPUBlend = cmd.composite_operation.into();
                     let states = if let Some(prev_states) = prev_states {
                         if prev_states.matches(blend, texture_format) {
@@ -721,8 +725,6 @@ impl Renderer for WGPU {
                                 &mut self.index_buffer,
                                 states,
                             );
-
-                            // self.stencil_stroke(&mut pass, images, cmd, *stencil_params, *fill_params);
                         }
                         CommandType::Stroke { params } => {
                             stroke(
@@ -780,9 +782,7 @@ impl Renderer for WGPU {
                             // self.ctx.queue().submit(Some(buffer));
                             // pass = encoder.begin_render_pass(&pass_desc);
                             continue 'outer;
-                            todo!()
                         }
-                        // _ => todo!(),
                     }
                 }
             }
