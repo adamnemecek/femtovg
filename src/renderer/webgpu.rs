@@ -560,7 +560,7 @@ impl Renderer for WGPU {
         // );
         // let mut pass = new_pass();
         // let mut state: Option<WGPUPipelineState> = None;
-        let mut prev_state: Option<WGPUPipelineStates> = None;
+        let mut prev_state: Option<&WGPUPipelineStates> = None;
 
         let pass_desc = new_pass_descriptor();
         {
@@ -572,7 +572,7 @@ impl Renderer for WGPU {
             // let mut state = None;
             for cmd in commands {
                 let blend: WGPUBlend = cmd.composite_operation.into();
-                let state = if let Some(ref prev_state) = prev_state {
+                let state = if let Some(prev_state) = prev_state {
                     if prev_state.matches(blend, texture_format) {
                         prev_state
                     } else {
@@ -581,19 +581,7 @@ impl Renderer for WGPU {
                 } else {
                     self.cache.get(blend, texture_format)
                 };
-                // let s = if let Some(ref s) = state {
-                //     todo!()
-                //     // if s.blend_func() == blend {
-                //     //     s
-                //     // } else {
-
-                //     // }
-                // } else {
-                //     // self.cache.get(blend, pixel_format)
-                //     todo!()
-                // };
-                // let r = &mut pass;
-                // let state = self.cache.get(cmd.composite_operation.into(), texture_format);
+                prev_state = Some(state);
 
                 match &cmd.cmd_type {
                     CommandType::ConvexFill { params } => {
@@ -606,15 +594,7 @@ impl Renderer for WGPU {
                             &self.vertex_buffer,
                             &mut self.index_buffer,
                             state
-                            // &state,
-                            // s.convex_fill1(),
-                            // s.convex_fill2(),
-                            // &self.convex_fill1,
-                            // &self.convex_fill2,
                         );
-                        // self.convex_fill(&mut pass, images, cmd, *params);
-
-                        // pass.set_pipeline(state.convex_fill1());
                     }
                     CommandType::ConcaveFill {
                         stencil_params,
