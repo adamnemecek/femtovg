@@ -357,8 +357,9 @@ impl<'a> WGPUPipelineCache<'a> {
             blend_func,
             texture_format,
         };
+        let r = unsafe { self.inner.get().as_mut().unwrap() };
 
-        if unsafe { !self.inner.get().as_ref().unwrap().contains_key(&key) } {
+        if !r.contains_key(&key) {
             let ps = WGPUPipelineState::new(
                 &self.context,
                 blend_func,
@@ -366,13 +367,14 @@ impl<'a> WGPUPipelineCache<'a> {
                 &self.shader,
                 // crate::Vertex::desc(),
             );
-            unsafe { self.inner.get().as_mut().unwrap().insert(key, Rc::new(ps)) };
+            r.insert(key, Rc::new(ps));
             // self.inner.insert(key, Rc::new(ps));
             // self.inner.borrow_mut().insert(key, ps);
         }
 
         // &self.inner.borrow()[&key]
-        unsafe { &self.inner.get().as_ref().unwrap()[&key] }
+        // unsafe { &self.inner.get().as_ref().unwrap()[&key] }
+        &r[&key]
         // self.inner.borrow().get(&key).as_ref().unwrap()
         // todo!()
     }
