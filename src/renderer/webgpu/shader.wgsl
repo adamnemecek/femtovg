@@ -1,10 +1,10 @@
 // alias b="convert shader.wgsl shader.metal"
-[[block]]
-struct Vertex {
-    pos: vec2<f32>;// [[attribute(0)]];
-    // float2 tcoord [[attribute(1)]];
-    tcoord: vec2<f32>;
-};
+// [[block]]
+// struct Vertex {
+//     pos: vec2<f32>;// [[attribute(0)]];
+//     // float2 tcoord [[attribute(1)]];
+//     tcoord: vec2<f32>;
+// };
 
 // [[block]]
 struct RasterizerData {
@@ -56,22 +56,26 @@ struct ViewSize {
     y: f32;
 };
 
-[[group(0), binding(0)]]
-var vert: Vertex;
+// [[group(0), binding(0)]]
+// var vert: Vertex;
 
 [[group(0), binding(1)]]
 var viewSize: ViewSize;
 
 [[stage(vertex)]]
 fn vertex_shader(
+    [[location(0)]] vert: vec4<f32>,
+    // [[location(1)]] v: Vertex,
     // vert: Vertex,
 ) -> RasterizerData {
     var ret: RasterizerData;
-    ret.ftcoord = vert.tcoord;
-    ret.fpos = vert.pos;
+    const tcoord = vert.xy;
+    const pos = vert.wz;
+    ret.ftcoord = tcoord;
+    ret.fpos = pos;
     ret.pos = vec4<f32>(
-                    2.0 * vert.pos.x / viewSize.x - 1.0,
-                    1.0 - 2.0 * vert.pos.y / viewSize.y,
+                    2.0 * pos.x / viewSize.x - 1.0,
+                    1.0 - 2.0 * pos.y / viewSize.y,
                     0.0,
                     1.0
             );
@@ -87,8 +91,8 @@ fn vertex_shader(
 // todo: ordering
 
 
-[[group(0), binding(1)]]
-var i: RasterizerData;
+// [[group(0), binding(1)]]
+// var i: RasterizerData;
 
 [[group(0), binding(2)]]
 var u: Uniforms;
@@ -104,7 +108,7 @@ var alpha_samplr: sampler;
 
 [[stage(fragment)]]
 fn fragment_shader_aa(
-    // in: RasterizerData,
+    i: RasterizerData,
     // u: Uniforms,
 
 ) -> [[location(0)]] vec4<f32> {
