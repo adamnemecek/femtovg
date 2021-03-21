@@ -500,14 +500,14 @@ fn convex_fill<'a, 'b>(
     paint: Params,
     vertex_buffer: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
-    state: &'b WGPUPipelineStates,
+    states: &'b WGPUPipelineStates,
 ) {
     // encoder.push_debug_group("convex_fill");
 
     for drawable in &cmd.drawables {
         if let Some((start, count)) = drawable.fill_verts {
             //
-            pass.set_pipeline(&state.convex_fill1());
+            pass.set_pipeline(&states.convex_fill1());
             // pass.set_pipeline(&state.convex_fill1());
 
             let offset = index_buffer.len();
@@ -522,7 +522,7 @@ fn convex_fill<'a, 'b>(
         }
 
         if let Some((start, count)) = drawable.stroke_verts {
-            pass.set_pipeline(&state.convex_fill2());
+            pass.set_pipeline(&states.convex_fill2());
             let vertex_range = start as _..(start + count) as _;
             pass.draw(vertex_range, 0..0);
         }
@@ -536,8 +536,10 @@ fn stroke<'a, 'b>(
     paint: Params,
     vertex_buffer: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
-    state: &'b WGPUPipelineStates,
+    states: &'b WGPUPipelineStates,
 ) {
+
+    // set_uniforms()
     //
     // draws triangle strip
     // self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
@@ -571,8 +573,9 @@ fn concave_fill<'a, 'b>(
     fill_paint: Params,
     vertex_buffer: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
-    state: &'b WGPUPipelineStates,
+    states: &'b WGPUPipelineStates,
 ) {
+
 }
 
 fn triangles<'a, 'b>(
@@ -582,7 +585,7 @@ fn triangles<'a, 'b>(
     params: Params,
     vertex_buffer: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
-    state: &'b WGPUPipelineStates,
+    states: &'b WGPUPipelineStates,
 ) {
 }
 
@@ -590,27 +593,11 @@ fn clear_rect<'a, 'b>(
     pass: &'a mut wgpu::RenderPass<'b>,
     images: &ImageStore<WGPUTexture>,
     cmd: &Command,
-    // params: Params,
     vertex_buffer: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
-    state: &'b WGPUPipelineStates,
+    states: &'b WGPUPipelineStates,
 ) {
 }
-
-// fn encode(encoder: &mut wgpu::CommandEncoder, pass_desc: &wgpu::RenderPassDescriptor, a: &[u32]) {
-//     use std::cell::UnsafeCell;
-//     let mut pass = UnsafeCell::new(encoder.begin_render_pass(pass_desc));
-//     for e in a {
-//         match e {
-//             0 => {
-//                 // pass = None;
-//                 // pass = Some(encoder.begin_render_pass(pass_desc));
-//             }
-//             _ => {}
-//         }
-//     }
-
-// }
 
 impl WGPU {}
 
@@ -657,7 +644,6 @@ impl Renderer for WGPU {
         let mut i = 0;
 
         'outer: while i < commands.len() {
-
             let target_texture = match render_target {
                 RenderTarget::Screen => {
                     self.swap_chain.get_current_frame().unwrap()
@@ -703,7 +689,6 @@ impl Renderer for WGPU {
 
                     match &cmd.cmd_type {
                         CommandType::ConvexFill { params } => {
-                            // self.convex_fill(&mut pass, images, cmd, *params);
                             convex_fill(
                                 &mut pass,
                                 images,
