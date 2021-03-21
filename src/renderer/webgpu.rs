@@ -575,7 +575,6 @@ fn concave_fill<'a, 'b>(
     index_buffer: &mut WGPUVec<u32>,
     states: &'b WGPUPipelineStates,
 ) {
-
 }
 
 fn triangles<'a, 'b>(
@@ -661,117 +660,115 @@ impl Renderer for WGPU {
                 }
             };
             let pass_desc = new_pass_descriptor();
-            {
-                let mut pass = encoder.begin_render_pass(&pass_desc);
+            let mut pass = encoder.begin_render_pass(&pass_desc);
 
-                // pass.set_bind_group(index, bind_group, offsets)
+            // pass.set_bind_group(index, bind_group, offsets)
 
-                // encoder.begin_render_pass(desc)
+            // encoder.begin_render_pass(desc)
 
-                // pass.set_viewport(x, y, w, h, min_depth, max_depth)
+            // pass.set_viewport(x, y, w, h, min_depth, max_depth)
 
-                // let mut state = None;
-                while i < commands.len() {
-                    let cmd = &commands[i];
-                    i += 1;
+            // let mut state = None;
+            while i < commands.len() {
+                let cmd = &commands[i];
+                i += 1;
 
-                    let blend: WGPUBlend = cmd.composite_operation.into();
-                    let states = if let Some(prev_states) = prev_states {
-                        if prev_states.matches(blend, texture_format) {
-                            prev_states
-                        } else {
-                            self.cache.get(blend, texture_format)
-                        }
+                let blend: WGPUBlend = cmd.composite_operation.into();
+                let states = if let Some(prev_states) = prev_states {
+                    if prev_states.matches(blend, texture_format) {
+                        prev_states
                     } else {
                         self.cache.get(blend, texture_format)
-                    };
-                    prev_states = Some(states);
+                    }
+                } else {
+                    self.cache.get(blend, texture_format)
+                };
+                prev_states = Some(states);
 
-                    match &cmd.cmd_type {
-                        CommandType::ConvexFill { params } => {
-                            convex_fill(
-                                &mut pass,
-                                images,
-                                cmd,
-                                *params,
-                                &self.vertex_buffer,
-                                &mut self.index_buffer,
-                                states,
-                            );
-                        }
-                        CommandType::ConcaveFill {
-                            stencil_params,
-                            fill_params,
-                        } => {
-                            concave_fill(
-                                &mut pass,
-                                images,
-                                cmd,
-                                *stencil_params,
-                                *fill_params,
-                                &self.vertex_buffer,
-                                &mut self.index_buffer,
-                                states,
-                            );
-                        }
-                        CommandType::Stroke { params } => {
-                            stroke(
-                                &mut pass,
-                                images,
-                                cmd,
-                                *params,
-                                &self.vertex_buffer,
-                                &mut self.index_buffer,
-                                states,
-                            );
-                        }
-                        CommandType::StencilStroke { params1, params2 } => {
-                            stencil_stroke(
-                                &mut pass,
-                                images,
-                                cmd,
-                                *params1,
-                                *params2,
-                                &self.vertex_buffer,
-                                &mut self.index_buffer,
-                                states,
-                            );
-                        }
-                        CommandType::Triangles { params } => {
-                            triangles(
-                                &mut pass,
-                                images,
-                                cmd,
-                                *params,
-                                &self.vertex_buffer,
-                                &mut self.index_buffer,
-                                states,
-                            );
-                        }
-                        CommandType::ClearRect {
-                            x,
-                            y,
-                            width,
-                            height,
-                            color,
-                        } => {
-                            clear_rect(
-                                &mut pass,
-                                images,
-                                cmd,
-                                // *params,
-                                &self.vertex_buffer,
-                                &mut self.index_buffer,
-                                states,
-                            );
-                        }
-                        CommandType::SetRenderTarget(target) => {
-                            render_target = *target;
-                            // let buffer = encoder.finish();
-                            // self.ctx.queue().submit(Some(buffer));
-                            // pass = encoder.begin_render_pass(&pass_desc);
-                            continue 'outer;
-                        }
+                match &cmd.cmd_type {
+                    CommandType::ConvexFill { params } => {
+                        convex_fill(
+                            &mut pass,
+                            images,
+                            cmd,
+                            *params,
+                            &self.vertex_buffer,
+                            &mut self.index_buffer,
+                            states,
+                        );
+                    }
+                    CommandType::ConcaveFill {
+                        stencil_params,
+                        fill_params,
+                    } => {
+                        concave_fill(
+                            &mut pass,
+                            images,
+                            cmd,
+                            *stencil_params,
+                            *fill_params,
+                            &self.vertex_buffer,
+                            &mut self.index_buffer,
+                            states,
+                        );
+                    }
+                    CommandType::Stroke { params } => {
+                        stroke(
+                            &mut pass,
+                            images,
+                            cmd,
+                            *params,
+                            &self.vertex_buffer,
+                            &mut self.index_buffer,
+                            states,
+                        );
+                    }
+                    CommandType::StencilStroke { params1, params2 } => {
+                        stencil_stroke(
+                            &mut pass,
+                            images,
+                            cmd,
+                            *params1,
+                            *params2,
+                            &self.vertex_buffer,
+                            &mut self.index_buffer,
+                            states,
+                        );
+                    }
+                    CommandType::Triangles { params } => {
+                        triangles(
+                            &mut pass,
+                            images,
+                            cmd,
+                            *params,
+                            &self.vertex_buffer,
+                            &mut self.index_buffer,
+                            states,
+                        );
+                    }
+                    CommandType::ClearRect {
+                        x,
+                        y,
+                        width,
+                        height,
+                        color,
+                    } => {
+                        clear_rect(
+                            &mut pass,
+                            images,
+                            cmd,
+                            // *params,
+                            &self.vertex_buffer,
+                            &mut self.index_buffer,
+                            states,
+                        );
+                    }
+                    CommandType::SetRenderTarget(target) => {
+                        render_target = *target;
+                        // let buffer = encoder.finish();
+                        // self.ctx.queue().submit(Some(buffer));
+                        // pass = encoder.begin_render_pass(&pass_desc);
+                        continue 'outer;
                     }
                 }
             }
