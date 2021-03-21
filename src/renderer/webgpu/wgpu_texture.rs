@@ -85,7 +85,7 @@ impl WGPUTexture {
         };
 
         let mut sampler_desc = wgpu::SamplerDescriptor {
-            label: Some("Nearest Neighbor Sampler"),
+            label: Some("Texture Sampler"),
             mag_filter: filter,
             min_filter: filter,
             ..Default::default()
@@ -125,7 +125,7 @@ impl WGPUTexture {
         todo!()
     }
 
-    pub fn resize(&mut self) {
+    pub fn resize(&mut self, size: Size) {
         // self.tex.destroy()
         todo!()
     }

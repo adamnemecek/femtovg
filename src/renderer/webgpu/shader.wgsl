@@ -17,7 +17,6 @@ struct RasterizerData {
 // size_of(uniforms) == 256
 [[block]]
 struct Uniforms {
-
     scissor_mat: mat3x4<f32>;       // 3 * 4 * 4
     paint_mat: mat3x4<f32>;         // 3 * 4 * 4
     inner_col: vec4<f32>;           // 4 * 4

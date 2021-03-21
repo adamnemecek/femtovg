@@ -146,13 +146,6 @@ fn new_render_pass<'a>(
     // encoder
 }
 
-pub struct WGPUStates {}
-
-impl WGPUStates {
-    pub fn new() -> Self {
-        Self {}
-    }
-}
 
 /// the things that
 pub struct WGPU {
@@ -181,12 +174,13 @@ pub struct WGPU {
 
     view_size: Size,
     swap_chain: WGPUSwapChain,
+    bind_group_layout: wgpu::BindGroupLayout,
 }
 
 fn create_bind_group() {}
 
 impl WGPU {
-    pub fn new(device: &wgpu::Device) -> Self {
+    pub fn new(device: &wgpu::Device, size: Size) -> Self {
         // let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
         //     label: None,
         //     source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("webgpu/shader.wgsl"))),
@@ -334,6 +328,15 @@ impl WGPU {
 
         // }
         todo!();
+        // Self {
+        // stencil_texture,
+        //  index_buffer,
+        // vertex_buffer,
+        // pseudo_texture,
+        // cache,
+        // view_size,
+        // bind_group_layout,
+        // }
     }
 
     // fn convex_fill<'a, 'b>(
