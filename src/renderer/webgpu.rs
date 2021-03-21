@@ -101,7 +101,7 @@ fn new_render_pass<'a>(
     clear_color: Color,
     stencil_texture: &'a mut WGPUStencilTexture,
     vertex_buffer: &'a WGPUVec<Vertex>,
-
+    index_buffer: &'a WGPUVec<u32>,
     view_size: Size,
     // ) -> wgpu::CommandEncoder {
 ) -> wgpu::RenderPass<'a> {
@@ -111,7 +111,7 @@ fn new_render_pass<'a>(
         label: None,
         color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
             attachment: target,
-            resolve_target: None,
+            resolve_target: None, // todo! what's this?
             ops: wgpu::Operations {
                 load: wgpu::LoadOp::Clear(clear_color.into()),
                 store: true,
@@ -139,6 +139,8 @@ fn new_render_pass<'a>(
 
     pass.set_vertex_buffer(0, vertex_buffer.slice());
     pass.set_stencil_reference(0);
+
+    pass.set_index_buffer(index_buffer.slice(), wgpu::IndexFormat::Uint32);
 
     // pass.set_vertex_buffer(1, buffer_slice)
     pass

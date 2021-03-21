@@ -30,11 +30,6 @@ impl crate::Vertex {
                     shader_location: 0,
                     format: wgpu::VertexFormat::Float32x4,
                 },
-                // wgpu::VertexAttribute {
-                //     offset: mem::size_of::<[f32; 3]>() as wgpu::BufferAddress,
-                //     shader_location: 1,
-                //     format: wgpu::VertexFormat::Float2, // NEW!
-                // },
             ],
         }
     }
@@ -56,7 +51,9 @@ fn create_pipeline(
         vertex: wgpu::VertexState {
             module: shader,
             entry_point: "vs_main",
-            buffers: &[],
+            buffers: &[
+                crate::Vertex::desc()
+            ],
         },
         fragment: Some(wgpu::FragmentState {
             module: shader,
