@@ -489,11 +489,11 @@ fn create_bind_group(
     ctx: &WGPUContext,
     // pass: &'a mut wgpu::RenderPass<'b>,
     images: &ImageStore<WGPUTexture>,
-    view_size: WGPUVar<[f32; 2]>,
+    view_size: WGPUVar<Size>,
     uniforms: WGPUVar<Params>,
     image_tex: Option<ImageId>,
     alpha_tex: Option<ImageId>,
-    pseudo_texture: &WGPUTexture,
+    pseudo_tex: &WGPUTexture,
 
     layout: wgpu::BindGroupLayout,
     // out: &mut wgpu::BindGroup,
@@ -501,13 +501,13 @@ fn create_bind_group(
     let tex = if let Some(id) = image_tex {
         images.get(id).unwrap()
     } else {
-        pseudo_texture
+        pseudo_tex
     };
 
     let alpha_tex = if let Some(id) = alpha_tex {
         images.get(id).unwrap()
     } else {
-        pseudo_texture
+        pseudo_tex
     };
 
     ctx.device().create_bind_group(&wgpu::BindGroupDescriptor {
@@ -595,18 +595,33 @@ fn convex_fill<'a, 'b>(
 }
 
 fn stroke<'a, 'b>(
+    ctx: &WGPUContext,
     pass: &'a mut wgpu::RenderPass<'b>,
     images: &ImageStore<WGPUTexture>,
+    view_size: WGPUVar<Size>,
     cmd: &Command,
-    paint: Params,
+    uniforms: WGPUVar<Params>,
     vertex_buffer: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
+    image_tex: Option<ImageId>,
+    alpha_tex: Option<ImageId>,
+    pseudo_tex: &WGPUTexture,
+    bind_group_layout: wgpu::BindGroupLayout,
     states: &'b WGPUPipelineStates,
 ) {
     // set_uniforms()
     //
     // draws triangle strip
-    // self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
+    let bind_group = create_bind_group(
+        ctx,
+        images,
+        view_size,
+        uniforms,
+        image_tex,
+        alpha_tex,
+        pseudo_tex,
+        bind_group_layout,
+    );
     for drawable in &cmd.drawables {
         if let Some((start, count)) = drawable.stroke_verts {
             // pass.draw()
@@ -824,15 +839,17 @@ impl Renderer for WGPU {
                         );
                     }
                     CommandType::Stroke { params } => {
-                        stroke(
-                            &mut pass,
-                            images,
-                            cmd,
-                            *params,
-                            &self.vertex_buffer,
-                            &mut self.index_buffer,
-                            states,
-                        );
+                        // stroke(
+                        //     &self.ctx,
+                        //     &mut pass,
+                        //     images,
+                        //     self.view_size,
+                        //     cmd,
+                        //     *params,
+                        //     &self.vertex_buffer,
+                        //     &mut self.index_buffer,
+                        //     states,
+                        // );
                     }
                     CommandType::StencilStroke { params1, params2 } => {
                         stencil_stroke(
