@@ -59,7 +59,7 @@ struct ViewSize {
 // [[group(0), binding(0)]]
 // var vert: Vertex;
 
-[[group(0), binding(1)]]
+[[group(0), binding(0)]]
 var viewSize: ViewSize;
 
 [[stage(vertex)]]
@@ -94,16 +94,16 @@ fn vertex_shader(
 // [[group(0), binding(1)]]
 // var i: RasterizerData;
 
-[[group(0), binding(2)]]
+[[group(0), binding(1)]]
 var u: Uniforms;
 
-[[group(0), binding(3)]]
+[[group(0), binding(2)]]
 var tex: texture_2d<f32>;
-[[group(0), binding(4)]]
+[[group(0), binding(3)]]
 var samplr: sampler;
-[[group(0), binding(5)]]
+[[group(0), binding(4)]]
 var alpha_tex: texture_2d<f32>;
-[[group(0), binding(6)]]
+[[group(0), binding(5)]]
 var alpha_samplr: sampler;
 
 [[stage(fragment)]]
