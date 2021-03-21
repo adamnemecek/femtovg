@@ -496,7 +496,6 @@ fn set_uniforms<'a, 'b>(
                 binding: 1,
                 resource: wgpu::BindingResource::Sampler(tex.sampler()),
             },
-
             // wgpu::BindGroupEntry {
             //     binding: 2,
             //     resource: wgpu::BindingResource::Buffer()
