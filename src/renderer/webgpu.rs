@@ -222,6 +222,7 @@ impl WGPU {
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: None,
             entries: &[
+                //viewsize
                 wgpu::BindGroupLayoutEntry {
                     binding: 0,
                     visibility: wgpu::ShaderStage::FRAGMENT,
@@ -232,9 +233,20 @@ impl WGPU {
                     },
                     count: None,
                 },
-                // texture
+                //uniforms
                 wgpu::BindGroupLayoutEntry {
                     binding: 1,
+                    visibility: wgpu::ShaderStage::FRAGMENT,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                },
+                // texture
+                wgpu::BindGroupLayoutEntry {
+                    binding: 2,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Texture {
                         sample_type: wgpu::TextureSampleType::Float { filterable: false },
@@ -245,7 +257,7 @@ impl WGPU {
                 },
                 // sampler
                 wgpu::BindGroupLayoutEntry {
-                    binding: 1,
+                    binding: 3,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Sampler {
                         filtering: false,
@@ -255,7 +267,7 @@ impl WGPU {
                 },
                 // alpha texture
                 wgpu::BindGroupLayoutEntry {
-                    binding: 1,
+                    binding: 4,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Texture {
                         sample_type: wgpu::TextureSampleType::Float { filterable: false },
@@ -266,7 +278,7 @@ impl WGPU {
                 },
                 //alpha sampler
                 wgpu::BindGroupLayoutEntry {
-                    binding: 1,
+                    binding: 5,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Sampler {
                         filtering: false,
