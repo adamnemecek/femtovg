@@ -63,7 +63,6 @@ impl<T: Copy> AsRef<wgpu::Buffer> for WGPUVar<T> {
     }
 }
 
-
 mod tests {
     use super::*;
 
@@ -77,4 +76,3 @@ mod tests {
         // let mut var = WGPUVar::new();
     }
 }
-

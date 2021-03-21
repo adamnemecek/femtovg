@@ -95,16 +95,16 @@ impl From<CompositeOperationState> for WGPUBlend {
 
 fn new_render_pass<'a>(
     // ctx: WGPUContext,
-    encoder: &mut wgpu::CommandEncoder,
-    target: &wgpu::TextureView,
+    encoder: &'a mut wgpu::CommandEncoder,
+    target: &'a wgpu::TextureView,
     // command_buffer: &'a wgpu::CommandBuffer,
     clear_color: Color,
-    stencil_texture: &mut WGPUStencilTexture,
-    vertex_buffer: &WGPUVec<Vertex>,
+    stencil_texture: &'a mut WGPUStencilTexture,
+    vertex_buffer: &'a WGPUVec<Vertex>,
 
     view_size: Size,
     // ) -> wgpu::CommandEncoder {
-) {
+) -> wgpu::RenderPass<'a> {
     stencil_texture.resize(view_size);
 
     let pass_desc = wgpu::RenderPassDescriptor {
@@ -118,16 +118,16 @@ fn new_render_pass<'a>(
             },
         }],
         depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachmentDescriptor {
-            attachment: stencil_texture.tex(), //&'a TextureView,
+            attachment: stencil_texture.view(),
             depth_ops: Some(wgpu::Operations {
                 load: wgpu::LoadOp::Load,
                 store: false,
             }), //Option<Operations<f32>>,
-            stencil_ops: None,                 //Option<Operations<u32>>,
+            stencil_ops: None, //Option<Operations<u32>>,
         }),
     };
 
-    // todo set cull mode on the
+    // todo set cull mode on the state
 
     // let mut encoder = ctx
     //     .device()
@@ -137,15 +137,15 @@ fn new_render_pass<'a>(
     pass.set_viewport(0.0, 0.0, view_size.w as _, view_size.h as _, 0.0, 1.0);
 
     pass.set_vertex_buffer(0, vertex_buffer.slice());
+    pass.set_stencil_reference(0);
     // pass.set_vertex_buffer(1, buffer_slice)
-    todo!()
+    pass
 
     // encoder.set_vertex_buffer(0, vertex_buffer.as_slice());
     // encoder
 
     // encoder
 }
-
 
 /// the things that
 pub struct WGPU {
@@ -176,8 +176,6 @@ pub struct WGPU {
     swap_chain: WGPUSwapChain,
     bind_group_layout: wgpu::BindGroupLayout,
 }
-
-fn create_bind_group() {}
 
 impl WGPU {
     pub fn new(device: &wgpu::Device, size: Size) -> Self {
@@ -483,12 +481,10 @@ pub struct TextureBindings {
     // tex_tex:
 }
 
-fn set_uniforms<'a, 'b>(
+fn create_bind_group(
     ctx: &WGPUContext,
-    pass: &'a mut wgpu::RenderPass<'b>,
+    // pass: &'a mut wgpu::RenderPass<'b>,
     images: &ImageStore<WGPUTexture>,
-    // vertex_buffer: &WGPUVec<Vertex>,
-    // index_buffer: &WGPUVec<u32>,
     view_size: WGPUVar<[f32; 2]>,
     uniforms: WGPUVar<Params>,
     image_tex: Option<ImageId>,
@@ -496,7 +492,8 @@ fn set_uniforms<'a, 'b>(
     pseudo_texture: &WGPUTexture,
 
     layout: wgpu::BindGroupLayout,
-) {
+    // out: &mut wgpu::BindGroup,
+) -> wgpu::BindGroup {
     let tex = if let Some(id) = image_tex {
         images.get(id).unwrap()
     } else {
@@ -552,7 +549,7 @@ fn set_uniforms<'a, 'b>(
                 resource: wgpu::BindingResource::Sampler(alpha_tex.sampler()),
             },
         ],
-    });
+    })
     // pass.set_tex
 }
 

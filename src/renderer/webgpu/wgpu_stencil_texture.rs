@@ -8,7 +8,7 @@ impl WGPUStencilTexture {
         todo!()
     }
 
-    pub fn tex(&self) -> &wgpu::TextureView {
+    pub fn view(&self) -> &wgpu::TextureView {
         todo!()
     }
 }
