@@ -65,12 +65,11 @@ var viewSize: ViewSize;
 [[stage(vertex)]]
 fn vertex_shader(
     [[location(0)]] vert: vec4<f32>,
-    // [[location(1)]] v: Vertex,
-    // vert: Vertex,
 ) -> RasterizerData {
-    var ret: RasterizerData;
     const tcoord = vert.xy;
     const pos = vert.wz;
+
+    var ret: RasterizerData;
     ret.ftcoord = tcoord;
     ret.fpos = pos;
     ret.pos = vec4<f32>(
@@ -81,18 +80,6 @@ fn vertex_shader(
             );
     return ret;
 }
-
-
-// [[group(0), binding(1)]]
-// var r_texture: texture_cube<f32>;
-// [[group(0), binding(2)]]
-// var r_sampler: sampler;
-
-// todo: ordering
-
-
-// [[group(0), binding(1)]]
-// var i: RasterizerData;
 
 [[group(0), binding(1)]]
 var u: Uniforms;
