@@ -54,7 +54,10 @@ fn sdroundrect(u: Uniforms, pt: vec2<f32>) -> f32 {
     // float2 ext2 = uniforms.extent - float2(uniforms.radius);
     // float2 d = abs(pt) - ext2;
     // return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - uniforms.radius;
-    return 0.0;
+    // return 0.0;
+    const ext2 = u.extent - vec2<f32>(u.radius, u.radius);
+    const d = abs(pt) - ext2;
+    return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - u.radius;
 }
 
 [[block]]
