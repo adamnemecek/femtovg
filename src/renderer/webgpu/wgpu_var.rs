@@ -32,6 +32,10 @@ impl<T> WGPUVar<T> {
             ph: Default::default(),
         }
     }
+
+    // pub fn as_raw(&self) -> &wgpu::Buffer {
+    //     &self.inner
+    // }
 }
 
 impl<T> std::ops::Deref for WGPUVar<T> {
@@ -53,6 +57,13 @@ impl<T> std::ops::DerefMut for WGPUVar<T> {
     }
 }
 
+impl<T: Copy> AsRef<wgpu::Buffer> for WGPUVar<T> {
+    fn as_ref(&self) -> &wgpu::Buffer {
+        &self.inner
+    }
+}
+
+
 mod tests {
     use super::*;
 
@@ -66,3 +77,4 @@ mod tests {
         // let mut var = WGPUVar::new();
     }
 }
+

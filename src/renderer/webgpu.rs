@@ -302,14 +302,14 @@ impl WGPU {
         //  * viewsize
         // fragment shader
 
-        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: None,
-            layout: &bind_group_layout,
-            entries: &[wgpu::BindGroupEntry {
-                binding: 0,
-                resource: wgpu::BindingResource::TextureViewArray(&[]),
-            }],
-        });
+        // let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+        //     label: None,
+        //     layout: &bind_group_layout,
+        //     entries: &[wgpu::BindGroupEntry {
+        //         binding: 0,
+        //         resource: wgpu::BindingResource::TextureViewArray(&[]),
+        //     }],
+        // });
 
         // bind_group.destroy();
 
@@ -516,7 +516,11 @@ fn set_uniforms<'a, 'b>(
             //viewsize
             wgpu::BindGroupEntry {
                 binding: 0,
-                resource: wgpu::BindingResource::TextureView(tex.view()),
+                resource: wgpu::BindingResource::Buffer {
+                    buffer: view_size.as_ref(),
+                    offset: 0,
+                    size: None,
+                },
             },
             //uniforms
             wgpu::BindGroupEntry {
