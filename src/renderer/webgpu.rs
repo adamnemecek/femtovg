@@ -389,49 +389,49 @@ impl WGPU {
     //     }
     // }
 
-    fn stencil_stroke<'a, 'b>(
-        &'a mut self,
-        pass: &'a mut wgpu::RenderPass<'b>,
-        images: &ImageStore<WGPUTexture>,
-        cmd: &Command,
-        paint1: Params,
-        paint2: Params,
-    ) {
-        //
-        // pass.set_pipeline(pipeline);
-        // self.set_uniforms(pass, images, image_tex, alpha_tex)
-    }
+    // fn stencil_stroke<'a, 'b>(
+    //     &'a mut self,
+    //     pass: &'a mut wgpu::RenderPass<'b>,
+    //     images: &ImageStore<WGPUTexture>,
+    //     cmd: &Command,
+    //     paint1: Params,
+    //     paint2: Params,
+    // ) {
+    //     //
+    //     // pass.set_pipeline(pipeline);
+    //     // self.set_uniforms(pass, images, image_tex, alpha_tex)
+    // }
 
-    fn triangles<'a>(
-        &'a mut self,
-        pass: &mut wgpu::RenderPass<'a>,
-        images: &ImageStore<WGPUTexture>,
-        cmd: &Command,
-        paint: Params,
-    ) {
-        //
-        self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
-        // pass.set_pipeline(pipeline)
-        if let Some((start, count)) = cmd.triangles_verts {
-            // pass.draw(vertices, instances)
-        }
-    }
+    // fn triangles<'a>(
+    //     &'a mut self,
+    //     pass: &mut wgpu::RenderPass<'a>,
+    //     images: &ImageStore<WGPUTexture>,
+    //     cmd: &Command,
+    //     paint: Params,
+    // ) {
+    //     //
+    //     // self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
+    //     // pass.set_pipeline(pipeline)
+    //     if let Some((start, count)) = cmd.triangles_verts {
+    //         // pass.draw(vertices, instances)
+    //     }
+    // }
 
-    fn set_uniforms<'a>(
-        &self,
-        pass: &wgpu::RenderPass<'a>,
-        images: &ImageStore<WGPUTexture>,
-        paint: Params,
-        image_tex: Option<ImageId>,
-        alpha_tex: Option<ImageId>,
-    ) {
-        let tex = if let Some(id) = image_tex {
-            images.get(id).unwrap()
-        } else {
-            &self.pseudo_texture
-        };
-        // pass.set_viewport(x, y, w, h, min_depth, max_depth)
-    }
+    // fn set_uniforms<'a>(
+    //     &self,
+    //     pass: &wgpu::RenderPass<'a>,
+    //     images: &ImageStore<WGPUTexture>,
+    //     paint: Params,
+    //     image_tex: Option<ImageId>,
+    //     alpha_tex: Option<ImageId>,
+    // ) {
+    //     let tex = if let Some(id) = image_tex {
+    //         images.get(id).unwrap()
+    //     } else {
+    //         &self.pseudo_texture
+    //     };
+    //     // pass.set_viewport(x, y, w, h, min_depth, max_depth)
+    // }
 
     fn clear_rect<'a>(
         &'a mut self,
@@ -484,13 +484,14 @@ fn set_uniforms<'a, 'b>(
     ctx: &WGPUContext,
     pass: &'a mut wgpu::RenderPass<'b>,
     images: &ImageStore<WGPUTexture>,
-
+    // vertex_buffer: &WGPUVec<Vertex>,
+    // index_buffer: &WGPUVec<u32>,
+    view_size: WGPUVar<[f32; 2]>,
     paint: WGPUVar<Params>,
     image_tex: Option<ImageId>,
     alpha_tex: Option<ImageId>,
     pseudo_texture: &WGPUTexture,
-    vertex_buffer: &WGPUVec<Vertex>,
-    index_buffer: &WGPUVec<u32>,
+
     layout: wgpu::BindGroupLayout,
 ) {
     let tex = if let Some(id) = image_tex {
@@ -509,22 +510,44 @@ fn set_uniforms<'a, 'b>(
         label: None,
         layout: &layout,
         entries: &[
+            //viewsize
             wgpu::BindGroupEntry {
                 binding: 0,
                 resource: wgpu::BindingResource::TextureView(tex.view()),
             },
+            //uniforms
+            wgpu::BindGroupEntry {
+                binding: 0,
+                resource: wgpu::BindingResource::TextureView(tex.view()),
+            },
+            // texture
+            wgpu::BindGroupEntry {
+                binding: 0,
+                resource: wgpu::BindingResource::TextureView(tex.view()),
+            },
+            // sampler
             wgpu::BindGroupEntry {
                 binding: 1,
-                resource: wgpu::BindingResource::Sampler(alpha_tex.sampler()),
+                resource: wgpu::BindingResource::Sampler(tex.sampler()),
             },
+            // wgpu::BindGroupEntry {
+            //     binding: 2,
+            //     resource: wgpu::BindingResource::Buffer {
+            //         buffer: vertex_buffer.as_raw(),
+            //         offset: 0,
+            //         size: None,
+            //     }
+            // }
+            // alpha texture
             wgpu::BindGroupEntry {
-                binding: 2,
-                resource: wgpu::BindingResource::Buffer {
-                    buffer: vertex_buffer.as_raw(),
-                    offset: 0,
-                    size: None,
-                }
-            }
+                binding: 0,
+                resource: wgpu::BindingResource::TextureView(tex.view()),
+            },
+            // aplha sampler
+            wgpu::BindGroupEntry {
+                binding: 1,
+                resource: wgpu::BindingResource::Sampler(tex.sampler()),
+            },
         ],
     });
     // pass.set_tex
