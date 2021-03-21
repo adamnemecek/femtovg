@@ -225,7 +225,7 @@ impl WGPU {
                 //viewsize
                 wgpu::BindGroupLayoutEntry {
                     binding: 0,
-                    visibility: wgpu::ShaderStage::FRAGMENT,
+                    visibility: wgpu::ShaderStage::VERTEX,
                     ty: wgpu::BindingType::Buffer {
                         ty: wgpu::BufferBindingType::Uniform,
                         has_dynamic_offset: false,
@@ -319,14 +319,14 @@ impl WGPU {
 
         // bind_group.destroy();
 
-        let fill_shape_stencil_state = 0;
-        let fill_anti_alias_stencil_state_nonzero = 0;
-        let fill_anti_alias_stencil_state_evenodd = 0;
-        let fill_stencil_state_nonzero = 0;
-        let fill_stencil_state_evenodd = 0;
-        let stroke_shape_stencil_state = 0;
-        let stroke_anti_alias_stencil_state = 0;
-        let stroke_clear_stencil_state = 0;
+        // let fill_shape_stencil_state = 0;
+        // let fill_anti_alias_stencil_state_nonzero = 0;
+        // let fill_anti_alias_stencil_state_evenodd = 0;
+        // let fill_stencil_state_nonzero = 0;
+        // let fill_stencil_state_evenodd = 0;
+        // let stroke_shape_stencil_state = 0;
+        // let stroke_anti_alias_stencil_state = 0;
+        // let stroke_clear_stencil_state = 0;
 
         let encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 

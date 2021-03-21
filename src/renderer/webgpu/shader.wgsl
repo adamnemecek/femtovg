@@ -66,9 +66,6 @@ struct ViewSize {
     y: f32;
 };
 
-// [[group(0), binding(0)]]
-// var vert: Vertex;
-
 [[group(0), binding(0)]]
 var viewSize: ViewSize;
 
@@ -93,7 +90,6 @@ fn vertex_shader(
 
 [[group(0), binding(1)]]
 var u: Uniforms;
-
 [[group(0), binding(2)]]
 var tex: texture_2d<f32>;
 [[group(0), binding(3)]]
@@ -106,10 +102,7 @@ var alpha_samplr: sampler;
 [[stage(fragment)]]
 fn fragment_shader_aa(
     in: RasterizerData,
-    // u: Uniforms,
-
 ) -> [[location(0)]] vec4<f32> {
-
     var result: vec4<f32>;
     const scissor = scissor_mask(u, in.fpos);
     const stroke_alpha = stroke_mask(u, in.ftcoord);
