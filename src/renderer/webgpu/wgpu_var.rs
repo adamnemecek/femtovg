@@ -5,7 +5,7 @@ pub struct WGPUVar<T> {
 }
 
 impl<T> WGPUVar<T> {
-
+    
 }
 
 impl<T> std::ops::Deref for WGPUVar<T> {
@@ -19,3 +19,15 @@ impl<T> std::ops::Deref for WGPUVar<T> {
         }
     }
 }
+
+impl<T> std::ops::DerefMut for WGPUVar<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        let slice = self.inner.slice(..);
+        let z = slice.get_mapped_range_mut();
+        let z = z.as_ref();
+        unsafe {
+            (z.as_ptr() as *mut T).as_mut().unwrap()
+        }
+    }
+}
+
