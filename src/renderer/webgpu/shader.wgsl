@@ -35,12 +35,13 @@ struct Uniforms {
     padding: array<f32, 19>;        // 19 * 4
 };
 
-
-
-
 fn scissor_mask(u: Uniforms, p: vec2<f32>) -> f32 {
+    var sc: vec2<f32>;
+    sc = (abs((u.scissor_mat * vec3<f32>(p, 1.0)).xy)
+                 - u.scissor_ext);
 
-    return 0.0;
+    sc = vec2<f32>(0.5, 0.5) - sc * u.scissor_scale;
+    return clamp(sc.x, 0.0, 1.0) * clamp(sc.y, 0.0, 1.0);
 }
 
 fn stroke_mask(u: Uniforms, p: vec2<f32>) -> f32 {
