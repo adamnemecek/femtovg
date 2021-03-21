@@ -44,8 +44,10 @@ fn scissor_mask(u: Uniforms, p: vec2<f32>) -> f32 {
     return clamp(sc.x, 0.0, 1.0) * clamp(sc.y, 0.0, 1.0);
 }
 
-fn stroke_mask(u: Uniforms, p: vec2<f32>) -> f32 {
-    return 0.0;
+fn stroke_mask(u: Uniforms, ftcoord: vec2<f32>) -> f32 {
+    return min(1.0, (1.0 - abs(ftcoord.x * 2.0 - 1.0)) * u.stroke_mult)
+          * min(1.0, ftcoord.y);
+    // return 0.0;
 }
 
 fn sdroundrect(u: Uniforms, pt: vec2<f32>) -> f32 {
