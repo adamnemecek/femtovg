@@ -280,6 +280,8 @@ pub struct WGPUPipelineStates {
     convex_fill2: wgpu::RenderPipeline,
     concave_fill1: wgpu::RenderPipeline,
     concave_fill2: wgpu::RenderPipeline,
+    fill_anti_alias_stencil_state_nonzero: wgpu::RenderPipeline,
+    fill_anti_alias_stencil_state_evenodd: wgpu::RenderPipeline,
 }
 
 impl WGPUPipelineStates {
@@ -289,6 +291,14 @@ impl WGPUPipelineStates {
 
     pub fn blend_func(&self) -> WGPUBlend {
         self.blend_func
+    }
+
+    pub fn fill_anti_alias_stencil_state_evenodd(&self) -> &wgpu::RenderPipeline {
+        &self.fill_anti_alias_stencil_state_evenodd
+    }
+
+    pub fn fill_anti_alias_stencil_state_nonzero(&self) -> &wgpu::RenderPipeline {
+        &self.fill_anti_alias_stencil_state_nonzero
     }
 
     pub fn convex_fill1(&self) -> &wgpu::RenderPipeline {

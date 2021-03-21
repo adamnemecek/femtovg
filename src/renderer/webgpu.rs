@@ -588,7 +588,14 @@ fn concave_fill<'a, 'b>(
 
     // fringes
     if antialias {
-
+        match cmd.fill_rule {
+            FillRule::NonZero => {
+                pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
+            }
+            FillRule::EvenOdd => {
+                pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
+            }
+        }
     }
 }
 
