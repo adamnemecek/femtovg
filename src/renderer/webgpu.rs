@@ -114,15 +114,16 @@ fn new_render_pass<'a>(
             resolve_target: None,
             ops: wgpu::Operations {
                 load: wgpu::LoadOp::Clear(clear_color.into()),
-                store: false,
+                store: true,
             },
         }],
         depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachmentDescriptor {
             attachment: stencil_texture.view(),
             depth_ops: Some(wgpu::Operations {
-                load: wgpu::LoadOp::Load,
+                load: wgpu::LoadOp::Clear(0.0),
                 store: false,
-            }), //Option<Operations<f32>>,
+            }),
+            // todo: what is this?
             stencil_ops: None, //Option<Operations<u32>>,
         }),
     };
@@ -138,6 +139,7 @@ fn new_render_pass<'a>(
 
     pass.set_vertex_buffer(0, vertex_buffer.slice());
     pass.set_stencil_reference(0);
+
     // pass.set_vertex_buffer(1, buffer_slice)
     pass
 
