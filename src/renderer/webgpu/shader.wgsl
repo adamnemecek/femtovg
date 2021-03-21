@@ -108,18 +108,18 @@ var alpha_samplr: sampler;
 
 [[stage(fragment)]]
 fn fragment_shader_aa(
-    i: RasterizerData,
+    in: RasterizerData,
     // u: Uniforms,
 
 ) -> [[location(0)]] vec4<f32> {
 
     var result: vec4<f32>;
-    const scissor = scissor_mask(u, i.fpos);
-    const stroke_alpha = stroke_mask(u, i.ftcoord);
+    const scissor = scissor_mask(u, in.fpos);
+    const stroke_alpha = stroke_mask(u, in.ftcoord);
 
     if (u.shader_type == 0.0) {
         // // MNVG_SHADER_FILLGRAD
-        const pt = (u.paint_mat * vec3<f32>(i.fpos, 1.0)).xy;
+        const pt = (u.paint_mat * vec3<f32>(in.fpos, 1.0)).xy;
         // // revisit d
         const d = clamp((sdroundrect(u, pt) + u.feather*0.5) / u.feather, 0.0, 1.0);
         // // float d = saturate((u.feather * 0.5 + sdroundrect(uniforms, pt))
@@ -131,7 +131,7 @@ fn fragment_shader_aa(
     } elseif (u.shader_type == 1.0) {
         // MNVG_SHADER_IMG
         // this has to be fpos
-        const pt = (u.paint_mat * vec3<f32>(i.fpos, 1.0)).xy / u.extent;
+        const pt = (u.paint_mat * vec3<f32>(in.fpos, 1.0)).xy / u.extent;
 
         var color: vec4<f32>;
         color = textureSample(tex, samplr, pt);
@@ -151,7 +151,7 @@ fn fragment_shader_aa(
 
     if (u.has_mask == 1.0) {
     //     // revisit ftcoord
-        const ftcoord = vec2<f32>(i.ftcoord.x, 1.0 - i.ftcoord.y);
+        const ftcoord = vec2<f32>(in.ftcoord.x, 1.0 - in.ftcoord.y);
         const r = textureSample(alpha_tex, samplr, ftcoord).r;
         var mask: vec4<f32>;
         mask = vec4<f32>(r, r, r, r);
