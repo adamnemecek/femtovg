@@ -490,7 +490,7 @@ fn set_uniforms<'a, 'b>(
     // vertex_buffer: &WGPUVec<Vertex>,
     // index_buffer: &WGPUVec<u32>,
     view_size: WGPUVar<[f32; 2]>,
-    paint: WGPUVar<Params>,
+    uniforms: WGPUVar<Params>,
     image_tex: Option<ImageId>,
     alpha_tex: Option<ImageId>,
     pseudo_texture: &WGPUTexture,
@@ -524,36 +524,32 @@ fn set_uniforms<'a, 'b>(
             },
             //uniforms
             wgpu::BindGroupEntry {
-                binding: 0,
-                resource: wgpu::BindingResource::TextureView(tex.view()),
+                binding: 1,
+                resource: wgpu::BindingResource::Buffer {
+                    buffer: uniforms.as_ref(),
+                    offset: 0,
+                    size: None,
+                },
             },
             // texture
             wgpu::BindGroupEntry {
-                binding: 0,
+                binding: 2,
                 resource: wgpu::BindingResource::TextureView(tex.view()),
             },
             // sampler
             wgpu::BindGroupEntry {
-                binding: 1,
+                binding: 3,
                 resource: wgpu::BindingResource::Sampler(tex.sampler()),
             },
-            // wgpu::BindGroupEntry {
-            //     binding: 2,
-            //     resource: wgpu::BindingResource::Buffer {
-            //         buffer: vertex_buffer.as_raw(),
-            //         offset: 0,
-            //         size: None,
-            //     }
-            // }
             // alpha texture
             wgpu::BindGroupEntry {
-                binding: 0,
-                resource: wgpu::BindingResource::TextureView(tex.view()),
+                binding: 4,
+                resource: wgpu::BindingResource::TextureView(alpha_tex.view()),
             },
-            // aplha sampler
+            // alpha sampler
             wgpu::BindGroupEntry {
-                binding: 1,
-                resource: wgpu::BindingResource::Sampler(tex.sampler()),
+                binding: 5,
+                resource: wgpu::BindingResource::Sampler(alpha_tex.sampler()),
             },
         ],
     });
