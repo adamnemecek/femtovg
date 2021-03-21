@@ -472,13 +472,22 @@ fn set_uniforms<'a, 'b>(
     ctx: &WGPUContext,
     pass: &'a mut wgpu::RenderPass<'b>,
     images: &ImageStore<WGPUTexture>,
+
     paint: WGPUVar<Params>,
     image_tex: Option<ImageId>,
     alpha_tex: Option<ImageId>,
     pseudo_texture: &WGPUTexture,
+    vertex_buffer: &WGPUVec<Vertex>,
+    index_buffer: &WGPUVec<u32>,
     layout: wgpu::BindGroupLayout,
 ) {
     let tex = if let Some(id) = image_tex {
+        images.get(id).unwrap()
+    } else {
+        pseudo_texture
+    };
+
+    let alpha_tex = if let Some(id) = alpha_tex {
         images.get(id).unwrap()
     } else {
         pseudo_texture
@@ -494,12 +503,16 @@ fn set_uniforms<'a, 'b>(
             },
             wgpu::BindGroupEntry {
                 binding: 1,
-                resource: wgpu::BindingResource::Sampler(tex.sampler()),
+                resource: wgpu::BindingResource::Sampler(alpha_tex.sampler()),
             },
-            // wgpu::BindGroupEntry {
-            //     binding: 2,
-            //     resource: wgpu::BindingResource::Buffer()
-            // }
+            wgpu::BindGroupEntry {
+                binding: 2,
+                resource: wgpu::BindingResource::Buffer {
+                    buffer: vertex_buffer.as_raw(),
+                    offset: 0,
+                    size: None,
+                }
+            }
         ],
     });
     // pass.set_tex

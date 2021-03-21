@@ -22,6 +22,7 @@ impl<T> WGPUVar<T> {
     pub fn new(device: &wgpu::Device, label: Option<&str>, value: &T, usage: wgpu::BufferUsage) -> Self {
         // let c =
 
+
         let inner = device.create_buffer_init(&BufferInitDescriptor {
             label,
             contents: as_u8_slice(value),

@@ -65,6 +65,10 @@ impl<T: Copy> WGPUVec<T> {
         todo!()
     }
 
+    pub fn as_raw(&self) -> &wgpu::Buffer {
+        &self.inner
+    }
+
     pub fn as_slice<S: std::ops::RangeBounds<wgpu::BufferAddress>>(&self, bounds: S) -> wgpu::BufferSlice {
         self.inner.slice(bounds)
     }
