@@ -278,6 +278,8 @@ pub struct WGPUPipelineStates {
     texture_format: wgpu::TextureFormat,
     convex_fill1: wgpu::RenderPipeline,
     convex_fill2: wgpu::RenderPipeline,
+    concave_fill1: wgpu::RenderPipeline,
+    concave_fill2: wgpu::RenderPipeline,
 }
 
 impl WGPUPipelineStates {
@@ -295,6 +297,14 @@ impl WGPUPipelineStates {
 
     pub fn convex_fill2(&self) -> &wgpu::RenderPipeline {
         &self.convex_fill2
+    }
+
+    pub fn concave_fill1(&self) -> &wgpu::RenderPipeline {
+        &self.concave_fill1
+    }
+
+    pub fn concave_fill2(&self) -> &wgpu::RenderPipeline {
+        &self.concave_fill2
     }
 
     pub fn new(

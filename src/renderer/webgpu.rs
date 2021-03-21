@@ -154,7 +154,7 @@ impl WGPUStates {
 /// the things that
 pub struct WGPU {
     ctx: WGPUContext,
-
+    antialias: bool,
     // default_stencil_state: wgpu::RenderPipeline,
     // fill_shape_stencil_state: wgpu::RenderPipeline,
     // fill_anti_alias_stencil_state_nonzero: wgpu::RenderPipeline,
@@ -569,12 +569,27 @@ fn concave_fill<'a, 'b>(
     pass: &'a mut wgpu::RenderPass<'b>,
     images: &ImageStore<WGPUTexture>,
     cmd: &Command,
+    antialias: bool,
     stencil_paint: Params,
     fill_paint: Params,
     vertex_buffer: &WGPUVec<Vertex>,
     index_buffer: &mut WGPUVec<u32>,
     states: &'b WGPUPipelineStates,
 ) {
+    for drawable in &cmd.drawables {
+        if let Some((start, count)) = drawable.fill_verts {
+            let offset = index_buffer.len();
+            index_buffer.extend_with_triange_fan_indices_cw(start as _, count as _);
+            pass.draw_indexed(0..0, 0, 0..0);
+        }
+    }
+    pass.set_pipeline(states.concave_fill1());
+    // set_uniforms
+
+    // fringes
+    if antialias {
+
+    }
 }
 
 fn triangles<'a, 'b>(
@@ -705,6 +720,7 @@ impl Renderer for WGPU {
                             &mut pass,
                             images,
                             cmd,
+                            self.antialias,
                             *stencil_params,
                             *fill_params,
                             &self.vertex_buffer,
