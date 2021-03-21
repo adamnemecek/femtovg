@@ -23,6 +23,9 @@ pub use mem_align::*;
 mod wgpu_swap_chain;
 pub use wgpu_swap_chain::*;
 
+mod wgpu_var;
+pub use wgpu_var::*;
+
 use crate::{
     renderer::{
         ImageId,
@@ -469,7 +472,7 @@ fn set_uniforms<'a, 'b>(
     ctx: &WGPUContext,
     pass: &'a mut wgpu::RenderPass<'b>,
     images: &ImageStore<WGPUTexture>,
-    paint: Params,
+    paint: WGPUVar<Params>,
     image_tex: Option<ImageId>,
     alpha_tex: Option<ImageId>,
     pseudo_texture: &WGPUTexture,
@@ -484,10 +487,21 @@ fn set_uniforms<'a, 'b>(
     ctx.device().create_bind_group(&wgpu::BindGroupDescriptor {
         label: None,
         layout: &layout,
-        entries: &[wgpu::BindGroupEntry {
-            binding: 0,
-            resource: wgpu::BindingResource::TextureView(tex.view()),
-        }],
+        entries: &[
+            wgpu::BindGroupEntry {
+                binding: 0,
+                resource: wgpu::BindingResource::TextureView(tex.view()),
+            },
+            wgpu::BindGroupEntry {
+                binding: 1,
+                resource: wgpu::BindingResource::Sampler(tex.sampler()),
+            },
+
+            // wgpu::BindGroupEntry {
+            //     binding: 2,
+            //     resource: wgpu::BindingResource::Buffer()
+            // }
+        ],
     });
     // pass.set_tex
 }
@@ -538,16 +552,15 @@ fn stroke<'a, 'b>(
     index_buffer: &mut WGPUVec<u32>,
     states: &'b WGPUPipelineStates,
 ) {
-
     // set_uniforms()
     //
     // draws triangle strip
     // self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
-    // for drawable in &cmd.drawables {
-    //     if let Some((start, count)) = drawable.stroke_verts {
-    //         // pass.draw()
-    //     }
-    // }
+    for drawable in &cmd.drawables {
+        if let Some((start, count)) = drawable.stroke_verts {
+            // pass.draw()
+        }
+    }
 }
 
 fn stencil_stroke<'a, 'b>(
@@ -560,9 +573,12 @@ fn stencil_stroke<'a, 'b>(
     index_buffer: &mut WGPUVec<u32>,
     states: &'b WGPUPipelineStates,
 ) {
+    // pass.set_pipeline()
     //
     // pass.set_pipeline(pipeline);
     // self.set_uniforms(pass, images, image_tex, alpha_tex)
+
+    // pass.set_pipeline();
 }
 
 fn concave_fill<'a, 'b>(
@@ -596,7 +612,28 @@ fn concave_fill<'a, 'b>(
                 pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
             }
         }
+
+        for drawable in &cmd.drawables {
+            if let Some((start, count)) = drawable.stroke_verts {
+                // pass.draw(vertices, instances)
+            }
+        }
     }
+
+    // todo: can be moved into the if statement
+    match cmd.fill_rule {
+        FillRule::NonZero => {
+            pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
+        }
+        FillRule::EvenOdd => {
+            pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
+        }
+    }
+
+    if let Some((start, count)) = cmd.triangles_verts {
+        // pass.
+    }
+    // pass.set_pipeline(pipeline)
 }
 
 fn triangles<'a, 'b>(
