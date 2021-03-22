@@ -768,6 +768,7 @@ impl Renderer for WGPU {
 
                 match &cmd.cmd_type {
                     CommandType::ConvexFill { params } => {
+                        // set_uniforms
                         let bg = self.bind_group_cache.get(
                             &self.ctx,
                             images,
@@ -776,26 +777,23 @@ impl Renderer for WGPU {
                             cmd.alpha_mask,
                             &self.pseudo_texture,
                         );
+
+                        pass.set_pipeline(states.convex_fill1());
                         pass.set_bind_group(0, bg.as_ref(), &[]);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
                         for drawable in &cmd.drawables {
                             if let Some((start, count)) = drawable.fill_verts {
-                                //
-
-                                pass.set_pipeline(states.convex_fill1());
-
                                 let offset = self.index_buffer.len();
+                                // let byte_index_buffer_offset = offset * std::mem::size_of::<u32>();
+
                                 let triangle_fan_index_count = self
                                     .index_buffer
                                     .extend_with_triange_fan_indices_cw(start as u32, count as u32);
 
-                                // encoder.begin_render_pass(desc)
-                                // render_pass.draw_indexed(indices, base_vertex, instances)
-                                // pass.set_index_buffer(buffer_slice, );
                                 let fmt = wgpu::IndexFormat::Uint32;
                                 // pass.set_index_buffer(self.index_buffer, fmt);
-                                pass.draw_indexed(0..0, 0, 0..0);
+                                pass.draw_indexed((offset as _)..(offset + triangle_fan_index_count) as _, 0, 0..1);
                             }
                             // draw fringes
 
