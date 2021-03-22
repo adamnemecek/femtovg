@@ -744,6 +744,19 @@ impl Renderer for WGPU {
             // pass.set_viewport(x, y, w, h, min_depth, max_depth)
 
             // let mut state = None;
+
+            macro_rules! bind_group {
+                ($_self: ident, $cmd: ident) => {
+                    $_self.bind_group_cache.get(
+                        &$_self.ctx,
+                        images,
+                        &$_self.bind_group_layout,
+                        $cmd.image,
+                        $cmd.alpha_mask,
+                        &$_self.pseudo_texture,
+                    );
+                };
+            }
             while i < commands.len() {
                 let cmd = &commands[i];
                 i += 1;
@@ -769,14 +782,7 @@ impl Renderer for WGPU {
                 match &cmd.cmd_type {
                     CommandType::ConvexFill { params } => {
                         // set_uniforms
-                        let bg = self.bind_group_cache.get(
-                            &self.ctx,
-                            images,
-                            &self.bind_group_layout,
-                            cmd.image,
-                            cmd.alpha_mask,
-                            &self.pseudo_texture,
-                        );
+                        let bg = bind_group!(self, cmd);
 
                         pass.set_pipeline(states.convex_fill1());
                         pass.set_bind_group(0, bg.as_ref(), &[]);
@@ -808,6 +814,8 @@ impl Renderer for WGPU {
                         stencil_params,
                         fill_params,
                     } => {
+                        let bg = bind_group!(self, cmd);
+
                         for drawable in &cmd.drawables {
                             if let Some((start, count)) = drawable.fill_verts {
                                 let offset = self.index_buffer.len();
@@ -863,7 +871,7 @@ impl Renderer for WGPU {
                         );
                         // pass.set_pipeline()
                         pass.set_bind_group(0, bg.as_ref(), &[]);
-                        pass.set_pipeline(states.convex_fill1());
+
                         pass.set_bind_group(0, bg.as_ref(), &[]);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
