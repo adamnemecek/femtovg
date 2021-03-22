@@ -29,7 +29,7 @@ fn create_bind_group(
     ctx: &WGPUContext,
     // pass: &'a mut wgpu::RenderPass<'b>,
     images: &ImageStore<WGPUTexture>,
-    layout: wgpu::BindGroupLayout,
+    layout: &wgpu::BindGroupLayout,
     // view_size: WGPUVar<Size>,
     // uniforms: WGPUVar<Params>,
     image_tex: Option<ImageId>,
@@ -51,7 +51,7 @@ fn create_bind_group(
 
     ctx.device().create_bind_group(&wgpu::BindGroupDescriptor {
         label: None,
-        layout: &layout,
+        layout,
         entries: &[
             //viewsize
             // wgpu::BindGroupEntry {
@@ -120,7 +120,7 @@ impl WGPUBindGroupCache {
         ctx: &WGPUContext,
         // pass: &'a mut wgpu::RenderPass<'b>,
         images: &ImageStore<WGPUTexture>,
-        layout: wgpu::BindGroupLayout,
+        layout: &wgpu::BindGroupLayout,
         // view_size: WGPUVar<Size>,
         // uniforms: WGPUVar<Params>,
         image_tex: Option<ImageId>,

@@ -505,6 +505,7 @@ fn convex_fill<'a, 'b>(
         if let Some((start, count)) = drawable.fill_verts {
             //
             pass.set_pipeline(&states.convex_fill1());
+
             // pass.set_pipeline(&state.convex_fill1());
 
             let offset = index_buffer.len();
@@ -764,6 +765,15 @@ impl Renderer for WGPU {
 
                 match &cmd.cmd_type {
                     CommandType::ConvexFill { params } => {
+                        let bg = self.bind_group_cache.get(
+                            &self.ctx,
+                            images,
+                            &self.bind_group_layout,
+                            cmd.image,
+                            cmd.alpha_mask,
+                            &self.pseudo_texture,
+                        );
+                        pass.set_bind_group(0, bg, &[]);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
                         for drawable in &cmd.drawables {
