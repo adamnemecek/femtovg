@@ -29,13 +29,12 @@ fn create_bind_group(
     ctx: &WGPUContext,
     // pass: &'a mut wgpu::RenderPass<'b>,
     images: &ImageStore<WGPUTexture>,
-    view_size: WGPUVar<Size>,
-    uniforms: WGPUVar<Params>,
+    layout: wgpu::BindGroupLayout,
+    // view_size: WGPUVar<Size>,
+    // uniforms: WGPUVar<Params>,
     image_tex: Option<ImageId>,
     alpha_tex: Option<ImageId>,
     pseudo_tex: &WGPUTexture,
-
-    layout: wgpu::BindGroupLayout,
     // out: &mut wgpu::BindGroup,
 ) -> wgpu::BindGroup {
     let tex = if let Some(id) = image_tex {
@@ -55,23 +54,23 @@ fn create_bind_group(
         layout: &layout,
         entries: &[
             //viewsize
-            wgpu::BindGroupEntry {
-                binding: 0,
-                resource: wgpu::BindingResource::Buffer {
-                    buffer: view_size.as_ref(),
-                    offset: 0,
-                    size: None,
-                },
-            },
+            // wgpu::BindGroupEntry {
+            //     binding: 0,
+            //     resource: wgpu::BindingResource::Buffer {
+            //         buffer: view_size.as_ref(),
+            //         offset: 0,
+            //         size: None,
+            //     },
+            // },
             //uniforms
-            wgpu::BindGroupEntry {
-                binding: 1,
-                resource: wgpu::BindingResource::Buffer {
-                    buffer: uniforms.as_ref(),
-                    offset: 0,
-                    size: None,
-                },
-            },
+            // wgpu::BindGroupEntry {
+            //     binding: 1,
+            //     resource: wgpu::BindingResource::Buffer {
+            //         buffer: uniforms.as_ref(),
+            //         offset: 0,
+            //         size: None,
+            //     },
+            // },
             // texture
             wgpu::BindGroupEntry {
                 binding: 2,
@@ -109,7 +108,22 @@ pub struct WGPUBindGroupCache {
 }
 
 impl WGPUBindGroupCache {
-    pub fn get(&self) -> &wgpu::BindGroup {
+    pub fn new() -> Self {
+        todo!()
+    }
+
+    pub fn get(
+        &self,
+        ctx: &WGPUContext,
+        // pass: &'a mut wgpu::RenderPass<'b>,
+        images: &ImageStore<WGPUTexture>,
+        layout: wgpu::BindGroupLayout,
+        // view_size: WGPUVar<Size>,
+        // uniforms: WGPUVar<Params>,
+        image_tex: Option<ImageId>,
+        alpha_tex: Option<ImageId>,
+        pseudo_tex: &WGPUTexture,
+    ) -> &wgpu::BindGroup {
         todo!()
     }
 
