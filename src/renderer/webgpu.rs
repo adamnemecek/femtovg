@@ -898,7 +898,7 @@ impl Renderer for WGPU {
                     }
                     CommandType::StencilStroke { params1, params2 } => {
                         // pipeline state + stroke_shape_stencil_state
-                        // let bg = bind_group!(self, cmd);
+                        let bg = bind_group!(self, images, cmd);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
 
                         for drawable in &cmd.drawables {
@@ -912,15 +912,14 @@ impl Renderer for WGPU {
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
                     }
                     CommandType::Triangles { params } => {
-                        // triangles(
-                        //     &mut pass,
-                        //     images,
-                        //     cmd,
-                        //     *params,
-                        //     &self.vertex_buffer,
-                        //     &mut self.index_buffer,
-                        //     states,
-                        // );
+                        let bg = bind_group!(self, images, cmd);
+                        uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
+
+                        // pass.set_bind_group(index, bind_group, offsets)
+                        if let Some((start, count)) = cmd.triangles_verts {
+                            // encoder.draw_primitives(metal::MTLPrimitiveType::Triangle, start as u64, count as u64);
+                            // pass.draw()
+                        }
                     }
                     CommandType::ClearRect {
                         x,
