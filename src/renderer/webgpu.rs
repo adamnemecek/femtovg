@@ -669,7 +669,23 @@ pub struct TextureBindings {
 // ) {
 // }
 
-impl WGPU {}
+impl WGPU {
+    pub fn bind_group_for(
+        &self,
+        images: &ImageStore<WGPUTexture>,
+        image_tex: Option<ImageId>,
+        alpha_tex: Option<ImageId>,
+    ) -> &WGPUBindGroup {
+        self.bind_group_cache.get(
+            &self.ctx,
+            images,
+            &self.bind_group_layout,
+            image_tex,
+            alpha_tex,
+            &self.pseudo_texture,
+        )
+    }
+}
 
 impl Renderer for WGPU {
     type Image = WGPUTexture;
@@ -746,10 +762,10 @@ impl Renderer for WGPU {
             // let mut state = None;
 
             macro_rules! bind_group {
-                ($_self: ident, $cmd: ident) => {
+                ($_self: ident, $images: ident, $cmd: ident) => {
                     $_self.bind_group_cache.get(
                         &$_self.ctx,
-                        images,
+                        $images,
                         &$_self.bind_group_layout,
                         $cmd.image,
                         $cmd.alpha_mask,
@@ -782,10 +798,14 @@ impl Renderer for WGPU {
                 match &cmd.cmd_type {
                     CommandType::ConvexFill { params } => {
                         // set_uniforms
-                        let bg = bind_group!(self, cmd);
 
-                        pass.set_pipeline(states.convex_fill1());
-                        pass.set_bind_group(0, bg.as_ref(), &[]);
+                        // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
+                        {
+                            let bg = bind_group!(self, images, cmd);
+
+                            pass.set_pipeline(states.convex_fill1());
+                            pass.set_bind_group(0, bg.as_ref(), &[]);
+                        }
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
                         for drawable in &cmd.drawables {
@@ -814,7 +834,7 @@ impl Renderer for WGPU {
                         stencil_params,
                         fill_params,
                     } => {
-                        let bg = bind_group!(self, cmd);
+                        // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
 
                         for drawable in &cmd.drawables {
                             if let Some((start, count)) = drawable.fill_verts {
@@ -861,12 +881,12 @@ impl Renderer for WGPU {
                         }
                     }
                     CommandType::Stroke { params } => {
-                        let bg = bind_group!(self, cmd);
+                        // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
 
                         // pass.set_pipeline()
-                        pass.set_bind_group(0, bg.as_ref(), &[]);
+                        // pass.set_bind_group(0, bg.as_ref(), &[]);
 
-                        pass.set_bind_group(0, bg.as_ref(), &[]);
+                        // pass.set_bind_group(0, bg.as_ref(), &[]);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
                         // self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
@@ -878,7 +898,7 @@ impl Renderer for WGPU {
                     }
                     CommandType::StencilStroke { params1, params2 } => {
                         // pipeline state + stroke_shape_stencil_state
-                        let bg = bind_group!(self, cmd);
+                        // let bg = bind_group!(self, cmd);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
 
                         for drawable in &cmd.drawables {
@@ -888,7 +908,7 @@ impl Renderer for WGPU {
                             }
                         }
 
-                        let bg = bind_group!(self, cmd);
+                        // let bg = bind_group!(self, cmd);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
                     }
                     CommandType::Triangles { params } => {
