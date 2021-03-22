@@ -489,43 +489,43 @@ pub struct TextureBindings {
     // tex_tex:
 }
 
-fn convex_fill<'a, 'b>(
-    // &'a mut self,
-    pass: &'a mut wgpu::RenderPass<'b>,
-    images: &ImageStore<WGPUTexture>,
-    cmd: &Command,
-    paint: Params,
-    vertex_buffer: &WGPUVec<Vertex>,
-    index_buffer: &mut WGPUVec<u32>,
-    states: &'b WGPUPipelineStates,
-) {
-    // encoder.push_debug_group("convex_fill");
+// fn convex_fill<'a, 'b>(
+//     // &'a mut self,
+//     pass: &'a mut wgpu::RenderPass<'b>,
+//     images: &ImageStore<WGPUTexture>,
+//     cmd: &Command,
+//     paint: Params,
+//     vertex_buffer: &WGPUVec<Vertex>,
+//     index_buffer: &mut WGPUVec<u32>,
+//     states: &'b WGPUPipelineStates,
+// ) {
+//     // encoder.push_debug_group("convex_fill");
 
-    for drawable in &cmd.drawables {
-        if let Some((start, count)) = drawable.fill_verts {
-            //
-            pass.set_pipeline(&states.convex_fill1());
+//     for drawable in &cmd.drawables {
+//         if let Some((start, count)) = drawable.fill_verts {
+//             //
+//             pass.set_pipeline(&states.convex_fill1());
 
-            // pass.set_pipeline(&state.convex_fill1());
+//             // pass.set_pipeline(&state.convex_fill1());
 
-            let offset = index_buffer.len();
-            let triangle_fan_index_count = index_buffer.extend_with_triange_fan_indices_cw(start as u32, count as u32);
+//             let offset = index_buffer.len();
+//             let triangle_fan_index_count = index_buffer.extend_with_triange_fan_indices_cw(start as u32, count as u32);
 
-            // encoder.begin_render_pass(desc)
-            // render_pass.draw_indexed(indices, base_vertex, instances)
-            // pass.set_index_buffer(buffer_slice, );
-            let fmt = wgpu::IndexFormat::Uint32;
-            // pass.set_index_buffer(self.index_buffer, fmt);
-            pass.draw_indexed(0..0, 0, 0..0);
-        }
+//             // encoder.begin_render_pass(desc)
+//             // render_pass.draw_indexed(indices, base_vertex, instances)
+//             // pass.set_index_buffer(buffer_slice, );
+//             let fmt = wgpu::IndexFormat::Uint32;
+//             // pass.set_index_buffer(self.index_buffer, fmt);
+//             pass.draw_indexed(0..0, 0, 0..0);
+//         }
 
-        if let Some((start, count)) = drawable.stroke_verts {
-            pass.set_pipeline(&states.convex_fill2());
-            let vertex_range = start as _..(start + count) as _;
-            pass.draw(vertex_range, 0..0);
-        }
-    }
-}
+//         if let Some((start, count)) = drawable.stroke_verts {
+//             pass.set_pipeline(&states.convex_fill2());
+//             let vertex_range = start as _..(start + count) as _;
+//             pass.draw(vertex_range, 0..0);
+//         }
+//     }
+// }
 
 // fn stroke<'a, 'b>(
 //     ctx: &WGPUContext,
@@ -861,14 +861,8 @@ impl Renderer for WGPU {
                         }
                     }
                     CommandType::Stroke { params } => {
-                        let bg = self.bind_group_cache.get(
-                            &self.ctx,
-                            images,
-                            &self.bind_group_layout,
-                            cmd.image,
-                            cmd.alpha_mask,
-                            &self.pseudo_texture,
-                        );
+                        let bg = bind_group!(self, cmd);
+
                         // pass.set_pipeline()
                         pass.set_bind_group(0, bg.as_ref(), &[]);
 
@@ -883,16 +877,19 @@ impl Renderer for WGPU {
                         //     }
                     }
                     CommandType::StencilStroke { params1, params2 } => {
-                        // stencil_stroke(
-                        //     &mut pass,
-                        //     images,
-                        //     cmd,
-                        //     *params1,
-                        //     *params2,
-                        //     &self.vertex_buffer,
-                        //     &mut self.index_buffer,
-                        //     states,
-                        // );
+                        // pipeline state + stroke_shape_stencil_state
+                        let bg = bind_group!(self, cmd);
+                        uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
+
+                        for drawable in &cmd.drawables {
+                            if let Some((start, count)) = drawable.stroke_verts {
+                                // encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64)
+                                pass.draw(0..0, 0..0);
+                            }
+                        }
+
+                        let bg = bind_group!(self, cmd);
+                        uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
                     }
                     CommandType::Triangles { params } => {
                         // triangles(
