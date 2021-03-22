@@ -800,12 +800,10 @@ impl Renderer for WGPU {
                         // set_uniforms
 
                         // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
-                        {
-                            let bg = bind_group!(self, images, cmd);
+                        let bg = bind_group!(self, images, cmd);
 
-                            pass.set_pipeline(states.convex_fill1());
-                            pass.set_bind_group(0, bg.as_ref(), &[]);
-                        }
+                        pass.set_pipeline(states.convex_fill1());
+                        pass.set_bind_group(0, bg.as_ref(), &[]);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
                         for drawable in &cmd.drawables {
@@ -835,6 +833,7 @@ impl Renderer for WGPU {
                         fill_params,
                     } => {
                         // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
+                        let bg = bind_group!(self, images, cmd);
 
                         for drawable in &cmd.drawables {
                             if let Some((start, count)) = drawable.fill_verts {
@@ -882,9 +881,10 @@ impl Renderer for WGPU {
                     }
                     CommandType::Stroke { params } => {
                         // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
+                        let bg = bind_group!(self, images, cmd);
 
                         // pass.set_pipeline()
-                        // pass.set_bind_group(0, bg.as_ref(), &[]);
+                        pass.set_bind_group(0, bg.as_ref(), &[]);
 
                         // pass.set_bind_group(0, bg.as_ref(), &[]);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
