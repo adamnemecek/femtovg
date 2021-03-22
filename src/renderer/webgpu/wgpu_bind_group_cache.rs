@@ -100,11 +100,14 @@ use std::collections::HashMap;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 struct CacheKey {
-    inner: u32,
+    image_tex: Option<ImageId>,
+    alpha_tex: Option<ImageId>,
 }
+
 pub struct WGPUBindGroupCache {
     // arena: generational_arena::Arena<wgpu::BindGroup>,
-    inner: HashMap<CacheKey, wgpu::BindGroup>,
+    inner: std::cell::UnsafeCell<HashMap<CacheKey, wgpu::BindGroup>>,
+    // inner: HashMap<CacheKey, wgpu::BindGroup>,
 }
 
 impl WGPUBindGroupCache {
@@ -124,10 +127,25 @@ impl WGPUBindGroupCache {
         alpha_tex: Option<ImageId>,
         pseudo_tex: &WGPUTexture,
     ) -> &wgpu::BindGroup {
-        todo!()
+        let key = CacheKey { image_tex, alpha_tex };
+        // let inner= self.inner.get_mut();
+        let r = unsafe { self.inner.get().as_mut().unwrap() };
+
+        // if let Some(bg) = inner.get(&key) {
+        //     return bg;
+        // }
+        // let bind_group = create_bind_group(ctx, images, layout, image_tex, alpha_tex, pseudo_tex);
+        // inner.insert(key, bind_group);
+        // inner.get(&key).unwrap()
+
+        if !r.contains_key(&key) {
+            let bg = create_bind_group(ctx, images, layout, image_tex, alpha_tex, pseudo_tex);
+            r.insert(key, bg);
+        }
+        &r[&key]
     }
 
     pub fn clear(&mut self) {
-        self.inner.clear()
+        // self.inner.get_mut().clear()
     }
 }
