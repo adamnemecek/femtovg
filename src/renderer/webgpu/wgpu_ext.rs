@@ -11,16 +11,28 @@ impl WGPUDeviceExt for wgpu::CommandEncoder {
 
 pub trait RenderPassExt {
     #[must_use]
-    fn set_fragment_value<T: Copy>(&mut self, offset: u32, value: &T) -> usize;
+    fn set_fragment_value<T: Copy>(&mut self, offset: u32, value: &T) -> u32;
 }
 
+// pub trait ByteSliceExt {
+//     fn from_value<T>(v: &T) -> Self;
+// }
+
+// impl ByteSliceExt for &[u8] {
+//     fn from_value<T>(v: &T) -> Self {
+//         unsafe {
+//             std::slice::from_raw_parts(value as *const T as *const u8, size)
+//        }
+//     }
+// }
+
 impl<'a> RenderPassExt for wgpu::RenderPass<'a> {
-    fn set_fragment_value<T: Copy>(&mut self, offset: u32, value: &T) -> usize {
+    fn set_fragment_value<T: Copy>(&mut self, offset: u32, value: &T) -> u32 {
         let size = std::mem::size_of::<T>();
         debug_assert!(size % 4 == 0);
         let slice = unsafe { std::slice::from_raw_parts(value as *const T as *const u8, size) };
         self.set_push_constants(wgpu::ShaderStage::FRAGMENT, offset, slice);
-        return size;
+        size as _
     }
 }
 

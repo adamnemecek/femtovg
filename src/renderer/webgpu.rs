@@ -791,7 +791,7 @@ impl Renderer for WGPU {
         let mut i = 0;
 
         // let bind_groups = vec![];
-        let mut uniforms_offset = 0;
+        let mut uniforms_offset: u32 = 0;
 
         'outer: while i < commands.len() {
             let target_texture = match render_target {
@@ -842,7 +842,7 @@ impl Renderer for WGPU {
 
                 match &cmd.cmd_type {
                     CommandType::ConvexFill { params } => {
-                        uniforms_offset += pass.set_fragment_value(0, params);
+                        uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
                         convex_fill(
                             &mut pass,
                             images,
