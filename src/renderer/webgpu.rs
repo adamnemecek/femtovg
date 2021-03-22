@@ -762,14 +762,14 @@ impl Renderer for WGPU {
             // let mut state = None;
 
             macro_rules! bind_group {
-                ($_self: ident, $images: ident, $cmd: ident) => {
-                    $_self.bind_group_cache.get(
-                        &$_self.ctx,
+                ($self_: ident, $images: ident, $cmd: ident) => {
+                    $self_.bind_group_cache.get(
+                        &$self_.ctx,
                         $images,
-                        &$_self.bind_group_layout,
+                        &$self_.bind_group_layout,
                         $cmd.image,
                         $cmd.alpha_mask,
-                        &$_self.pseudo_texture,
+                        &$self_.pseudo_texture,
                     );
                 };
             }
