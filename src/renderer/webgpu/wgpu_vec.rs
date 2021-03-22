@@ -21,8 +21,7 @@ impl<T: Copy> WGPUVec<T> {
     }
 
     pub fn len(&self) -> usize {
-        // self.cpu.len()
-        todo!()
+        self.len
     }
 
     pub fn extend_from_slice(&mut self, other: &[T]) {

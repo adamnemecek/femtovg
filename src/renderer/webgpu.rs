@@ -195,29 +195,29 @@ impl WGPU {
 
         let default_stencil_state = 0;
 
-        let clear_stencil_state = {
-            let front = wgpu::StencilFaceState {
-                compare: wgpu::CompareFunction::Always,
-                fail_op: wgpu::StencilOperation::Keep,
-                depth_fail_op: wgpu::StencilOperation::Keep,
-                pass_op: wgpu::StencilOperation::Keep,
-            };
+        // let clear_stencil_state = {
+        //     let front = wgpu::StencilFaceState {
+        //         compare: wgpu::CompareFunction::Always,
+        //         fail_op: wgpu::StencilOperation::Keep,
+        //         depth_fail_op: wgpu::StencilOperation::Keep,
+        //         pass_op: wgpu::StencilOperation::Keep,
+        //     };
 
-            let state = wgpu::DepthStencilState {
-                format: wgpu::TextureFormat::Depth32Float,
-                depth_write_enabled: false,
-                depth_compare: wgpu::CompareFunction::LessEqual,
-                stencil: wgpu::StencilState {
-                    front,
-                    //todo: is default the as None?
-                    back: Default::default(),
-                    read_mask: 0,
-                    write_mask: 0,
-                },
-                bias: Default::default(),
-                clamp_depth: false,
-            };
-        };
+        //     let state = wgpu::DepthStencilState {
+        //         format: wgpu::TextureFormat::Depth32Float,
+        //         depth_write_enabled: false,
+        //         depth_compare: wgpu::CompareFunction::LessEqual,
+        //         stencil: wgpu::StencilState {
+        //             front,
+        //             //todo: is default the as None?
+        //             back: Default::default(),
+        //             read_mask: 0,
+        //             write_mask: 0,
+        //         },
+        //         bias: Default::default(),
+        //         clamp_depth: false,
+        //     };
+        // };
 
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: None,
@@ -747,18 +747,20 @@ impl Renderer for WGPU {
             while i < commands.len() {
                 let cmd = &commands[i];
                 i += 1;
-
-                let blend: WGPUBlend = cmd.composite_operation.into();
-                let states = if let Some(prev_states) = prev_states {
-                    if prev_states.matches(blend, texture_format) {
-                        prev_states
+                let states = {
+                    let blend: WGPUBlend = cmd.composite_operation.into();
+                    let states = if let Some(prev_states) = prev_states {
+                        if prev_states.matches(blend, texture_format) {
+                            prev_states
+                        } else {
+                            self.pipeline_cache.get(blend, texture_format)
+                        }
                     } else {
                         self.pipeline_cache.get(blend, texture_format)
-                    }
-                } else {
-                    self.pipeline_cache.get(blend, texture_format)
+                    };
+                    prev_states = Some(states);
+                    states
                 };
-                prev_states = Some(states);
 
                 // pass.set_push_constants(wgpu::ShaderStage::FRAGMENT, 0, &[]);
 
