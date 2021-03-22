@@ -110,6 +110,12 @@ pub struct WGPUBindGroup {
     inner: wgpu::BindGroup,
 }
 
+impl WGPUBindGroup {
+    pub fn matches(&self, image_tex: Option<ImageId>, alpha_tex: Option<ImageId>) -> bool {
+        self.image_tex == image_tex && self.alpha_tex == alpha_tex
+    }
+}
+
 impl AsRef<wgpu::BindGroup> for WGPUBindGroup {
     fn as_ref(&self) -> &wgpu::BindGroup {
         &self.inner
