@@ -711,6 +711,7 @@ impl Renderer for WGPU {
         // let mut pass = new_pass();
         // let mut state: Option<WGPUPipelineState> = None;
         let mut prev_states: Option<&WGPUPipelineStates> = None;
+        // let mut prev_bind_group: Option<&WGPUBindGroup> = None;
         let mut i = 0;
 
         // let bind_groups = vec![];

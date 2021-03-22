@@ -157,11 +157,11 @@ impl WGPUBindGroupCache {
         // inner.get(&key).unwrap()
 
         if !r.contains_key(&key) {
-            let bg = create_bind_group(ctx, images, layout, image_tex, alpha_tex, pseudo_tex);
+            let inner = create_bind_group(ctx, images, layout, image_tex, alpha_tex, pseudo_tex);
             r.insert(
                 key,
                 WGPUBindGroup {
-                    inner: bg,
+                    inner,
                     image_tex,
                     alpha_tex,
                 },
@@ -171,6 +171,7 @@ impl WGPUBindGroupCache {
     }
 
     pub fn clear(&mut self) {
+        self.inner.get_mut().clear()
         // self.inner.get_mut().clear()
     }
 }
