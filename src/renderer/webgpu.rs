@@ -23,6 +23,9 @@ pub use mem_align::*;
 mod wgpu_swap_chain;
 pub use wgpu_swap_chain::*;
 
+mod wgpu_binding_group_cache;
+pub use wgpu_binding_group_cache::*;
+
 mod wgpu_var;
 pub use wgpu_var::*;
 
@@ -485,88 +488,6 @@ pub struct TextureBindings {
     // tex_tex:
 }
 
-pub struct BindingGroupCache {
-    arena: generational_arena::Arena<wgpu::BindGroup>,
-}
-
-impl BindingGroupCache {
-    pub fn get(&self) -> &wgpu::BindGroup {
-        todo!()
-    }
-}
-
-fn create_bind_group(
-    ctx: &WGPUContext,
-    // pass: &'a mut wgpu::RenderPass<'b>,
-    images: &ImageStore<WGPUTexture>,
-    view_size: WGPUVar<Size>,
-    uniforms: WGPUVar<Params>,
-    image_tex: Option<ImageId>,
-    alpha_tex: Option<ImageId>,
-    pseudo_tex: &WGPUTexture,
-
-    layout: wgpu::BindGroupLayout,
-    // out: &mut wgpu::BindGroup,
-) -> wgpu::BindGroup {
-    let tex = if let Some(id) = image_tex {
-        images.get(id).unwrap()
-    } else {
-        pseudo_tex
-    };
-
-    let alpha_tex = if let Some(id) = alpha_tex {
-        images.get(id).unwrap()
-    } else {
-        pseudo_tex
-    };
-
-    ctx.device().create_bind_group(&wgpu::BindGroupDescriptor {
-        label: None,
-        layout: &layout,
-        entries: &[
-            //viewsize
-            wgpu::BindGroupEntry {
-                binding: 0,
-                resource: wgpu::BindingResource::Buffer {
-                    buffer: view_size.as_ref(),
-                    offset: 0,
-                    size: None,
-                },
-            },
-            //uniforms
-            wgpu::BindGroupEntry {
-                binding: 1,
-                resource: wgpu::BindingResource::Buffer {
-                    buffer: uniforms.as_ref(),
-                    offset: 0,
-                    size: None,
-                },
-            },
-            // texture
-            wgpu::BindGroupEntry {
-                binding: 2,
-                resource: wgpu::BindingResource::TextureView(tex.view()),
-            },
-            // sampler
-            wgpu::BindGroupEntry {
-                binding: 3,
-                resource: wgpu::BindingResource::Sampler(tex.sampler()),
-            },
-            // alpha texture
-            wgpu::BindGroupEntry {
-                binding: 4,
-                resource: wgpu::BindingResource::TextureView(alpha_tex.view()),
-            },
-            // alpha sampler
-            wgpu::BindGroupEntry {
-                binding: 5,
-                resource: wgpu::BindingResource::Sampler(alpha_tex.sampler()),
-            },
-        ],
-    })
-    // pass.set_tex
-}
-
 fn convex_fill<'a, 'b>(
     // &'a mut self,
     pass: &'a mut wgpu::RenderPass<'b>,
@@ -604,52 +525,52 @@ fn convex_fill<'a, 'b>(
     }
 }
 
-fn stroke<'a, 'b>(
-    ctx: &WGPUContext,
-    pass: &'a mut wgpu::RenderPass<'a>,
-    images: &ImageStore<WGPUTexture>,
-    view_size: WGPUVar<Size>,
-    cmd: &Command,
-    uniforms: WGPUVar<Params>,
-    vertex_buffer: &WGPUVec<Vertex>,
-    index_buffer: &mut WGPUVec<u32>,
-    image_tex: Option<ImageId>,
-    alpha_tex: Option<ImageId>,
-    pseudo_tex: &WGPUTexture,
-    bind_group_layout: wgpu::BindGroupLayout,
-    states: &'b WGPUPipelineStates,
+// fn stroke<'a, 'b>(
+//     ctx: &WGPUContext,
+//     pass: &'a mut wgpu::RenderPass<'a>,
+//     images: &ImageStore<WGPUTexture>,
+//     view_size: WGPUVar<Size>,
+//     cmd: &Command,
+//     uniforms: WGPUVar<Params>,
+//     vertex_buffer: &WGPUVec<Vertex>,
+//     index_buffer: &mut WGPUVec<u32>,
+//     image_tex: Option<ImageId>,
+//     alpha_tex: Option<ImageId>,
+//     pseudo_tex: &WGPUTexture,
+//     bind_group_layout: wgpu::BindGroupLayout,
+//     states: &'b WGPUPipelineStates,
 
-    // cache: &'a BindingGroupCache
-    bind_groups: &'a mut Vec<wgpu::BindGroup>,
-) {
-    // set_uniforms()
-    //di
-    // draws triangle strip
-    let bind_group = create_bind_group(
-        ctx,
-        images,
-        view_size,
-        uniforms,
-        image_tex,
-        alpha_tex,
-        pseudo_tex,
-        bind_group_layout,
-    );
+//     // cache: &'a BindingGroupCache
+//     bind_groups: &'a mut Vec<wgpu::BindGroup>,
+// ) {
+//     // set_uniforms()
+//     //di
+//     // draws triangle strip
+//     let bind_group = create_bind_group(
+//         ctx,
+//         images,
+//         view_size,
+//         uniforms,
+//         image_tex,
+//         alpha_tex,
+//         pseudo_tex,
+//         bind_group_layout,
+//     );
 
-    // let bind = cache.get();
-    // pass.set_bind_group(0, bind, &[]);
-    bind_groups.push(bind_group);
-    let bind_group = bind_groups.last().unwrap();
-    pass.set_bind_group(0, bind_group, &[]);
+//     // let bind = cache.get();
+//     // pass.set_bind_group(0, bind, &[]);
+//     bind_groups.push(bind_group);
+//     let bind_group = bind_groups.last().unwrap();
+//     pass.set_bind_group(0, bind_group, &[]);
 
-    // pass.set_pipeline(pipeline);
-    // pass.set_bind_group(0, &bind_group, &[]);
-    for drawable in &cmd.drawables {
-        if let Some((start, count)) = drawable.stroke_verts {
-            // pass.draw()
-        }
-    }
-}
+//     // pass.set_pipeline(pipeline);
+//     // pass.set_bind_group(0, &bind_group, &[]);
+//     for drawable in &cmd.drawables {
+//         if let Some((start, count)) = drawable.stroke_verts {
+//             // pass.draw()
+//         }
+//     }
+// }
 
 fn stencil_stroke<'a, 'b>(
     pass: &'a mut wgpu::RenderPass<'b>,
@@ -847,6 +768,7 @@ impl Renderer for WGPU {
                         for drawable in &cmd.drawables {
                             if let Some((start, count)) = drawable.fill_verts {
                                 //
+
                                 pass.set_pipeline(states.convex_fill1());
 
                                 let offset = self.index_buffer.len();
@@ -861,6 +783,7 @@ impl Renderer for WGPU {
                                 // pass.set_index_buffer(self.index_buffer, fmt);
                                 pass.draw_indexed(0..0, 0, 0..0);
                             }
+                            // draw fringes
 
                             if let Some((start, count)) = drawable.stroke_verts {
                                 pass.set_pipeline(states.convex_fill2());
