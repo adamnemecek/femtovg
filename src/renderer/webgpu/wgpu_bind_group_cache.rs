@@ -104,9 +104,21 @@ struct CacheKey {
     alpha_tex: Option<ImageId>,
 }
 
+pub struct WGPUBindGroup {
+    image_tex: Option<ImageId>,
+    alpha_tex: Option<ImageId>,
+    inner: wgpu::BindGroup,
+}
+
+impl AsRef<wgpu::BindGroup> for WGPUBindGroup {
+    fn as_ref(&self) -> &wgpu::BindGroup {
+        &self.inner
+    }
+}
+
 pub struct WGPUBindGroupCache {
     // arena: generational_arena::Arena<wgpu::BindGroup>,
-    inner: std::cell::UnsafeCell<HashMap<CacheKey, wgpu::BindGroup>>,
+    inner: std::cell::UnsafeCell<HashMap<CacheKey, WGPUBindGroup>>,
     // inner: HashMap<CacheKey, wgpu::BindGroup>,
 }
 
@@ -126,7 +138,7 @@ impl WGPUBindGroupCache {
         image_tex: Option<ImageId>,
         alpha_tex: Option<ImageId>,
         pseudo_tex: &WGPUTexture,
-    ) -> &wgpu::BindGroup {
+    ) -> &WGPUBindGroup {
         let key = CacheKey { image_tex, alpha_tex };
         // let inner= self.inner.get_mut();
         let r = unsafe { self.inner.get().as_mut().unwrap() };
@@ -140,7 +152,14 @@ impl WGPUBindGroupCache {
 
         if !r.contains_key(&key) {
             let bg = create_bind_group(ctx, images, layout, image_tex, alpha_tex, pseudo_tex);
-            r.insert(key, bg);
+            r.insert(
+                key,
+                WGPUBindGroup {
+                    inner: bg,
+                    image_tex,
+                    alpha_tex,
+                },
+            );
         }
         &r[&key]
     }

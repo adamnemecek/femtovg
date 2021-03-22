@@ -773,7 +773,7 @@ impl Renderer for WGPU {
                             cmd.alpha_mask,
                             &self.pseudo_texture,
                         );
-                        pass.set_bind_group(0, bg, &[]);
+                        pass.set_bind_group(0, bg.as_ref(), &[]);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
                         for drawable in &cmd.drawables {
