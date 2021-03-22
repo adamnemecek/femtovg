@@ -19,7 +19,6 @@ use winit::window::WindowBuilder;
 //use glutin::{GlRequest, Api};
 
 use femtovg::{
-
     renderer::WGPU,
     Align,
     Baseline,
@@ -34,6 +33,7 @@ use femtovg::{
     Paint,
     Path,
     Renderer,
+    Size,
     Solidity,
 };
 
@@ -53,48 +53,80 @@ fn main() {
     #[cfg(all(debug_assertions, target_arch = "wasm32"))]
     console_error_panic_hook::set_once();
 
-    let el = EventLoop::new();
+    let event_loop = EventLoop::new();
 
-    #[cfg(not(target_arch = "wasm32"))]
-    let (renderer, windowed_context) = {
-        use glutin::ContextBuilder;
+    // #[cfg(not(target_arch = "wasm32"))]
+    // let (renderer, windowed_context) = {
+    //     use glutin::ContextBuilder;
 
-        let wb = WindowBuilder::new()
-            .with_inner_size(winit::dpi::PhysicalSize::new(1000, 600))
-            .with_title("femtovg demo");
+    //     let wb = WindowBuilder::new()
+    //         .with_inner_size(winit::dpi::PhysicalSize::new(1000, 600))
+    //         .with_title("femtovg demo");
 
-        //let windowed_context = ContextBuilder::new().with_gl(GlRequest::Specific(Api::OpenGlEs, (2, 0))).with_vsync(false).build_windowed(wb, &el).unwrap();
-        //let windowed_context = ContextBuilder::new().with_vsync(false).with_multisampling(8).build_windowed(wb, &el).unwrap();
-        let windowed_context = ContextBuilder::new().with_vsync(false).build_windowed(wb, &el).unwrap();
-        let windowed_context = unsafe { windowed_context.make_current().unwrap() };
+    //     //let windowed_context = ContextBuilder::new().with_gl(GlRequest::Specific(Api::OpenGlEs, (2, 0))).with_vsync(false).build_windowed(wb, &el).unwrap();
+    //     //let windowed_context = ContextBuilder::new().with_vsync(false).with_multisampling(8).build_windowed(wb, &el).unwrap();
+    //     let windowed_context = ContextBuilder::new().with_vsync(false).build_windowed(wb, &el).unwrap();
+    //     let windowed_context = unsafe { windowed_context.make_current().unwrap() };
 
-        let renderer =
-            OpenGl::new(|s| windowed_context.get_proc_address(s) as *const _).expect("Cannot create renderer");
+    //     let renderer =
+    //         OpenGl::new(|s| windowed_context.get_proc_address(s) as *const _).expect("Cannot create renderer");
 
-        (renderer, windowed_context)
-    };
+    //     (renderer, windowed_context)
+    // // };
 
-    #[cfg(target_arch = "wasm32")]
-    let (renderer, window) = {
-        use wasm_bindgen::JsCast;
+    let window = winit::window::Window::new(&event_loop).unwrap();
 
-        let canvas = web_sys::window()
-            .unwrap()
-            .document()
-            .unwrap()
-            .get_element_by_id("canvas")
-            .unwrap()
-            .dyn_into::<web_sys::HtmlCanvasElement>()
-            .unwrap();
+    pollster::block_on(run(event_loop, window));
+    // #[cfg(target_arch = "wasm32")]
+    // let (renderer, window) = {
+    //     use wasm_bindgen::JsCast;
 
-        use winit::platform::web::WindowBuilderExtWebSys;
+    //     let canvas = web_sys::window()
+    //         .unwrap()
+    //         .document()
+    //         .unwrap()
+    //         .get_element_by_id("canvas")
+    //         .unwrap()
+    //         .dyn_into::<web_sys::HtmlCanvasElement>()
+    //         .unwrap();
 
-        let renderer = OpenGl::new_from_html_canvas(&canvas).expect("Cannot create renderer");
+    //     use winit::platform::web::WindowBuilderExtWebSys;
 
-        let window = WindowBuilder::new().with_canvas(Some(canvas)).build(&el).unwrap();
+    //     let renderer = OpenGl::new_from_html_canvas(&canvas).expect("Cannot create renderer");
 
-        (renderer, window)
-    };
+    //     let window = WindowBuilder::new().with_canvas(Some(canvas)).build(&el).unwrap();
+
+    //     (renderer, window)
+    // };
+}
+
+async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
+    let size = window.inner_size();
+    let instance = wgpu::Instance::new(wgpu::BackendBit::all());
+    let surface = unsafe { instance.create_surface(&window) };
+    let adapter = instance
+        .request_adapter(&wgpu::RequestAdapterOptions {
+            power_preference: wgpu::PowerPreference::default(),
+            // Request an adapter which can render to our surface
+            compatible_surface: Some(&surface),
+        })
+        .await
+        .expect("Failed to find an appropriate adapter");
+
+    // Create the logical device and command queue
+    let (device, queue) = adapter
+        .request_device(
+            &wgpu::DeviceDescriptor {
+                label: None,
+                features: wgpu::Features::empty(),
+                limits: wgpu::Limits::default(),
+            },
+            None,
+        )
+        .await
+        .expect("Failed to create device");
+
+    let renderer = WGPU::new(device, Size::new(size.width as _, size.height as _));
 
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
@@ -167,9 +199,9 @@ fn main() {
 
     let mut perf = PerfGraph::new();
 
-    el.run(move |event, _, control_flow| {
-        #[cfg(not(target_arch = "wasm32"))]
-        let window = windowed_context.window();
+    event_loop.run(move |event, _, control_flow| {
+        // #[cfg(not(target_arch = "wasm32"))]
+        // let window = windowed_context.window();
 
         *control_flow = ControlFlow::Poll;
 
@@ -178,7 +210,8 @@ fn main() {
             Event::WindowEvent { ref event, .. } => match event {
                 #[cfg(not(target_arch = "wasm32"))]
                 WindowEvent::Resized(physical_size) => {
-                    windowed_context.resize(*physical_size);
+                    // windowed_context.resize(*physical_size);
+                    todo!("resize");
                 }
                 WindowEvent::CursorMoved {
                     device_id: _, position, ..
@@ -375,8 +408,9 @@ fn main() {
                 //canvas.restore();
 
                 canvas.flush();
-                #[cfg(not(target_arch = "wasm32"))]
-                windowed_context.swap_buffers().unwrap();
+                // #[cfg(not(target_arch = "wasm32"))]
+                // windowed_context.swap_buffers().unwrap();
+                todo!("swap buffers");
             }
             Event::MainEventsCleared => {
                 //scroll = 1.0;
@@ -1572,4 +1606,3 @@ fn draw_spinner<T: Renderer>(canvas: &mut Canvas<T>, cx: f32, cy: f32, r: f32, t
 
     canvas.restore();
 }
-

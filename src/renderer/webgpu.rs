@@ -186,7 +186,7 @@ pub struct WGPU {
 }
 
 impl WGPU {
-    pub fn new(device: &wgpu::Device, size: Size) -> Self {
+    pub fn new(device: wgpu::Device, size: Size) -> Self {
         // let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
         //     label: None,
         //     source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("webgpu/shader.wgsl"))),

@@ -74,8 +74,11 @@ use renderer::{
 };
 
 pub(crate) mod geometry;
-pub use geometry::Transform2D;
 use geometry::*;
+pub use geometry::{
+    Size,
+    Transform2D,
+};
 
 mod paint;
 pub use paint::Paint;
