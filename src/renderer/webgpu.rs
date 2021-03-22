@@ -843,15 +843,31 @@ impl Renderer for WGPU {
                 match &cmd.cmd_type {
                     CommandType::ConvexFill { params } => {
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
-                        convex_fill(
-                            &mut pass,
-                            images,
-                            cmd,
-                            *params,
-                            &self.vertex_buffer,
-                            &mut self.index_buffer,
-                            states,
-                        );
+
+                        for drawable in &cmd.drawables {
+                            if let Some((start, count)) = drawable.fill_verts {
+                                //
+                                pass.set_pipeline(states.convex_fill1());
+
+                                let offset = self.index_buffer.len();
+                                let triangle_fan_index_count = self
+                                    .index_buffer
+                                    .extend_with_triange_fan_indices_cw(start as u32, count as u32);
+
+                                // encoder.begin_render_pass(desc)
+                                // render_pass.draw_indexed(indices, base_vertex, instances)
+                                // pass.set_index_buffer(buffer_slice, );
+                                let fmt = wgpu::IndexFormat::Uint32;
+                                // pass.set_index_buffer(self.index_buffer, fmt);
+                                pass.draw_indexed(0..0, 0, 0..0);
+                            }
+
+                            if let Some((start, count)) = drawable.stroke_verts {
+                                pass.set_pipeline(states.convex_fill2());
+                                let vertex_range = start as _..(start + count) as _;
+                                pass.draw(vertex_range, 0..0);
+                            }
+                        }
                     }
                     CommandType::ConcaveFill {
                         stencil_params,
