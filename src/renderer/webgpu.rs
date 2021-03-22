@@ -592,61 +592,61 @@ fn stencil_stroke<'a, 'b>(
     // pass.set_pipeline();
 }
 
-fn concave_fill<'a, 'b>(
-    pass: &'a mut wgpu::RenderPass<'b>,
-    images: &ImageStore<WGPUTexture>,
-    cmd: &Command,
-    antialias: bool,
-    stencil_paint: Params,
-    fill_paint: Params,
-    vertex_buffer: &WGPUVec<Vertex>,
-    index_buffer: &mut WGPUVec<u32>,
-    states: &'b WGPUPipelineStates,
-) {
-    for drawable in &cmd.drawables {
-        if let Some((start, count)) = drawable.fill_verts {
-            let offset = index_buffer.len();
-            index_buffer.extend_with_triange_fan_indices_cw(start as _, count as _);
-            pass.draw_indexed(0..0, 0, 0..0);
-            // pass.set_push_constants(stages, offset, data)p
-        }
-    }
-    pass.set_pipeline(states.concave_fill1());
-    // set_uniforms
+// fn concave_fill<'a, 'b>(
+//     pass: &'a mut wgpu::RenderPass<'b>,
+//     images: &ImageStore<WGPUTexture>,
+//     cmd: &Command,
+//     antialias: bool,
+//     stencil_paint: Params,
+//     fill_paint: Params,
+//     vertex_buffer: &WGPUVec<Vertex>,
+//     index_buffer: &mut WGPUVec<u32>,
+//     states: &'b WGPUPipelineStates,
+// ) {
+//     for drawable in &cmd.drawables {
+//         if let Some((start, count)) = drawable.fill_verts {
+//             let offset = index_buffer.len();
+//             index_buffer.extend_with_triange_fan_indices_cw(start as _, count as _);
+//             pass.draw_indexed(0..0, 0, 0..0);
+//             // pass.set_push_constants(stages, offset, data)p
+//         }
+//     }
+//     pass.set_pipeline(states.concave_fill1());
+//     // set_uniforms
 
-    // fringes
-    if antialias {
-        match cmd.fill_rule {
-            FillRule::NonZero => {
-                pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
-            }
-            FillRule::EvenOdd => {
-                pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
-            }
-        }
+//     // fringes
+//     if antialias {
+//         match cmd.fill_rule {
+//             FillRule::NonZero => {
+//                 pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
+//             }
+//             FillRule::EvenOdd => {
+//                 pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
+//             }
+//         }
 
-        for drawable in &cmd.drawables {
-            if let Some((start, count)) = drawable.stroke_verts {
-                // pass.draw(vertices, instances)
-            }
-        }
-    }
+//         for drawable in &cmd.drawables {
+//             if let Some((start, count)) = drawable.stroke_verts {
+//                 // pass.draw(vertices, instances)
+//             }
+//         }
+//     }
 
-    // todo: can be moved into the if statement
-    match cmd.fill_rule {
-        FillRule::NonZero => {
-            pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
-        }
-        FillRule::EvenOdd => {
-            pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
-        }
-    }
+//     // todo: can be moved into the if statement
+//     match cmd.fill_rule {
+//         FillRule::NonZero => {
+//             pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
+//         }
+//         FillRule::EvenOdd => {
+//             pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
+//         }
+//     }
 
-    if let Some((start, count)) = cmd.triangles_verts {
-        // pass.
-    }
-    // pass.set_pipeline(pipeline)
-}
+//     if let Some((start, count)) = cmd.triangles_verts {
+//         // pass.
+//     }
+//     // pass.set_pipeline(pipeline)
+// }
 
 fn triangles<'a, 'b>(
     pass: &'a mut wgpu::RenderPass<'b>,
@@ -791,7 +791,7 @@ impl Renderer for WGPU {
                                     .index_buffer
                                     .extend_with_triange_fan_indices_cw(start as u32, count as u32);
 
-                                let fmt = wgpu::IndexFormat::Uint32;
+                                // let fmt = wgpu::IndexFormat::Uint32;
                                 // pass.set_index_buffer(self.index_buffer, fmt);
                                 pass.draw_indexed((offset as _)..(offset + triangle_fan_index_count) as _, 0, 0..1);
                             }
@@ -808,17 +808,49 @@ impl Renderer for WGPU {
                         stencil_params,
                         fill_params,
                     } => {
-                        concave_fill(
-                            &mut pass,
-                            images,
-                            cmd,
-                            self.antialias,
-                            *stencil_params,
-                            *fill_params,
-                            &self.vertex_buffer,
-                            &mut self.index_buffer,
-                            states,
-                        );
+                       
+                        for drawable in &cmd.drawables {
+                            if let Some((start, count)) = drawable.fill_verts {
+                                let offset = self.index_buffer.len();
+                                self.index_buffer.extend_with_triange_fan_indices_cw(start as _, count as _);
+                                pass.draw_indexed(0..0, 0, 0..0);
+                                // pass.set_push_constants(stages, offset, data)p
+                            }
+                        }
+                        pass.set_pipeline(states.concave_fill1());
+                        // set_uniforms
+                    
+                        // fringes
+                        if self.antialias {
+                            match cmd.fill_rule {
+                                FillRule::NonZero => {
+                                    pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
+                                }
+                                FillRule::EvenOdd => {
+                                    pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
+                                }
+                            }
+                    
+                            for drawable in &cmd.drawables {
+                                if let Some((start, count)) = drawable.stroke_verts {
+                                    // pass.draw(vertices, instances)
+                                }
+                            }
+                        }
+                    
+                        // todo: can be moved into the if statement
+                        match cmd.fill_rule {
+                            FillRule::NonZero => {
+                                pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
+                            }
+                            FillRule::EvenOdd => {
+                                pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
+                            }
+                        }
+                    
+                        if let Some((start, count)) = cmd.triangles_verts {
+                            // pass.
+                        }
                     }
                     CommandType::Stroke { params } => {
                         // stroke(
