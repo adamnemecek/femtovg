@@ -844,17 +844,17 @@ impl Renderer for WGPU {
                                 // pass.set_push_constants(stages, offset, data)p
                             }
                         }
-                        pass.set_pipeline(states.concave_fill1());
+                        // pass.set_pipeline(states.concave_fill1());
                         // set_uniforms
 
                         // fringes
                         if self.antialias {
                             match cmd.fill_rule {
                                 FillRule::NonZero => {
-                                    pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
+                                    // pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
                                 }
                                 FillRule::EvenOdd => {
-                                    pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
+                                    // pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
                                 }
                             }
 
@@ -868,10 +868,10 @@ impl Renderer for WGPU {
                         // todo: can be moved into the if statement
                         match cmd.fill_rule {
                             FillRule::NonZero => {
-                                pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
+                                // pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
                             }
                             FillRule::EvenOdd => {
-                                pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
+                                // pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
                             }
                         }
 

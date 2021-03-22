@@ -281,17 +281,30 @@ impl ConvexFill {
     }
 }
 
+pub struct ConcaveFill {
+    fill_verts: wgpu::RenderPipeline,
+    fringes_nonzero: wgpu::RenderPipeline,
+    fringes_evenodd: wgpu::RenderPipeline,
+    triangle_verts_nonzero: wgpu::RenderPipeline,
+    triangle_verts_evenodd: wgpu::RenderPipeline,
+}
+
+impl ConcaveFill {
+    
+}
+
 pub struct WGPUPipelineStates {
     blend_func: WGPUBlend,
     texture_format: wgpu::TextureFormat,
     convex_fill: ConvexFill,
+    concave_fill: ConcaveFill,
     // convex_fill1: wgpu::RenderPipeline,
     // convex_fill2: wgpu::RenderPipeline,
-    concave_fill1: wgpu::RenderPipeline,
-    concave_fill2: wgpu::RenderPipeline,
-    fill_anti_alias_stencil_state_nonzero: wgpu::RenderPipeline,
-    fill_anti_alias_stencil_state_evenodd: wgpu::RenderPipeline,
-    stroke_shape_stencil_state: wgpu::RenderPipeline,
+    // concave_fill1: wgpu::RenderPipeline,
+    // concave_fill2: wgpu::RenderPipeline,
+    // fill_anti_alias_stencil_state_nonzero: wgpu::RenderPipeline,
+    // fill_anti_alias_stencil_state_evenodd: wgpu::RenderPipeline,
+    // stroke_shape_stencil_state: wgpu::RenderPipeline,
 }
 
 impl WGPUPipelineStates {
@@ -303,17 +316,17 @@ impl WGPUPipelineStates {
         self.blend_func
     }
 
-    pub fn stroke_shape_stencil_state(&self) -> &wgpu::RenderPipeline {
-        &self.stroke_shape_stencil_state
-    }
+    // pub fn stroke_shape_stencil_state(&self) -> &wgpu::RenderPipeline {
+    //     &self.stroke_shape_stencil_state
+    // }
 
-    pub fn fill_anti_alias_stencil_state_evenodd(&self) -> &wgpu::RenderPipeline {
-        &self.fill_anti_alias_stencil_state_evenodd
-    }
+    // pub fn fill_anti_alias_stencil_state_evenodd(&self) -> &wgpu::RenderPipeline {
+    //     &self.fill_anti_alias_stencil_state_evenodd
+    // }
 
-    pub fn fill_anti_alias_stencil_state_nonzero(&self) -> &wgpu::RenderPipeline {
-        &self.fill_anti_alias_stencil_state_nonzero
-    }
+    // pub fn fill_anti_alias_stencil_state_nonzero(&self) -> &wgpu::RenderPipeline {
+    //     &self.fill_anti_alias_stencil_state_nonzero
+    // }
 
     pub fn convex_fill(&self) -> &ConvexFill {
         &self.convex_fill
@@ -327,13 +340,13 @@ impl WGPUPipelineStates {
     //     &self.convex_fill2
     // }
 
-    pub fn concave_fill1(&self) -> &wgpu::RenderPipeline {
-        &self.concave_fill1
-    }
+    // pub fn concave_fill1(&self) -> &wgpu::RenderPipeline {
+    //     &self.concave_fill1
+    // }
 
-    pub fn concave_fill2(&self) -> &wgpu::RenderPipeline {
-        &self.concave_fill2
-    }
+    // pub fn concave_fill2(&self) -> &wgpu::RenderPipeline {
+    //     &self.concave_fill2
+    // }
 
     pub fn new(
         ctx: &WGPUContext,
