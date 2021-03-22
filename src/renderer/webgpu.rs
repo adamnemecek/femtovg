@@ -853,6 +853,20 @@ impl Renderer for WGPU {
                         }
                     }
                     CommandType::Stroke { params } => {
+                        let bg = self.bind_group_cache.get(
+                            &self.ctx,
+                            images,
+                            &self.bind_group_layout,
+                            cmd.image,
+                            cmd.alpha_mask,
+                            &self.pseudo_texture,
+                        );
+                        // pass.set_pipeline()
+                        pass.set_bind_group(0, bg.as_ref(), &[]);
+                        pass.set_pipeline(states.convex_fill1());
+                        pass.set_bind_group(0, bg.as_ref(), &[]);
+                        uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
+
                         // self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
                         //     for drawable in &cmd.drawables {
                         //         if let Some((start, count)) = drawable.stroke_verts {
