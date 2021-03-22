@@ -56,8 +56,6 @@ use imgref::ImgVec;
 use rgb::RGBA8;
 use std::borrow::Cow;
 
-
-
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct WGPUBlend {
     pub src_rgb: wgpu::BlendFactor,
@@ -497,7 +495,6 @@ impl BindingGroupCache {
     }
 }
 
-
 fn create_bind_group(
     ctx: &WGPUContext,
     // pass: &'a mut wgpu::RenderPass<'b>,
@@ -688,6 +685,7 @@ fn concave_fill<'a, 'b>(
             let offset = index_buffer.len();
             index_buffer.extend_with_triange_fan_indices_cw(start as _, count as _);
             pass.draw_indexed(0..0, 0, 0..0);
+            // pass.set_push_constants(stages, offset, data)p
         }
     }
     pass.set_pipeline(states.concave_fill1());
@@ -793,6 +791,7 @@ impl Renderer for WGPU {
         let mut i = 0;
 
         // let bind_groups = vec![];
+        let mut uniforms_offset = 0;
 
         'outer: while i < commands.len() {
             let target_texture = match render_target {
@@ -837,8 +836,13 @@ impl Renderer for WGPU {
                 };
                 prev_states = Some(states);
 
+                // pass.set_push_constants(wgpu::ShaderStage::FRAGMENT, 0, &[]);
+
+                // uniforms_offset += std::mem::size_of::<Params>();
+
                 match &cmd.cmd_type {
                     CommandType::ConvexFill { params } => {
+                        uniforms_offset += pass.set_fragment_value(0, params);
                         convex_fill(
                             &mut pass,
                             images,
@@ -877,6 +881,30 @@ impl Renderer for WGPU {
                         //     &mut self.index_buffer,
                         //     states,
                         // );
+                        // let bind_group = create_bind_group(
+                        //     self.ctx,
+                        //     images,
+                        //     self.view_size,
+                        //     uniforms,
+                        //     image_tex,
+                        //     alpha_tex,
+                        //     pseudo_tex,
+                        //     bind_group_layout,
+                        // );
+
+                        // // let bind = cache.get();
+                        // // pass.set_bind_group(0, bind, &[]);
+                        // bind_groups.push(bind_group);
+                        // let bind_group = bind_groups.last().unwrap();
+                        // pass.set_bind_group(0, bind_group, &[]);
+
+                        // // pass.set_pipeline(pipeline);
+                        // // pass.set_bind_group(0, &bind_group, &[]);
+                        // for drawable in &cmd.drawables {
+                        //     if let Some((start, count)) = drawable.stroke_verts {
+                        //         // pass.draw()
+                        //     }
+                        // }
                     }
                     CommandType::StencilStroke { params1, params2 } => {
                         stencil_stroke(

@@ -13,6 +13,8 @@ TODO:
     - Tests
 */
 
+#![deny(unused_must_use)]
+
 #[cfg(feature = "serde")]
 #[macro_use]
 extern crate serde;
