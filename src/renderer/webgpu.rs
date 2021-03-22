@@ -23,8 +23,8 @@ pub use mem_align::*;
 mod wgpu_swap_chain;
 pub use wgpu_swap_chain::*;
 
-mod wgpu_binding_group_cache;
-pub use wgpu_binding_group_cache::*;
+mod wgpu_bind_group_cache;
+pub use wgpu_bind_group_cache::*;
 
 mod wgpu_var;
 pub use wgpu_var::*;
@@ -177,7 +177,8 @@ pub struct WGPU {
     render_target: RenderTarget,
     pseudo_texture: WGPUTexture,
 
-    cache: WGPUPipelineCache,
+    pipeline_cache: WGPUPipelineCache,
+    bind_group_cache: WGPUBindGroupCache,
 
     view_size: Size,
     swap_chain: WGPUSwapChain,
@@ -750,10 +751,10 @@ impl Renderer for WGPU {
                     if prev_states.matches(blend, texture_format) {
                         prev_states
                     } else {
-                        self.cache.get(blend, texture_format)
+                        self.pipeline_cache.get(blend, texture_format)
                     }
                 } else {
-                    self.cache.get(blend, texture_format)
+                    self.pipeline_cache.get(blend, texture_format)
                 };
                 prev_states = Some(states);
 

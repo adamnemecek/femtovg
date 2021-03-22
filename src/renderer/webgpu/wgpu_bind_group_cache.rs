@@ -103,12 +103,12 @@ use std::collections::HashMap;
 struct CacheKey {
     inner: u32,
 }
-pub struct BindingGroupCache {
+pub struct WGPUBindGroupCache {
     // arena: generational_arena::Arena<wgpu::BindGroup>,
     inner: HashMap<CacheKey, wgpu::BindGroup>,
 }
 
-impl BindingGroupCache {
+impl WGPUBindGroupCache {
     pub fn get(&self) -> &wgpu::BindGroup {
         todo!()
     }
