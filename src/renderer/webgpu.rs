@@ -56,6 +56,8 @@ use imgref::ImgVec;
 use rgb::RGBA8;
 use std::borrow::Cow;
 
+
+
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct WGPUBlend {
     pub src_rgb: wgpu::BlendFactor,
@@ -485,6 +487,17 @@ pub struct TextureBindings {
     // tex_tex:
 }
 
+pub struct BindingGroupCache {
+    arena: generational_arena::Arena<wgpu::BindGroup>,
+}
+
+impl BindingGroupCache {
+    pub fn get(&self) -> &wgpu::BindGroup {
+        todo!()
+    }
+}
+
+
 fn create_bind_group(
     ctx: &WGPUContext,
     // pass: &'a mut wgpu::RenderPass<'b>,
@@ -596,7 +609,7 @@ fn convex_fill<'a, 'b>(
 
 fn stroke<'a, 'b>(
     ctx: &WGPUContext,
-    pass: &'a mut wgpu::RenderPass<'b>,
+    pass: &'a mut wgpu::RenderPass<'a>,
     images: &ImageStore<WGPUTexture>,
     view_size: WGPUVar<Size>,
     cmd: &Command,
@@ -608,9 +621,12 @@ fn stroke<'a, 'b>(
     pseudo_tex: &WGPUTexture,
     bind_group_layout: wgpu::BindGroupLayout,
     states: &'b WGPUPipelineStates,
+
+    // cache: &'a BindingGroupCache
+    bind_groups: &'a mut Vec<wgpu::BindGroup>,
 ) {
     // set_uniforms()
-    //
+    //di
     // draws triangle strip
     let bind_group = create_bind_group(
         ctx,
@@ -622,6 +638,15 @@ fn stroke<'a, 'b>(
         pseudo_tex,
         bind_group_layout,
     );
+
+    // let bind = cache.get();
+    // pass.set_bind_group(0, bind, &[]);
+    bind_groups.push(bind_group);
+    let bind_group = bind_groups.last().unwrap();
+    pass.set_bind_group(0, bind_group, &[]);
+
+    // pass.set_pipeline(pipeline);
+    // pass.set_bind_group(0, &bind_group, &[]);
     for drawable in &cmd.drawables {
         if let Some((start, count)) = drawable.stroke_verts {
             // pass.draw()
@@ -766,6 +791,8 @@ impl Renderer for WGPU {
         // let mut state: Option<WGPUPipelineState> = None;
         let mut prev_states: Option<&WGPUPipelineStates> = None;
         let mut i = 0;
+
+        // let bind_groups = vec![];
 
         'outer: while i < commands.len() {
             let target_texture = match render_target {
