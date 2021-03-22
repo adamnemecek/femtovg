@@ -266,11 +266,27 @@ fn stroke_clear_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencil
     }
 }
 
+pub struct ConvexFill {
+    fill_buffer: wgpu::RenderPipeline,
+    stroke_buffer: wgpu::RenderPipeline,
+}
+
+impl ConvexFill {
+    pub fn fill_states(&self) -> &wgpu::RenderPipeline {
+        &self.fill_buffer
+    }
+
+    pub fn stroke_buffer(&self) -> &wgpu::RenderPipeline {
+        &self.stroke_buffer
+    }
+}
+
 pub struct WGPUPipelineStates {
     blend_func: WGPUBlend,
     texture_format: wgpu::TextureFormat,
-    convex_fill1: wgpu::RenderPipeline,
-    convex_fill2: wgpu::RenderPipeline,
+    convex_fill: ConvexFill,
+    // convex_fill1: wgpu::RenderPipeline,
+    // convex_fill2: wgpu::RenderPipeline,
     concave_fill1: wgpu::RenderPipeline,
     concave_fill2: wgpu::RenderPipeline,
     fill_anti_alias_stencil_state_nonzero: wgpu::RenderPipeline,
@@ -299,13 +315,17 @@ impl WGPUPipelineStates {
         &self.fill_anti_alias_stencil_state_nonzero
     }
 
-    pub fn convex_fill1(&self) -> &wgpu::RenderPipeline {
-        &self.convex_fill1
+    pub fn convex_fill(&self) -> &ConvexFill {
+        &self.convex_fill
     }
 
-    pub fn convex_fill2(&self) -> &wgpu::RenderPipeline {
-        &self.convex_fill2
-    }
+    // pub fn convex_fill1(&self) -> &wgpu::RenderPipeline {
+    //     &self.convex_fill1
+    // }
+
+    // pub fn convex_fill2(&self) -> &wgpu::RenderPipeline {
+    //     &self.convex_fill2
+    // }
 
     pub fn concave_fill1(&self) -> &wgpu::RenderPipeline {
         &self.concave_fill1
@@ -322,40 +342,63 @@ impl WGPUPipelineStates {
         shader: &wgpu::ShaderModule,
         // vertex_desc: &wgpu::VertexBufferLayout,
     ) -> Self {
-        let antialias = create_pipeline(
+         let convex_fill_fill_buffer = create_pipeline(
             ctx,
-            None,
+            Some("convex_fill/fill_buffer"),
             shader,
             format,
-            wgpu::PrimitiveTopology::TriangleStrip,
+            wgpu::PrimitiveTopology::TriangleList,
             wgpu::FrontFace::Ccw,
             None,
             None,
         );
+
+        let convex_fill_stroke_buffer = create_pipeline(
+            ctx,
+            Some("convex_fill/stroke_buffer"),
+            shader,
+            format,
+            wgpu::PrimitiveTopology::TriangleList,
+            wgpu::FrontFace::Ccw,
+            None,
+            None,
+        );
+        // let convex_fill1 = create_pipeline(
+        //     ctx,
+        //     Some("convex_fill1"),
+        //     shader,
+        //     format,
+        //     wgpu::PrimitiveTopology::TriangleStrip,
+        //     wgpu::FrontFace::Ccw,
+        //     None,
+        //     None,
+        // );
         // let stencil = ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
 
         // });
-        let pipeline = ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("blit"),
-            layout: None,
-            vertex: wgpu::VertexState {
-                module: shader,
-                entry_point: "vs_main",
-                buffers: &[],
-            },
-            fragment: Some(wgpu::FragmentState {
-                module: shader,
-                entry_point: "fs_main",
-                //todo!
-                targets: &[format.into()],
-            }),
-            primitive: wgpu::PrimitiveState {
-                topology: wgpu::PrimitiveTopology::TriangleStrip,
-                ..Default::default()
-            },
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState::default(),
-        });
+        // let pipeline = ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        //     label: Some("concave_fill1"),
+        //     layout: None,
+        //     vertex: wgpu::VertexState {
+        //         module: shader,
+        //         entry_point: "vs_main",
+        //         buffers: &[],
+        //     },
+        //     fragment: Some(wgpu::FragmentState {
+        //         module: shader,
+        //         entry_point: "fs_main",
+        //         //todo!
+        //         targets: &[format.into()],
+        //     }),
+        //     primitive: wgpu::PrimitiveState {
+        //         topology: wgpu::PrimitiveTopology::TriangleStrip,
+        //         ..Default::default()
+        //     },
+        //     depth_stencil: Some(stroke_clear_stencil_state(format)),
+        //     multisample: wgpu::MultisampleState::default(),
+        // });
+
+
         todo!()
         // Self {
 

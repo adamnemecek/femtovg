@@ -802,7 +802,7 @@ impl Renderer for WGPU {
                         // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                         let bg = bind_group!(self, images, cmd);
 
-                        pass.set_pipeline(states.convex_fill1());
+                        // pass.set_pipeline(states.convex_fill1());
                         pass.set_bind_group(0, bg.as_ref(), &[]);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
@@ -822,7 +822,7 @@ impl Renderer for WGPU {
                             // draw fringes
 
                             if let Some((start, count)) = drawable.stroke_verts {
-                                pass.set_pipeline(states.convex_fill2());
+                                // pass.set_pipeline(states.convex_fill2());
                                 let vertex_range = start as _..(start + count) as _;
                                 pass.draw(vertex_range, 0..0);
                             }
