@@ -33,18 +33,18 @@ impl crate::Vertex {
     }
 }
 
-fn create_pipeline(
+fn create_pipeline<'a>(
     ctx: &WGPUContext,
-    label: Option<&str>,
+    label: impl Into<Option<&'a str>>,
     layout: &wgpu::PipelineLayout,
     shader: &wgpu::ShaderModule,
     format: wgpu::TextureFormat,
     topology: wgpu::PrimitiveTopology,
-    cull_mode: Option<wgpu::Face>,
-    depth_stencil: Option<wgpu::DepthStencilState>,
+    cull_mode: impl Into<Option<wgpu::Face>>,
+    depth_stencil: impl Into<Option<wgpu::DepthStencilState>>,
 ) -> wgpu::RenderPipeline {
     ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-        label,
+        label: label.into(),
         layout: Some(layout),
         vertex: wgpu::VertexState {
             module: shader,
@@ -60,10 +60,10 @@ fn create_pipeline(
         primitive: wgpu::PrimitiveState {
             topology,
             front_face: wgpu::FrontFace::Ccw,
-            cull_mode,
+            cull_mode: cull_mode.into(),
             ..Default::default()
         },
-        depth_stencil,
+        depth_stencil: depth_stencil.into(),
         multisample: wgpu::MultisampleState::default(),
     })
 }
@@ -391,7 +391,7 @@ impl WGPUPipelineStates {
         let convex_fill = ConvexFill {
             fill_buffer: create_pipeline(
                 ctx,
-                Some("convex_fill/fill_buffer"),
+                "convex_fill/fill_buffer",
                 layout,
                 shader,
                 format,
@@ -401,7 +401,7 @@ impl WGPUPipelineStates {
             ),
             stroke_buffer: create_pipeline(
                 ctx,
-                Some("convex_fill/fill_buffer"),
+                "convex_fill/fill_buffer",
                 layout,
                 shader,
                 format,
@@ -414,7 +414,7 @@ impl WGPUPipelineStates {
         let concave_fill = ConcaveFill {
             fill_verts: create_pipeline(
                 ctx,
-                Some("concave_fill/fill_buffer"),
+                "concave_fill/fill_buffer",
                 layout,
                 shader,
                 format,
@@ -424,7 +424,7 @@ impl WGPUPipelineStates {
             ),
             fringes_nonzero: create_pipeline(
                 ctx,
-                Some("concave_fill/fringes_nonzero"),
+                "concave_fill/fringes_nonzero",
                 layout,
                 shader,
                 format,
@@ -434,7 +434,7 @@ impl WGPUPipelineStates {
             ),
             fringes_evenodd: create_pipeline(
                 ctx,
-                Some("concave_fill/fringes_evenodd"),
+                "concave_fill/fringes_evenodd",
                 layout,
                 shader,
                 format,
@@ -444,7 +444,7 @@ impl WGPUPipelineStates {
             ),
             triangle_verts_nonzero: create_pipeline(
                 ctx,
-                Some("concave_fill/triangle_verts_nonzero"),
+                "concave_fill/triangle_verts_nonzero",
                 layout,
                 shader,
                 format,
@@ -454,7 +454,7 @@ impl WGPUPipelineStates {
             ),
             triangle_verts_evenodd: create_pipeline(
                 ctx,
-                Some("concave_fill/triangle_verts_evenodd"),
+                "concave_fill/triangle_verts_evenodd",
                 layout,
                 shader,
                 format,
@@ -466,7 +466,7 @@ impl WGPUPipelineStates {
 
         let stroke = create_pipeline(
             ctx,
-            Some("stroke"),
+            "stroke",
             layout,
             shader,
             format,
@@ -478,17 +478,17 @@ impl WGPUPipelineStates {
         let stencil_stroke = StencilStroke {
             stroke_base: create_pipeline(
                 ctx,
-                Some("stroke_base"),
+                "stroke_base",
                 layout,
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
                 None,
-                None,
+                Some(stroke_shape_stencil_state(format)),
             ),
             pixels: create_pipeline(
                 ctx,
-                Some("pixels"),
+                "pixels",
                 layout,
                 shader,
                 format,
@@ -498,7 +498,7 @@ impl WGPUPipelineStates {
             ),
             clear_stencil: create_pipeline(
                 ctx,
-                Some("clear_stencil"),
+                "clear_stencil",
                 layout,
                 shader,
                 format,
@@ -510,7 +510,7 @@ impl WGPUPipelineStates {
 
         let triangles = create_pipeline(
             ctx,
-            Some("triangles"),
+            "triangles",
             layout,
             shader,
             format,
