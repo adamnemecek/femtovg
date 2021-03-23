@@ -18,6 +18,10 @@ impl<'a, T: Copy> WGPUVecIterator<'a, T> {
     }
 }
 
+fn as_u8_slice<T>(v: &[T]) -> &[u8] {
+    unsafe { std::slice::from_raw_parts(v.as_ptr() as *const u8, std::mem::size_of::<T>() * v.len()) }
+}
+
 pub struct WGPUVec<T: Copy> {
     ctx: WGPUContext,
     inner: wgpu::Buffer,
@@ -66,8 +70,16 @@ impl<T: Copy> WGPUVec<T> {
     }
 
     pub fn extend_from_slice(&mut self, other: &[T]) {
-        // self.cpu.extend_from_slice(other);
-        todo!()
+        let new_len = self.len() + other.len();
+
+        self.resize(new_len);
+
+        unsafe {
+            std::ptr::copy(other.as_ptr(), self.as_mut_ptr().offset(self.len() as _), other.len());
+        }
+        // self.ctx.queue().write_buffer(&self.inner, 0, as_u8_slice(other));
+
+        self.len = new_len;
     }
 
     pub fn resize(&mut self, capacity: usize) {
@@ -75,6 +87,7 @@ impl<T: Copy> WGPUVec<T> {
             return;
         }
         let mem_align = MemAlign::<T>::new(capacity);
+        // let inner = ctx.devi
         // let inner = self.device.new_mem(
         //     mem_align,
         //     metal::MTLResourceOptions::CPUCacheModeDefaultCache,
@@ -87,6 +100,7 @@ impl<T: Copy> WGPUVec<T> {
         //         self.len(),
         //     );
         // }
+        // self.ctx.queue.write_buffer(self, offset, data)
         self.mem_align = mem_align;
         // self.inner = inner;
     }
@@ -119,7 +133,14 @@ impl<T: Copy> WGPUVec<T> {
     }
 
     pub fn clear(&mut self) {
-        todo!()
+        self.len = 0;
+    }
+
+    fn as_mut_ptr(&mut self) -> *mut T {
+        // self.inner.slice(bounds)
+        // self.slice().get_mapped_range()
+        // todo!()
+        self.slice().get_mapped_range_mut().as_mut_ptr() as *mut T
     }
 
     // pub fn as_slice<'a>(&'a self) -> wgpu::BufferSlice<'a> {
