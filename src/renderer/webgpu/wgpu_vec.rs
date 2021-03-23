@@ -187,3 +187,5 @@ impl<T: Copy> AsRef<wgpu::Buffer> for WGPUVec<T> {
         &self.inner
     }
 }
+
+mod tests {}
