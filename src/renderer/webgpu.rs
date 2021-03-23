@@ -100,11 +100,12 @@ fn begin_render_pass<'a>(
     // ctx: WGPUContext,
     encoder: &'a mut wgpu::CommandEncoder,
     target: &'a wgpu::TextureView,
+    // images: &'a ImageStore<WGPUTexture>,
     // command_buffer: &'a wgpu::CommandBuffer,
     clear_color: Color,
     stencil_texture: &'a mut WGPUStencilTexture,
     vertex_buffer: &'a WGPUVec<Vertex>,
-    index_buffer: &'a WGPUVec<u32>,
+    // index_buffer: &'a WGPUVec<u32>,
     view_size: Size,
     // ) -> wgpu::CommandEncoder {
 ) -> wgpu::RenderPass<'a> {
@@ -143,7 +144,7 @@ fn begin_render_pass<'a>(
     pass.set_vertex_buffer(0, vertex_buffer.slice());
     pass.set_stencil_reference(0);
 
-    pass.set_index_buffer(index_buffer.slice(), wgpu::IndexFormat::Uint32);
+    // pass.set_index_buffer(index_buffer.slice(), wgpu::IndexFormat::Uint32);
 
     // pass.set_vertex_buffer(1, buffer_slice)
     pass
@@ -789,12 +790,36 @@ impl Renderer for WGPU {
         // let bind_groups = vec![];
         let mut uniforms_offset: u32 = 0;
 
+        // let mut current_frame = None;
+
+        enum TargetTexture<'a> {
+            Frame(wgpu::SwapChainFrame),
+            View(&'a wgpu::TextureView),
+        }
+        impl<'a> TargetTexture<'a> {
+            pub fn view(&'a self) -> &'a wgpu::TextureView {
+                match self {
+                    Self::Frame(f) => &f.output.view,
+                    Self::View(r) => r,
+                }
+            }
+        }
+
         'outer: while i < commands.len() {
-            let target_texture = match render_target {
+            //    let mut pass = {
+            let target_texture_view = match render_target {
                 RenderTarget::Screen => {
-                    let frame = self.swap_chain.get_current_frame().unwrap();
+                    // &self.swap_chain.get_current_frame().unwrap().output.view
+                    if let Ok(frame) = self.swap_chain.get_current_frame() {
+                        // current_frame = Some(frame);
+                        // Some(&frame.output.view)
+                        // current_frame.unwrap().output.view
+                        TargetTexture::Frame(frame)
+                    } else {
+                        todo!()
+                    }
                     // &frame.output.view
-                    frame
+                    // frame
 
                     // println!("render target: screen");
                     // let d = self.layer.next_drawable().unwrap().to_owned();
@@ -803,23 +828,26 @@ impl Renderer for WGPU {
                     // tex
                 }
                 RenderTarget::Image(id) => {
+                    TargetTexture::View(images.get(id).unwrap().view())
                     // println!("render target: image: {:?}", id);
                     // images.get(id).unwrap()
-                    todo!();
                 }
             };
 
-            // let pass = begin_render_pass(
-            //     &mut encoder,
-            //     &target_texture,
-            //     self.clear_color,
-            //     &mut self.stencil_texture,
-            //     &self.vertex_buffer,
-            //     &self.index_buffer,
-            //     self.view_size,
-            // );
-            let pass_desc = new_pass_descriptor();
-            let mut pass = encoder.begin_render_pass(&pass_desc);
+            let mut pass = begin_render_pass(
+                &mut encoder,
+                target_texture_view.view(),
+                self.clear_color,
+                &mut self.stencil_texture,
+                &self.vertex_buffer,
+                // &self.index_buffer,
+                self.view_size,
+            );
+
+            // };
+
+            // let pass_desc = new_pass_descriptor();
+            // let mut pass = encoder.begin_render_pass(&pass_desc);
 
             // pass.set_bind_group(index, bind_group, offsets)
 
@@ -885,9 +913,10 @@ impl Renderer for WGPU {
                                 let triangle_fan_index_count = self
                                     .index_buffer
                                     .extend_with_triange_fan_indices_cw(start as u32, count as u32);
-
+                                pass.set_index_buffer(self.index_buffer.as_ref().slice(..), wgpu::IndexFormat::Uint32);
                                 // let fmt = wgpu::IndexFormat::Uint32;
-                                // pass.set_index_buffer(self.index_buffer, fmt);
+                                // pass.set_index_buffer(self.index_buffer.slice(..), fmt);
+
                                 pass.draw_indexed((offset as _)..(offset + triangle_fan_index_count) as _, 0, 0..1);
                             }
                             // draw fringes

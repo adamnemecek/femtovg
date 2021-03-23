@@ -74,7 +74,7 @@ fn create_bind_group(
             // texture
             wgpu::BindGroupEntry {
                 binding: 2,
-                resource: wgpu::BindingResource::TextureView(tex.view()),
+                resource: wgpu::BindingResource::TextureView(&tex.view()),
             },
             // sampler
             wgpu::BindGroupEntry {
@@ -84,7 +84,7 @@ fn create_bind_group(
             // alpha texture
             wgpu::BindGroupEntry {
                 binding: 4,
-                resource: wgpu::BindingResource::TextureView(alpha_tex.view()),
+                resource: wgpu::BindingResource::TextureView(&alpha_tex.view()),
             },
             // alpha sampler
             wgpu::BindGroupEntry {
