@@ -1,3 +1,5 @@
+use wgpu::util::DeviceExt;
+
 use super::{
     MemAlign,
     WGPUContext,
@@ -5,9 +7,8 @@ use super::{
     WGPUVar,
 };
 
-pub trait DeviceExt {}
 
-impl DeviceExt for wgpu::Device {}
+
 
 pub struct WGPUVecIterator<'a, T: Copy> {
     inner: &'a WGPUVec<T>,
@@ -74,6 +75,43 @@ impl<T: Copy> WGPUVec<T> {
             len: 0,
             mem_align,
         }
+    }
+
+    pub fn from_slice(ctx: &WGPUContext, slice: &[T]) -> Self {
+        // use wgpu::util::BufferInitDescriptor;
+        let mem_align = MemAlign::new(slice.len());
+        
+
+        let inner = ctx.device().create_buffer(&wgpu::BufferDescriptor {
+            label: None,
+             /// Debug label of a buffer. This will show up in graphics debuggers for easy identification.
+            // pub label: L,
+            /// Size of a buffer.
+            // pub size: BufferAddress,
+            size: mem_align.byte_size as _,
+            /// Usages of a buffer. If the buffer is used in any way that isn't specified here, the operation
+            /// will panic.
+            // pub usage: BufferUsage,
+            usage: wgpu::BufferUsage::COPY_DST,
+            /// Allows a buffer to be mapped immediately after they are made. It does not have to be [`BufferUsage::MAP_READ`] or
+            /// [`BufferUsage::MAP_WRITE`], all buffers are allowed to be mapped at creation.
+            // pub mapped_at_creation: bool,
+            mapped_at_creation: true,
+        });
+        // Self {
+        //     cpu: vec![],
+        //     gpu:
+        // }
+        let mut self_ = Self {
+            ctx: ctx.clone(),
+            inner,
+            len: 0,
+            mem_align,
+        };
+
+        self_.extend_from_slice(slice);
+        self_
+        
     }
 
     pub fn new_index(ctx: &WGPUContext) -> Self {
@@ -232,6 +270,8 @@ mod tests {
         let mut v: WGPUVec<u32> = WGPUVec::new(&context, 10);
         v.extend_from_slice(&[10, 12]);
 
+
+        // assert!(v.iter().collect() == )
         for e in v.iter() {
             println!("{:?}", e);
         }
