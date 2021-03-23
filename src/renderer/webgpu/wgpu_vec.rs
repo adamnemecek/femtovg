@@ -20,6 +20,10 @@ impl<T: Copy> WGPUVec<T> {
         todo!()
     }
 
+    pub fn new_index(ctx: &WGPUContext) -> Self {
+        todo!()
+    }
+
     pub fn len(&self) -> usize {
         self.len
     }

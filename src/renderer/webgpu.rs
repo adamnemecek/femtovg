@@ -223,27 +223,27 @@ impl WGPU {
             label: None,
             entries: &[
                 //viewsize
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStage::VERTEX,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: None,
-                    },
-                    count: None,
-                },
-                //uniforms
-                wgpu::BindGroupLayoutEntry {
-                    binding: 1,
-                    visibility: wgpu::ShaderStage::FRAGMENT,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: None,
-                    },
-                    count: None,
-                },
+                // wgpu::BindGroupLayoutEntry {
+                //     binding: 0,
+                //     visibility: wgpu::ShaderStage::VERTEX,
+                //     ty: wgpu::BindingType::Buffer {
+                //         ty: wgpu::BufferBindingType::Uniform,
+                //         has_dynamic_offset: false,
+                //         min_binding_size: None,
+                //     },
+                //     count: None,
+                // },
+                // //uniforms
+                // wgpu::BindGroupLayoutEntry {
+                //     binding: 1,
+                //     visibility: wgpu::ShaderStage::FRAGMENT,
+                //     ty: wgpu::BindingType::Buffer {
+                //         ty: wgpu::BufferBindingType::Uniform,
+                //         has_dynamic_offset: false,
+                //         min_binding_size: None,
+                //     },
+                //     count: None,
+                // },
                 // texture
                 wgpu::BindGroupLayoutEntry {
                     binding: 2,
@@ -285,6 +285,23 @@ impl WGPU {
                         comparison: false,
                     },
                     count: None,
+                },
+            ],
+        });
+
+        let view_size_size: u32 = std::mem::size_of::<Size>() as _;
+        let vertex_size: u32 = std::mem::size_of::<Vertex>() as _;
+        let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: None,
+            bind_group_layouts: &[&bind_group_layout],
+            push_constant_ranges: &[
+                wgpu::PushConstantRange {
+                    stages: wgpu::ShaderStage::VERTEX,
+                    range: 0..view_size_size,
+                },
+                wgpu::PushConstantRange {
+                    stages: wgpu::ShaderStage::FRAGMENT,
+                    range: view_size_size..(view_size_size+vertex_size),
                 },
             ],
         });
@@ -798,11 +815,12 @@ impl Renderer for WGPU {
                 match &cmd.cmd_type {
                     CommandType::ConvexFill { params } => {
                         // set_uniforms
+                        let s = states.convex_fill();
 
                         // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                         let bg = bind_group!(self, images, cmd);
 
-                        // pass.set_pipeline(states.convex_fill1());
+                        pass.set_pipeline(s.fill_states());
                         pass.set_bind_group(0, bg.as_ref(), &[]);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
@@ -822,7 +840,7 @@ impl Renderer for WGPU {
                             // draw fringes
 
                             if let Some((start, count)) = drawable.stroke_verts {
-                                // pass.set_pipeline(states.convex_fill2());
+                                pass.set_pipeline(s.stroke_buffer());
                                 let vertex_range = start as _..(start + count) as _;
                                 pass.draw(vertex_range, 0..0);
                             }
