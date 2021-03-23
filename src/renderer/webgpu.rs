@@ -814,6 +814,7 @@ impl Renderer for WGPU {
 
                 match &cmd.cmd_type {
                     CommandType::ConvexFill { params } => {
+                        pass.push_debug_group("convex fill");
                         // set_uniforms
                         let s = states.convex_fill();
 
@@ -845,11 +846,13 @@ impl Renderer for WGPU {
                                 pass.draw(vertex_range, 0..0);
                             }
                         }
+                        pass.pop_debug_group();
                     }
                     CommandType::ConcaveFill {
                         stencil_params,
                         fill_params,
                     } => {
+                        pass.push_debug_group("concave fill");
                         // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                         let bg = bind_group!(self, images, cmd);
 
@@ -896,8 +899,10 @@ impl Renderer for WGPU {
                         if let Some((start, count)) = cmd.triangles_verts {
                             // pass.
                         }
+                        pass.pop_debug_group();
                     }
                     CommandType::Stroke { params } => {
+                        pass.push_debug_group("stroke");
                         // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                         let bg = bind_group!(self, images, cmd);
 
@@ -913,8 +918,10 @@ impl Renderer for WGPU {
                         //             // pass.draw()
                         //         }
                         //     }
+                        pass.pop_debug_group();
                     }
                     CommandType::StencilStroke { params1, params2 } => {
+                        pass.push_debug_group("stencil stroke");
                         // pipeline state + stroke_shape_stencil_state
                         let bg = bind_group!(self, images, cmd);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
@@ -928,8 +935,10 @@ impl Renderer for WGPU {
 
                         // let bg = bind_group!(self, cmd);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
+                        pass.pop_debug_group();
                     }
                     CommandType::Triangles { params } => {
+                        pass.push_debug_group("triangles");
                         let bg = bind_group!(self, images, cmd);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
@@ -938,6 +947,7 @@ impl Renderer for WGPU {
                             // encoder.draw_primitives(metal::MTLPrimitiveType::Triangle, start as u64, count as u64);
                             // pass.draw()
                         }
+                        pass.pop_debug_group();
                     }
                     CommandType::ClearRect {
                         x,
