@@ -1,7 +1,9 @@
 use std::future::Future;
+#[derive(Clone)]
 pub struct WGPUInstance {
-    instance: wgpu::Instance,
-    adapter: wgpu::Adapter,
+    instance: std::rc::Rc<wgpu::Instance>,
+    adapter: std::rc::Rc<wgpu::Adapter>,
+    surface: std::rc::Rc<wgpu::Surface>,
 }
 
 impl WGPUInstance {
@@ -14,10 +16,19 @@ impl WGPUInstance {
             // Request an adapter which can render to our surface
             compatible_surface: Some(&surface),
         });
-        async move { adapter.await.map(|adapter| Self { instance, adapter }) }
+        async move {
+            adapter.await.map(|adapter| Self {
+                instance: std::rc::Rc::new(instance),
+                adapter: std::rc::Rc::new(adapter),
+                surface: std::rc::Rc::new(surface),
+            })
+        }
+    }
+
+    pub fn new() -> Self {
+        todo!()
     }
 }
-
 #[derive(Clone)]
 pub struct WGPUContext {
     device: std::rc::Rc<wgpu::Device>,
@@ -25,8 +36,25 @@ pub struct WGPUContext {
 }
 
 impl WGPUContext {
-    pub fn new() -> Self {
-        todo!()
+    pub fn new(instance: WGPUInstance) -> impl Future<Output = Result<Self, wgpu::RequestDeviceError>> {
+        // instance.adapter.request_device(desc, trace_path)
+        let f = instance.adapter.request_device(
+            &wgpu::DeviceDescriptor {
+                label: None,
+                features: wgpu::Features::PUSH_CONSTANTS,
+                limits: wgpu::Limits {
+                    max_push_constant_size: 4096,
+                    ..Default::default()
+                },
+            },
+            None,
+        );
+        async move {
+            f.await.map(|(device, queue)| Self {
+                device: std::rc::Rc::new(device),
+                queue: std::rc::Rc::new(queue),
+            })
+        }
     }
 }
 
