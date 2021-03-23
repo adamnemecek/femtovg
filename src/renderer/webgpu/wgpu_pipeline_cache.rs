@@ -289,7 +289,27 @@ pub struct ConcaveFill {
     triangle_verts_evenodd: wgpu::RenderPipeline,
 }
 
-impl ConcaveFill {}
+impl ConcaveFill {
+    pub fn fill_verts(&self) -> &wgpu::RenderPipeline {
+        &self.fill_verts
+    }
+
+    pub fn fringes_nonzero(&self) -> &wgpu::RenderPipeline {
+        &self.fringes_nonzero
+    }
+
+    pub fn fringes_evenodd(&self) -> &wgpu::RenderPipeline {
+        &self.fringes_evenodd
+    }
+
+    pub fn triangle_verts_nonzero(&self) -> &wgpu::RenderPipeline {
+        &self.triangle_verts_nonzero
+    }
+
+    pub fn triangle_verts_evenodd(&self) -> &wgpu::RenderPipeline {
+        &self.triangle_verts_evenodd
+    }
+}
 
 pub struct StencilStroke {
     stroke_base: wgpu::RenderPipeline,
@@ -430,8 +450,8 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
-                None,
-                None,
+                wgpu::Face::Back,
+                fill_anti_alias_stencil_state_nonzero(format),
             ),
             fringes_evenodd: create_pipeline(
                 ctx,
@@ -440,8 +460,8 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
-                None,
-                None,
+                wgpu::Face::Back,
+                fill_anti_alias_stencil_state_evenodd(format),
             ),
             triangle_verts_nonzero: create_pipeline(
                 ctx,
@@ -450,7 +470,7 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
-                None,
+                wgpu::Face::Back,
                 None,
             ),
             triangle_verts_evenodd: create_pipeline(
@@ -460,7 +480,7 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
-                None,
+                wgpu::Face::Back,
                 None,
             ),
         };
@@ -472,7 +492,7 @@ impl WGPUPipelineStates {
             shader,
             format,
             wgpu::PrimitiveTopology::TriangleList,
-            None,
+            wgpu::Face::Back,
             None,
         );
 
@@ -484,7 +504,7 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
-                None,
+                wgpu::Face::Back,
                 Some(stroke_shape_stencil_state(format)),
             ),
             pixels: create_pipeline(
@@ -494,7 +514,7 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
-                None,
+                wgpu::Face::Back,
                 None,
             ),
             clear_stencil: create_pipeline(
@@ -504,7 +524,7 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
-                None,
+                wgpu::Face::Back,
                 None,
             ),
         };
@@ -516,7 +536,7 @@ impl WGPUPipelineStates {
             shader,
             format,
             wgpu::PrimitiveTopology::TriangleList,
-            None,
+            wgpu::Face::Back,
             None,
         );
 
