@@ -179,7 +179,7 @@ pub struct WGPU {
 
     pipeline_cache: WGPUPipelineCache,
     bind_group_cache: WGPUBindGroupCache,
-
+    clear_color: Color,
     view_size: Size,
     swap_chain: WGPUSwapChain,
     bind_group_layout: wgpu::BindGroupLayout,
@@ -246,7 +246,7 @@ impl WGPU {
                 // },
                 // texture
                 wgpu::BindGroupLayoutEntry {
-                    binding: 2,
+                    binding: 0,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Texture {
                         sample_type: wgpu::TextureSampleType::Float { filterable: false },
@@ -257,7 +257,7 @@ impl WGPU {
                 },
                 // sampler
                 wgpu::BindGroupLayoutEntry {
-                    binding: 3,
+                    binding: 1,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Sampler {
                         filtering: false,
@@ -267,7 +267,7 @@ impl WGPU {
                 },
                 // alpha texture
                 wgpu::BindGroupLayoutEntry {
-                    binding: 4,
+                    binding: 2,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Texture {
                         sample_type: wgpu::TextureSampleType::Float { filterable: false },
@@ -278,7 +278,7 @@ impl WGPU {
                 },
                 //alpha sampler
                 wgpu::BindGroupLayoutEntry {
-                    binding: 5,
+                    binding: 3,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Sampler {
                         filtering: false,
@@ -364,6 +364,7 @@ impl WGPU {
             flags,
         });
 
+        let clear_color = Color::white();
         let pipeline_cache = WGPUPipelineCache::new(ctx, pipeline_layout, shader);
         let bind_group_cache = WGPUBindGroupCache::new();
         let swap_chain = WGPUSwapChain::new(wgpu::TextureFormat::Astc10x10RgbaUnorm, view_size);
@@ -372,6 +373,7 @@ impl WGPU {
         // }
         // todo!();
         Self {
+            clear_color,
             antialias: true,
             stencil_texture,
             ctx: ctx.clone(),
@@ -791,7 +793,8 @@ impl Renderer for WGPU {
             let target_texture = match render_target {
                 RenderTarget::Screen => {
                     let frame = self.swap_chain.get_current_frame().unwrap();
-                    frame.output.view
+                    // &frame.output.view
+                    frame
 
                     // println!("render target: screen");
                     // let d = self.layer.next_drawable().unwrap().to_owned();
@@ -806,9 +809,17 @@ impl Renderer for WGPU {
                 }
             };
 
-            let pass = begin_render_pass(&mut encoder, target, clear_color, stencil_texture, vertex_buffer, index_buffer, view_size);
-            // let pass_desc = new_pass_descriptor();
-            // let mut pass = encoder.begin_render_pass(&pass_desc);
+            // let pass = begin_render_pass(
+            //     &mut encoder,
+            //     &target_texture,
+            //     self.clear_color,
+            //     &mut self.stencil_texture,
+            //     &self.vertex_buffer,
+            //     &self.index_buffer,
+            //     self.view_size,
+            // );
+            let pass_desc = new_pass_descriptor();
+            let mut pass = encoder.begin_render_pass(&pass_desc);
 
             // pass.set_bind_group(index, bind_group, offsets)
 
