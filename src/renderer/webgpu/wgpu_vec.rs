@@ -23,10 +23,12 @@ impl<'a, T: Copy> WGPUVecIterator<'a, T> {
 impl<'a, T: Copy> Iterator for WGPUVecIterator<'a, T> {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.inner.len() == self.idx {
+        if self.idx >= self.inner.len() {
             None
         } else {
-            None
+            let res = self.inner[self.idx];
+            self.idx += 1;
+            Some(res)
         }
     }
 }
@@ -229,6 +231,10 @@ mod tests {
         let context = WGPUContext::new(instance).await.unwrap();
         let mut v: WGPUVec<u32> = WGPUVec::new(&context, 10);
         v.extend_from_slice(&[10, 12]);
+
+        for e in v.iter() {
+            println!("{:?}", e);
+        }
     }
 
     #[test]
