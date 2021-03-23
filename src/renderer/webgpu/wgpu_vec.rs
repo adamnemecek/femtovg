@@ -4,20 +4,57 @@ use super::{
     WGPUVar,
 };
 
+pub trait DeviceExt {}
+
+impl DeviceExt for wgpu::Device {}
+
+pub struct WGPUVecIterator<'a, T: Copy> {
+    inner: &'a WGPUVec<T>,
+}
+
+impl<'a, T: Copy> WGPUVecIterator<'a, T> {
+    fn new(inner: &'a WGPUVec<T>) -> Self {
+        Self { inner }
+    }
+}
+
 pub struct WGPUVec<T: Copy> {
-    // cpu: Vec<T>,
+    ctx: WGPUContext,
     inner: wgpu::Buffer,
     len: usize,
     mem_align: MemAlign<T>,
 }
 
 impl<T: Copy> WGPUVec<T> {
-    pub fn new(ctx: &WGPUContext) -> Self {
+    pub fn new(ctx: &WGPUContext, capacity: usize) -> Self {
+        let mem_align = MemAlign::new(capacity);
+
+        let inner = ctx.device().create_buffer(&wgpu::BufferDescriptor {
+            label: None,
+             /// Debug label of a buffer. This will show up in graphics debuggers for easy identification.
+            // pub label: L,
+            /// Size of a buffer.
+            // pub size: BufferAddress,
+            size: 0,
+            /// Usages of a buffer. If the buffer is used in any way that isn't specified here, the operation
+            /// will panic.
+            // pub usage: BufferUsage,
+            usage: wgpu::BufferUsage::COPY_DST,
+            /// Allows a buffer to be mapped immediately after they are made. It does not have to be [`BufferUsage::MAP_READ`] or
+            /// [`BufferUsage::MAP_WRITE`], all buffers are allowed to be mapped at creation.
+            // pub mapped_at_creation: bool,
+            mapped_at_creation: true,
+        });
         // Self {
         //     cpu: vec![],
         //     gpu:
         // }
-        todo!()
+        Self {
+            ctx: ctx.clone(),
+            inner,
+            len: 0,
+            mem_align,
+        }
     }
 
     pub fn new_index(ctx: &WGPUContext) -> Self {
@@ -52,6 +89,10 @@ impl<T: Copy> WGPUVec<T> {
         // }
         self.mem_align = mem_align;
         // self.inner = inner;
+    }
+
+    pub fn iter(&self) -> WGPUVecIterator<'_, T> {
+        WGPUVecIterator::new(self)
     }
 
     #[inline]

@@ -790,6 +790,7 @@ impl Renderer for WGPU {
                     );
                 };
             }
+
             while i < commands.len() {
                 let cmd = &commands[i];
                 i += 1;

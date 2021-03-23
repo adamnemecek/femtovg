@@ -371,19 +371,19 @@ impl WGPUPipelineStates {
         &self.convex_fill
     }
 
-    fn concave_fill(&self) -> &ConcaveFill {
+    pub fn concave_fill(&self) -> &ConcaveFill {
         &self.concave_fill
     }
 
-    fn stroke(&self) -> &wgpu::RenderPipeline {
+    pub fn stroke(&self) -> &wgpu::RenderPipeline {
         &self.stroke
     }
 
-    fn stencil_stroke(&self) -> &StencilStroke {
+    pub fn stencil_stroke(&self) -> &StencilStroke {
         &self.stencil_stroke
     }
 
-    fn triangles(&self) -> &wgpu::RenderPipeline {
+    pub fn triangles(&self) -> &wgpu::RenderPipeline {
         &self.triangles
     }
 
@@ -603,11 +603,11 @@ impl WGPUPipelineStates {
 
 // struct
 pub struct WGPUPipelineCache {
+    ctx: WGPUContext,
     shader: wgpu::ShaderModule,
     layout: wgpu::PipelineLayout,
     // inner: std::rc::Rc<std::cell::RefCell<HashMap<PipelineCacheKey, WGPUPipelineState>>>,
     inner: std::cell::UnsafeCell<HashMap<PipelineCacheKey, WGPUPipelineStates>>,
-    ctx: WGPUContext,
     // ph: &'a std::marker::PhantomData<()>,
 }
 
