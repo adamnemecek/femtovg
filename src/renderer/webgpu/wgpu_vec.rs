@@ -87,22 +87,33 @@ impl<T: Copy> WGPUVec<T> {
             return;
         }
         let mem_align = MemAlign::<T>::new(capacity);
-        // let inner = ctx.devi
+
+        // let inner = ctx.device().create_buffer(&wgpu::BufferDescriptor {
+
+        // });
+
+        let inner = self.ctx.device().create_buffer(&wgpu::BufferDescriptor {
+            label: None,
+            size: mem_align.byte_size as _,
+            usage: wgpu::BufferUsage::COPY_DST,
+            mapped_at_creation: false,
+        });
+
         // let inner = self.device.new_mem(
         //     mem_align,
         //     metal::MTLResourceOptions::CPUCacheModeDefaultCache,
         // );
-        // unsafe {
-        //     std::ptr::copy(
-        //         self.as_ptr(),
-        //         // inner.contents() as *mut T,
-        //         inner.as_mut_ptr(),
-        //         self.len(),
-        //     );
-        // }
+        unsafe {
+            std::ptr::copy(
+                self.as_ptr(),
+                // inner.contents() as *mut T,
+                inner.slice(..).get_mapped_range_mut().as_mut_ptr() as *mut T,
+                self.len(),
+            );
+        }
         // self.ctx.queue.write_buffer(self, offset, data)
         self.mem_align = mem_align;
-        // self.inner = inner;
+        self.inner = inner;
     }
 
     pub fn iter(&self) -> WGPUVecIterator<'_, T> {
