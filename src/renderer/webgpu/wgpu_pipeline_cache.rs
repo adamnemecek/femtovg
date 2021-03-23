@@ -330,7 +330,7 @@ impl StencilStroke {
 
 pub struct WGPUPipelineStates {
     blend_func: WGPUBlend,
-    texture_format: wgpu::TextureFormat,
+    format: wgpu::TextureFormat,
 
     convex_fill: ConvexFill,
     concave_fill: ConcaveFill,
@@ -348,7 +348,7 @@ pub struct WGPUPipelineStates {
 
 impl WGPUPipelineStates {
     pub fn matches(&self, blend_func: WGPUBlend, format: wgpu::TextureFormat) -> bool {
-        self.blend_func == blend_func && self.texture_format == format
+        self.blend_func == blend_func && self.format == format
     }
 
     pub fn blend_func(&self) -> WGPUBlend {
@@ -588,10 +588,16 @@ impl WGPUPipelineStates {
         //     multisample: wgpu::MultisampleState::default(),
         // });
 
-        todo!()
-        // Self {
-
-        // }
+        // todo!()
+        Self {
+            blend_func,
+            format,
+            convex_fill,
+            concave_fill,
+            stroke,
+            stencil_stroke,
+            triangles,
+        }
     }
 }
 
