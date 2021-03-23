@@ -272,7 +272,7 @@ pub struct ConvexFill {
 }
 
 impl ConvexFill {
-    pub fn fill_states(&self) -> &wgpu::RenderPipeline {
+    pub fn fill_buffer(&self) -> &wgpu::RenderPipeline {
         &self.fill_buffer
     }
 

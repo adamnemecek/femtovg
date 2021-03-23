@@ -687,21 +687,21 @@ pub struct TextureBindings {
 // }
 
 impl WGPU {
-    pub fn bind_group_for(
-        &self,
-        images: &ImageStore<WGPUTexture>,
-        image_tex: Option<ImageId>,
-        alpha_tex: Option<ImageId>,
-    ) -> &WGPUBindGroup {
-        self.bind_group_cache.get(
-            &self.ctx,
-            images,
-            &self.bind_group_layout,
-            image_tex,
-            alpha_tex,
-            &self.pseudo_texture,
-        )
-    }
+    // pub fn bind_group_for(
+    //     &self,
+    //     images: &ImageStore<WGPUTexture>,
+    //     image_tex: Option<ImageId>,
+    //     alpha_tex: Option<ImageId>,
+    // ) -> &WGPUBindGroup {
+    //     self.bind_group_cache.get(
+    //         &self.ctx,
+    //         images,
+    //         &self.bind_group_layout,
+    //         image_tex,
+    //         alpha_tex,
+    //         &self.pseudo_texture,
+    //     )
+    // }
 }
 
 impl Renderer for WGPU {
@@ -821,7 +821,7 @@ impl Renderer for WGPU {
                         // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                         let bg = bind_group!(self, images, cmd);
 
-                        pass.set_pipeline(s.fill_states());
+                        pass.set_pipeline(s.fill_buffer());
                         pass.set_bind_group(0, bg.as_ref(), &[]);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
