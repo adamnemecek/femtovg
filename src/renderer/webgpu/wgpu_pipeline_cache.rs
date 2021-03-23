@@ -291,7 +291,26 @@ pub struct ConcaveFill {
 
 impl ConcaveFill {}
 
-pub struct StencilStroke {}
+pub struct StencilStroke {
+    stroke_base: wgpu::RenderPipeline,
+    pixels: wgpu::RenderPipeline,
+    clear_stencil: wgpu::RenderPipeline,
+}
+
+impl StencilStroke {
+    pub fn stroke_base(&self) -> &wgpu::RenderPipeline {
+        &self.stroke_base
+    }
+
+    pub fn pixels(&self) -> &wgpu::RenderPipeline {
+        &self.pixels
+    }
+
+    pub fn clear_stencil(&self) -> &wgpu::RenderPipeline {
+        &self.clear_stencil
+    }
+}
+
 pub struct WGPUPipelineStates {
     blend_func: WGPUBlend,
     texture_format: wgpu::TextureFormat,
@@ -456,7 +475,38 @@ impl WGPUPipelineStates {
             None,
         );
 
-        let stencil_stroke = StencilStroke {};
+        let stencil_stroke = StencilStroke {
+            stroke_base: create_pipeline(
+                ctx,
+                Some("stroke_base"),
+                layout,
+                shader,
+                format,
+                wgpu::PrimitiveTopology::TriangleList,
+                None,
+                None,
+            ),
+            pixels: create_pipeline(
+                ctx,
+                Some("pixels"),
+                layout,
+                shader,
+                format,
+                wgpu::PrimitiveTopology::TriangleList,
+                None,
+                None,
+            ),
+            clear_stencil: create_pipeline(
+                ctx,
+                Some("clear_stencil"),
+                layout,
+                shader,
+                format,
+                wgpu::PrimitiveTopology::TriangleList,
+                None,
+                None,
+            ),
+        };
 
         let triangles = create_pipeline(
             ctx,

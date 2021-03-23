@@ -301,7 +301,7 @@ impl WGPU {
                 },
                 wgpu::PushConstantRange {
                     stages: wgpu::ShaderStage::FRAGMENT,
-                    range: view_size_size..(view_size_size+vertex_size),
+                    range: view_size_size..(view_size_size + vertex_size),
                 },
             ],
         });
