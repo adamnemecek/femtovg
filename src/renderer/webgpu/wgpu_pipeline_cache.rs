@@ -396,31 +396,32 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
-                None,
+                wgpu::Face::Back,
                 None,
             ),
             stroke_buffer: create_pipeline(
                 ctx,
-                "convex_fill/fill_buffer",
+                "convex_fill/stroke_buffer",
                 layout,
                 shader,
                 format,
-                wgpu::PrimitiveTopology::TriangleList,
-                None,
+                wgpu::PrimitiveTopology::TriangleStrip,
+                wgpu::Face::Back,
                 None,
             ),
         };
 
         let concave_fill = ConcaveFill {
+            // stencil only pipeline state
             fill_verts: create_pipeline(
                 ctx,
-                "concave_fill/fill_buffer",
+                "concave_fill/fill_verts",
                 layout,
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
                 None,
-                None,
+                fill_shape_stencil_state(format),
             ),
             fringes_nonzero: create_pipeline(
                 ctx,
