@@ -3,7 +3,7 @@ use std::future::Future;
 pub struct WGPUInstance {
     instance: std::rc::Rc<wgpu::Instance>,
     adapter: std::rc::Rc<wgpu::Adapter>,
-    surface: std::rc::Rc<wgpu::Surface>,
+    surface: Option<std::rc::Rc<wgpu::Surface>>,
 }
 
 impl WGPUInstance {
@@ -20,13 +20,22 @@ impl WGPUInstance {
             adapter.await.map(|adapter| Self {
                 instance: std::rc::Rc::new(instance),
                 adapter: std::rc::Rc::new(adapter),
-                surface: std::rc::Rc::new(surface),
+                surface: Some(std::rc::Rc::new(surface)),
             })
         }
     }
 
-    pub fn new() -> Self {
-        todo!()
+    pub fn new() -> impl Future<Output = Option<Self>> {
+        let instance = wgpu::Instance::new(wgpu::BackendBit::all());
+        let adapter = instance.request_adapter(&wgpu::RequestAdapterOptions::default());
+
+        async move {
+            adapter.await.map(|adapter| Self {
+                instance: std::rc::Rc::new(instance),
+                adapter: std::rc::Rc::new(adapter),
+                surface: None,
+            })
+        }
     }
 }
 #[derive(Clone)]
