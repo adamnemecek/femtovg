@@ -186,7 +186,7 @@ pub struct WGPU {
 }
 
 impl WGPU {
-    pub fn new(device: wgpu::Device, size: Size) -> Self {
+    pub fn new(ctx: &WGPUContext, view_size: Size) -> Self {
         // let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
         //     label: None,
         //     source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("webgpu/shader.wgsl"))),
@@ -219,7 +219,7 @@ impl WGPU {
         //     };
         // };
 
-        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        let bind_group_layout = ctx.device().create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: None,
             entries: &[
                 //viewsize
@@ -291,7 +291,7 @@ impl WGPU {
 
         let view_size_size: u32 = std::mem::size_of::<Size>() as _;
         let vertex_size: u32 = std::mem::size_of::<Vertex>() as _;
-        let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        let pipeline_layout = ctx.device().create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: None,
             bind_group_layouts: &[&bind_group_layout],
             push_constant_ranges: &[
@@ -345,12 +345,58 @@ impl WGPU {
         // let stroke_anti_alias_stencil_state = 0;
         // let stroke_clear_stencil_state = 0;
 
-        let encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        let encoder = ctx
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        let stencil_texture = WGPUStencilTexture::new(ctx, view_size);
+        let index_buffer = WGPUVec::new(ctx, 1000);
+        let vertex_buffer = WGPUVec::new(ctx, 1000);
 
+        let mut flags = wgpu::ShaderFlags::VALIDATION;
+        match ctx.adapter().get_info().backend {
+            wgpu::Backend::Metal | wgpu::Backend::Vulkan => flags |= wgpu::ShaderFlags::EXPERIMENTAL_TRANSLATION,
+            _ => (), //TODO
+        }
+
+        let shader = ctx.device().create_shader_module(&wgpu::ShaderModuleDescriptor {
+            label: None,
+            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("webgpu/shader.wgsl"))),
+            flags,
+        });
+
+        let pipeline_cache = WGPUPipelineCache::new(ctx, pipeline_layout, shader);
+        let bind_group_cache = WGPUBindGroupCache::new();
+        let swap_chain = WGPUSwapChain::new(wgpu::TextureFormat::Astc10x10RgbaUnorm, view_size);
         // Self {
 
         // }
-        todo!();
+        // todo!();
+        Self {
+            antialias: true,
+            stencil_texture,
+            ctx: ctx.clone(),
+            index_buffer,
+            vertex_buffer,
+            render_target: RenderTarget::Screen,
+            pseudo_texture: WGPUTexture::new_pseudo_texture(ctx),
+            pipeline_cache,   //: Default::default(),
+            bind_group_cache, //: Default::default(),
+            view_size,
+            bind_group_layout,
+            swap_chain,
+            // swap_chain: WGPUSwapChain::new()
+            // index_buffer: WGPUVec<u32>,
+            // vertex_buffer: WGPUVec<Vertex>,
+            // render_target: RenderTarget,
+            // pseudo_texture: WGPUTexture,
+
+            // pipeline_cache: WGPUPipelineCache,
+            // bind_group_cache: WGPUBindGroupCache,
+
+            // view_size: Size,
+            // swap_chain: WGPUSwapChain,
+            // bind_group_layout: wgpu::BindGroupLayout,
+        }
         // Self {
         // stencil_texture,
         //  index_buffer,

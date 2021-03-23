@@ -7,9 +7,6 @@ use super::{
     WGPUVar,
 };
 
-
-
-
 pub struct WGPUVecIterator<'a, T: Copy> {
     inner: &'a WGPUVec<T>,
     idx: usize,
@@ -80,7 +77,6 @@ impl<T: Copy> WGPUVec<T> {
     pub fn from_slice(ctx: &WGPUContext, slice: &[T]) -> Self {
         // use wgpu::util::BufferInitDescriptor;
         let mem_align = MemAlign::new(slice.len());
-        
 
         let inner = ctx.device().create_buffer(&wgpu::BufferDescriptor {
             label: None,
@@ -111,7 +107,6 @@ impl<T: Copy> WGPUVec<T> {
 
         self_.extend_from_slice(slice);
         self_
-        
     }
 
     pub fn new_index(ctx: &WGPUContext) -> Self {
@@ -183,10 +178,10 @@ impl<T: Copy> WGPUVec<T> {
         self.mem_align.capacity
     }
 
-    pub fn upload(&mut self) {
-        // self.gpu.destroy()
-        todo!()
-    }
+    // pub fn upload(&mut self) {
+    //     // self.gpu.destroy()
+    //     todo!()
+    // }
 
     pub fn as_slice<S: std::ops::RangeBounds<wgpu::BufferAddress>>(&self, bounds: S) -> wgpu::BufferSlice {
         self.inner.slice(bounds)
@@ -269,7 +264,6 @@ mod tests {
         let context = WGPUContext::new(instance).await.unwrap();
         let mut v: WGPUVec<u32> = WGPUVec::new(&context, 10);
         v.extend_from_slice(&[10, 12]);
-
 
         // assert!(v.iter().collect() == )
         for e in v.iter() {

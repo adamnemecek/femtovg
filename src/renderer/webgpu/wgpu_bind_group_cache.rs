@@ -130,7 +130,9 @@ pub struct WGPUBindGroupCache {
 
 impl WGPUBindGroupCache {
     pub fn new() -> Self {
-        todo!()
+        Self {
+            inner: Default::default(),
+        }
     }
 
     pub fn get(

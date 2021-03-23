@@ -40,6 +40,7 @@ impl WGPUInstance {
 }
 #[derive(Clone)]
 pub struct WGPUContext {
+    instance: WGPUInstance,
     device: std::rc::Rc<wgpu::Device>,
     queue: std::rc::Rc<wgpu::Queue>,
 }
@@ -60,6 +61,7 @@ impl WGPUContext {
         );
         async move {
             f.await.map(|(device, queue)| Self {
+                instance: instance.clone(),
                 device: std::rc::Rc::new(device),
                 queue: std::rc::Rc::new(queue),
             })
@@ -68,6 +70,10 @@ impl WGPUContext {
 }
 
 impl WGPUContext {
+    pub fn adapter(&self) -> &wgpu::Adapter {
+        &self.instance.adapter
+    }
+
     pub fn device(&self) -> &std::rc::Rc<wgpu::Device> {
         &self.device
     }
