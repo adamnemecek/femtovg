@@ -1,6 +1,7 @@
 use super::{
     MemAlign,
     WGPUContext,
+    WGPUInstance,
     WGPUVar,
 };
 
@@ -162,6 +163,21 @@ impl<T: Copy> WGPUVec<T> {
     // pub fn as_mut_slice<'a>(&'a mut self) -> wgpu::BufferMutSlice<'a> {
     //     todo!()
     // }
+
+    fn element_byte_size() -> usize {
+        std::mem::size_of::<T>()
+    }
+}
+
+impl<T: Copy> std::ops::Index<usize> for WGPUVec<T> {
+    type Output = T;
+    fn index(&self, index: usize) -> &Self::Output {
+        let view = self.slice().get_mapped_range();
+        assert!(self.len() * Self::element_byte_size() == view.len());
+        // let z = z.len();
+
+        todo!()
+    }
 }
 
 impl<T: Copy> Drop for WGPUVec<T> {
@@ -188,4 +204,21 @@ impl<T: Copy> AsRef<wgpu::Buffer> for WGPUVec<T> {
     }
 }
 
-mod tests {}
+mod tests {
+    use super::{
+        WGPUContext,
+        WGPUInstance,
+        WGPUVec,
+    };
+
+    async fn vec_test() {
+        let instance = WGPUInstance::new().await.unwrap();
+
+        let context = WGPUContext::new(instance);
+    }
+
+    #[test]
+    fn vec() {
+        pollster::block_on(vec_test());
+    }
+}
