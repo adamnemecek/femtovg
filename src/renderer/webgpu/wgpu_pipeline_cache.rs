@@ -3,14 +3,11 @@ use super::{
     WGPUBlend,
     WGPUContext,
 };
-use std::{
-    cell::UnsafeCell,
-    rc::Rc,
-};
-use std::{
-    collections::HashMap,
-    pin::Pin,
-};
+// use std::{
+// cell::UnsafeCell,
+// rc::Rc,
+// };
+use std::collections::HashMap;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 struct PipelineCacheKey {
@@ -372,6 +369,22 @@ impl WGPUPipelineStates {
 
     pub fn convex_fill(&self) -> &ConvexFill {
         &self.convex_fill
+    }
+
+    fn concave_fill(&self) -> &ConcaveFill {
+        &self.concave_fill
+    }
+
+    fn stroke(&self) -> &wgpu::RenderPipeline {
+        &self.stroke
+    }
+
+    fn stencil_stroke(&self) -> &StencilStroke {
+        &self.stencil_stroke
+    }
+
+    fn triangles(&self) -> &wgpu::RenderPipeline {
+        &self.triangles
     }
 
     // pub fn convex_fill1(&self) -> &wgpu::RenderPipeline {
