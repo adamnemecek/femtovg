@@ -11,11 +11,23 @@ impl DeviceExt for wgpu::Device {}
 
 pub struct WGPUVecIterator<'a, T: Copy> {
     inner: &'a WGPUVec<T>,
+    idx: usize,
 }
 
 impl<'a, T: Copy> WGPUVecIterator<'a, T> {
     fn new(inner: &'a WGPUVec<T>) -> Self {
-        Self { inner }
+        Self { inner, idx: 0 }
+    }
+}
+
+impl<'a, T: Copy> Iterator for WGPUVecIterator<'a, T> {
+    type Item = T;
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.inner.len() == self.idx {
+            None
+        } else {
+            None
+        }
     }
 }
 
@@ -40,7 +52,7 @@ impl<T: Copy> WGPUVec<T> {
             // pub label: L,
             /// Size of a buffer.
             // pub size: BufferAddress,
-            size: 0,
+            size: mem_align.byte_size as _,
             /// Usages of a buffer. If the buffer is used in any way that isn't specified here, the operation
             /// will panic.
             // pub usage: BufferUsage,
@@ -141,7 +153,7 @@ impl<T: Copy> WGPUVec<T> {
     }
 
     pub fn slice(&self) -> wgpu::BufferSlice {
-        todo!()
+        self.inner.slice(..)
     }
 
     pub fn clear(&mut self) {
@@ -211,14 +223,16 @@ mod tests {
         WGPUVec,
     };
 
-    async fn vec_test() {
+    async fn async_vec_test() {
         let instance = WGPUInstance::new().await.unwrap();
 
-        let context = WGPUContext::new(instance);
+        let context = WGPUContext::new(instance).await.unwrap();
+        let mut v: WGPUVec<u32> = WGPUVec::new(&context, 10);
+        v.extend_from_slice(&[10, 12]);
     }
 
     #[test]
-    fn vec() {
-        pollster::block_on(vec_test());
+    fn vec_test() {
+        pollster::block_on(async_vec_test());
     }
 }
