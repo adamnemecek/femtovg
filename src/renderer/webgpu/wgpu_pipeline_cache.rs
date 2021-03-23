@@ -36,6 +36,7 @@ impl crate::Vertex {
 fn create_pipeline(
     ctx: &WGPUContext,
     label: Option<&str>,
+    layout: &wgpu::PipelineLayout,
     shader: &wgpu::ShaderModule,
     format: wgpu::TextureFormat,
     topology: wgpu::PrimitiveTopology,
@@ -44,7 +45,7 @@ fn create_pipeline(
 ) -> wgpu::RenderPipeline {
     ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label,
-        layout: None,
+        layout: Some(layout),
         vertex: wgpu::VertexState {
             module: shader,
             entry_point: "vs_main",
@@ -352,6 +353,7 @@ impl WGPUPipelineStates {
 
     pub fn new(
         ctx: &WGPUContext,
+        layout: &wgpu::PipelineLayout,
         blend_func: WGPUBlend,
         format: wgpu::TextureFormat,
         shader: &wgpu::ShaderModule,
@@ -371,6 +373,7 @@ impl WGPUPipelineStates {
             fill_buffer: create_pipeline(
                 ctx,
                 Some("convex_fill/fill_buffer"),
+                layout,
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
@@ -380,6 +383,7 @@ impl WGPUPipelineStates {
             stroke_buffer: create_pipeline(
                 ctx,
                 Some("convex_fill/fill_buffer"),
+                layout,
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
@@ -392,6 +396,7 @@ impl WGPUPipelineStates {
             fill_verts: create_pipeline(
                 ctx,
                 Some("concave_fill/fill_buffer"),
+                layout,
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
@@ -401,6 +406,7 @@ impl WGPUPipelineStates {
             fringes_nonzero: create_pipeline(
                 ctx,
                 Some("concave_fill/fringes_nonzero"),
+                layout,
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
@@ -410,6 +416,7 @@ impl WGPUPipelineStates {
             fringes_evenodd: create_pipeline(
                 ctx,
                 Some("concave_fill/fringes_evenodd"),
+                layout,
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
@@ -419,6 +426,7 @@ impl WGPUPipelineStates {
             triangle_verts_nonzero: create_pipeline(
                 ctx,
                 Some("concave_fill/triangle_verts_nonzero"),
+                layout,
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
@@ -428,6 +436,7 @@ impl WGPUPipelineStates {
             triangle_verts_evenodd: create_pipeline(
                 ctx,
                 Some("concave_fill/triangle_verts_evenodd"),
+                layout,
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
@@ -439,6 +448,7 @@ impl WGPUPipelineStates {
         let stroke = create_pipeline(
             ctx,
             Some("stroke"),
+            layout,
             shader,
             format,
             wgpu::PrimitiveTopology::TriangleList,
@@ -451,6 +461,7 @@ impl WGPUPipelineStates {
         let triangles = create_pipeline(
             ctx,
             Some("triangles"),
+            layout,
             shader,
             format,
             wgpu::PrimitiveTopology::TriangleList,
@@ -503,6 +514,7 @@ impl WGPUPipelineStates {
 // struct
 pub struct WGPUPipelineCache {
     shader: wgpu::ShaderModule,
+    layout: wgpu::PipelineLayout,
     // inner: std::rc::Rc<std::cell::RefCell<HashMap<PipelineCacheKey, WGPUPipelineState>>>,
     inner: std::cell::UnsafeCell<HashMap<PipelineCacheKey, WGPUPipelineStates>>,
     ctx: WGPUContext,
@@ -512,10 +524,12 @@ pub struct WGPUPipelineCache {
 impl WGPUPipelineCache {
     pub fn new(
         ctx: &WGPUContext,
+        layout: wgpu::PipelineLayout,
         shader: wgpu::ShaderModule, // vert: &wgpu::
     ) -> Self {
         Self {
             shader,
+            layout,
             inner: Default::default(),
             ctx: ctx.clone(),
         }
@@ -531,6 +545,7 @@ impl WGPUPipelineCache {
         if !r.contains_key(&key) {
             let ps = WGPUPipelineStates::new(
                 &self.ctx,
+                &self.layout,
                 blend_func,
                 texture_format,
                 &self.shader,
