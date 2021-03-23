@@ -173,10 +173,10 @@ impl<T: Copy> std::ops::Index<usize> for WGPUVec<T> {
     type Output = T;
     fn index(&self, index: usize) -> &Self::Output {
         let view = self.slice().get_mapped_range();
-        assert!(self.len() * Self::element_byte_size() == view.len());
+        assert!(self.capacity() * Self::element_byte_size() == view.len());
         // let z = z.len();
-
-        todo!()
+        let slice = unsafe { std::slice::from_raw_parts(view.as_ptr() as *const T, self.capacity()) };
+        &slice[index]
     }
 }
 
