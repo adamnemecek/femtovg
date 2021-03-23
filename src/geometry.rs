@@ -233,6 +233,16 @@ pub struct Size {
     pub h: f32,
 }
 
+impl From<Size> for wgpu::Extent3d {
+    fn from(a: Size) -> Self {
+        Self {
+            width: a.w as _,
+            height: a.h as _,
+            depth_or_array_layers: 1,
+        }
+    }
+}
+
 impl Size {
     pub fn new(w: f32, h: f32) -> Self {
         Self { w, h }

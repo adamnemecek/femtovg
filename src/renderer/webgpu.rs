@@ -96,7 +96,7 @@ impl From<CompositeOperationState> for WGPUBlend {
     }
 }
 
-fn new_render_pass<'a>(
+fn begin_render_pass<'a>(
     // ctx: WGPUContext,
     encoder: &'a mut wgpu::CommandEncoder,
     target: &'a wgpu::TextureView,
@@ -397,15 +397,6 @@ impl WGPU {
             // swap_chain: WGPUSwapChain,
             // bind_group_layout: wgpu::BindGroupLayout,
         }
-        // Self {
-        // stencil_texture,
-        //  index_buffer,
-        // vertex_buffer,
-        // pseudo_texture,
-        // cache,
-        // view_size,
-        // bind_group_layout,
-        // }
     }
 
     // fn convex_fill<'a, 'b>(
@@ -799,7 +790,8 @@ impl Renderer for WGPU {
         'outer: while i < commands.len() {
             let target_texture = match render_target {
                 RenderTarget::Screen => {
-                    self.swap_chain.get_current_frame().unwrap()
+                    let frame = self.swap_chain.get_current_frame().unwrap();
+                    frame.output.view
 
                     // println!("render target: screen");
                     // let d = self.layer.next_drawable().unwrap().to_owned();
@@ -813,12 +805,14 @@ impl Renderer for WGPU {
                     todo!();
                 }
             };
-            let pass_desc = new_pass_descriptor();
-            let mut pass = encoder.begin_render_pass(&pass_desc);
+
+            let pass = begin_render_pass(&mut encoder, target, clear_color, stencil_texture, vertex_buffer, index_buffer, view_size);
+            // let pass_desc = new_pass_descriptor();
+            // let mut pass = encoder.begin_render_pass(&pass_desc);
 
             // pass.set_bind_group(index, bind_group, offsets)
 
-            // encoder.begin_render_pass(desc)
+            // encoder.begin_render_pass(des c)
 
             // pass.set_viewport(x, y, w, h, min_depth, max_depth)
 
