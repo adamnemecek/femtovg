@@ -890,12 +890,12 @@ impl Renderer for WGPU {
             //         TargetTexture::View(images.get(id).unwrap().view()),
             //     }
             // };
-            let chain = self.swap_chain.get_current_frame().unwrap();
+            let frame = self.swap_chain.get_current_frame().unwrap();
 
             let mut pass = begin_render_pass(
                 &mut encoder,
                 // target_texture_view.view(),
-                &chain.output.view,
+                &frame.output.view,
                 self.clear_color,
                 &mut self.stencil_texture,
                 &self.vertex_buffer,
