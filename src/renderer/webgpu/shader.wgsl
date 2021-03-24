@@ -17,21 +17,21 @@ struct RasterizerData {
 // size_of(uniforms) == 256
 [[block]]
 struct Uniforms {
-    scissor_mat: mat3x4<f32>;       // 3 * 4 * 4
-    paint_mat: mat3x4<f32>;         // 3 * 4 * 4
-    inner_col: vec4<f32>;           // 4 * 4
-    outer_col: vec4<f32>;           // 4 * 4
-    scissor_ext: vec2<f32>;         // 2 * 4
-    scissor_scale: vec2<f32>;       // 2 * 4
-    extent: vec2<f32>;              // 2 * 4
-    radius: f32;                    // 4
-    feather: f32;                   // 4
-    stroke_mult: f32;               // 4
-    stroke_thr: f32;                // 4
-    tex_type: f32;                  // 4
-    shader_type: f32;               // 4
-    has_mask: f32;                  // 4
-    padding: array<f32, 19>;        // 19 * 4
+    scissor_mat: mat3x4<f32>;                       // 3 * 4 * 4
+    paint_mat: mat3x4<f32>;                         // 3 * 4 * 4
+    inner_col: vec4<f32>;                           // 4 * 4
+    outer_col: vec4<f32>;                           // 4 * 4
+    scissor_ext: vec2<f32>;                         // 2 * 4
+    scissor_scale: vec2<f32>;                       // 2 * 4
+    extent: vec2<f32>;                              // 2 * 4
+    radius: f32;                                    // 4
+    feather: f32;                                   // 4
+    stroke_mult: f32;                               // 4
+    stroke_thr: f32;                                // 4
+    tex_type: f32;                                  // 4
+    shader_type: f32;                               // 4
+    has_mask: f32;                                  // 4
+    padding: [[stride(4)]] array<f32, 19>;          // 19 * 4
 };
 
 fn scissor_mask(u: Uniforms, p: vec2<f32>) -> f32 {
