@@ -47,9 +47,14 @@ fn as_u8_slice<T>(v: &[T]) -> &[u8] {
     unsafe { std::slice::from_raw_parts(v.as_ptr() as *const u8, std::mem::size_of::<T>() * v.len()) }
 }
 
-fn create_buffer<T: Copy>(ctx: &WGPUContext, mem_align: MemAlign<T>, usage: wgpu::BufferUsage) -> wgpu::Buffer {
+fn create_buffer<T: Copy>(
+    ctx: &WGPUContext,
+    label: &str,
+    mem_align: MemAlign<T>,
+    usage: wgpu::BufferUsage,
+) -> wgpu::Buffer {
     ctx.device().create_buffer(&wgpu::BufferDescriptor {
-        label: None,
+        label: Some(label),
          /// Debug label of a buffer. This will show up in graphics debuggers for easy identification.
         // pub label: L,
         /// Size of a buffer.
@@ -77,7 +82,12 @@ impl<T: Copy> WGPUVec<T> {
     pub fn new_vertex(ctx: &WGPUContext, capacity: usize) -> Self {
         let mem_align = MemAlign::new(capacity);
 
-        let inner = create_buffer(ctx, mem_align, wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::VERTEX);
+        let inner = create_buffer(
+            ctx,
+            "vertex buffer",
+            mem_align,
+            wgpu::BufferUsage::VERTEX,
+        );
         Self {
             ctx: ctx.clone(),
             inner,
@@ -124,7 +134,12 @@ impl<T: Copy> WGPUVec<T> {
     pub fn new_index(ctx: &WGPUContext, capacity: usize) -> Self {
         let mem_align = MemAlign::new(capacity);
 
-        let inner = create_buffer(ctx, mem_align, wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::INDEX);
+        let inner = create_buffer(
+            ctx,
+            "index buffer",
+            mem_align,
+             wgpu::BufferUsage::INDEX,
+        );
         Self {
             ctx: ctx.clone(),
             inner,
