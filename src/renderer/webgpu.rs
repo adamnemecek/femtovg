@@ -189,11 +189,6 @@ pub struct WGPU {
 
 impl WGPU {
     pub fn new(ctx: &WGPUContext, view_size: Size) -> Self {
-        // let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
-        //     label: None,
-        //     source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("webgpu/shader.wgsl"))),
-        //     flags: wgpu::ShaderFlags::all(),
-        // });
 
         let default_stencil_state = 0;
 
@@ -402,7 +397,7 @@ impl WGPU {
         let clear_color = Color::white();
         let pipeline_cache = WGPUPipelineCache::new(ctx, pipeline_layout, clear_rect_pipeline_layout, shader);
         let bind_group_cache = WGPUBindGroupCache::new();
-        let swap_chain = WGPUSwapChain::new(wgpu::TextureFormat::Astc10x10RgbaUnorm, view_size);
+        let swap_chain = WGPUSwapChain::new(ctx, wgpu::TextureFormat::Bgra8Unorm, view_size);
         let pseudo_texture = WGPUTexture::new_pseudo_texture(ctx).unwrap();
         // Self {
 

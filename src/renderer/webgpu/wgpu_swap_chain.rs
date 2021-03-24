@@ -1,5 +1,7 @@
 use super::Size;
 
+use super::WGPUContext;
+
 fn sc_desc(format: wgpu::TextureFormat, size: Size) -> wgpu::SwapChainDescriptor {
     wgpu::SwapChainDescriptor {
         usage: wgpu::TextureUsage::RENDER_ATTACHMENT,
@@ -17,7 +19,8 @@ pub struct WGPUSwapChain {
 }
 
 impl WGPUSwapChain {
-    pub fn new(format: wgpu::TextureFormat, size: Size) -> Self {
+    pub fn new(ctx: &WGPUContext, format: wgpu::TextureFormat, size: Size) -> Self {
+        // ctx.device().create_swap_chain(surface, desc)
         todo!()
     }
 

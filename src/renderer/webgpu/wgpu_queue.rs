@@ -74,12 +74,16 @@ impl WGPUContext {
         &self.instance.adapter
     }
 
-    pub fn device(&self) -> &std::rc::Rc<wgpu::Device> {
+    pub fn device(&self) -> &wgpu::Device {
         &self.device
     }
 
-    pub fn queue(&self) -> &std::rc::Rc<wgpu::Queue> {
+    pub fn queue(&self) -> &wgpu::Queue {
         &self.queue
+    }
+
+    pub fn surface(&self) -> &wgpu::Surface {
+        self.instance.surface.as_ref().unwrap()
     }
 }
 // #[derive(Clone)]
