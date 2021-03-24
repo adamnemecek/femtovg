@@ -29,7 +29,15 @@ impl WGPUStencilTexture {
     }
 
     pub fn resize(&mut self, size: Size) {
-        todo!()
+        if self.size().contains(&size) {
+            return;
+        }
+        let size = size.max(&self.size());
+        let desc = new_stencil_descriptor(size);
+        self.tex.destroy();
+
+        self.tex = self.ctx.device().create_texture(&desc);
+        self.view = self.tex.create_view(&Default::default());
     }
 
     pub fn view(&self) -> &wgpu::TextureView {
@@ -50,8 +58,8 @@ fn new_stencil_descriptor<'a>(size: Size) -> wgpu::TextureDescriptor<'a> {
         mip_level_count: 1,
         sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
-        format: wgpu::TextureFormat::Depth24PlusStencil8,
         //todo!
+        format: wgpu::TextureFormat::R8Unorm,
         usage: wgpu::TextureUsage::RENDER_ATTACHMENT,
     }
 }
