@@ -6,6 +6,7 @@ use wgpu::{
 // use fnv::FnvHashMap;
 use super::{
     Color,
+    Rect,
     Vertex,
     WGPUBlend,
     WGPUContext,
@@ -37,8 +38,11 @@ impl crate::Vertex {
     }
 }
 
+#[repr(C)]
+#[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
 pub struct ClearRect {
-    color: Color,
+    pub rect: Rect,
+    pub color: Color,
 }
 
 impl ClearRect {

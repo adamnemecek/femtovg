@@ -874,9 +874,7 @@ impl Renderer for WGPU {
         let mut i = 0;
 
         'outer: while i < commands.len() {
-            let mut encoder = self
-                .ctx
-                .create_command_encoder(None);
+            let mut encoder = self.ctx.create_command_encoder(None);
             {
                 // let target_texture_view = match render_target {
                 //     RenderTarget::Screen => {
@@ -1115,6 +1113,28 @@ impl Renderer for WGPU {
                             height,
                             color,
                         } => {
+                            pass.push_debug_group("clear rect");
+                            let ndc_rect = Rect {
+                                x: -1.0,
+                                y: -1.0,
+                                w: 2.0,
+                                h: 2.0,
+                            };
+
+                            let clear_rect = ClearRect {
+                                rect: ndc_rect,
+                                color: *color,
+                            };
+
+                            let bg = bind_group!(self, images, cmd);
+
+                            pass.set_pipeline(states.clear_rect());
+
+                            pass.set_scissor_rect(*x as _, *y as _, *width as _, *height as _);
+                            pass.set_vertex_value(0, &clear_rect);
+                            // pass.draw()
+
+                            pass.pop_debug_group();
                             // clear_rect(
                             //     &mut pass,
                             //     images,
