@@ -208,20 +208,28 @@ fn rect_vert_cw(
     return pos;
 }
 
+// [[block]]
 struct ClearRectOut {
-
+    [[builtin(position)]] pos: vec4<f32>;
+    [[location(0)]] color: vec4<f32>;
 };
 
 [[stage(vertex)]]
 fn vertex_clear_rect(
+    [[location(0)]] rect: vec4<f32>,
+    [[location(1)]] color: vec4<f32>,
+    [[builtin(vertex_index)]] vid: u32,
+) -> ClearRectOut {
+    var out: ClearRectOut;
+    // out.pos = vec4<f32>(rect_vert_cw(rect, i32(vid)), 0.0, 1.0);
+    out.color = color;
 
-) {
-
+    return out;
 }
 
 [[stage(fragment)]]
 fn fragment_clear_rect(
-    in: RasterizerData
-) {
-
+    in: ClearRectOut
+) -> [[location(0)]] vec4<f32> {
+    return in.color;
 }
