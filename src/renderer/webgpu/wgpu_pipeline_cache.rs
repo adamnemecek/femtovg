@@ -1,3 +1,8 @@
+use wgpu::{
+    PrimitiveTopology,
+    ShaderModule,
+};
+
 // use fnv::FnvHashMap;
 use super::{
     WGPUBlend,
@@ -30,6 +35,32 @@ impl crate::Vertex {
     }
 }
 
+pub struct ClearRect {
+    color: crate::Color,
+}
+
+impl ClearRect {
+    fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
+        use std::mem;
+        wgpu::VertexBufferLayout {
+            array_stride: mem::size_of::<Self>() as wgpu::BufferAddress,
+            step_mode: wgpu::InputStepMode::Vertex,
+            attributes: &[
+                wgpu::VertexAttribute {
+                    offset: 0,
+                    shader_location: 0,
+                    format: wgpu::VertexFormat::Float32x4,
+                },
+                wgpu::VertexAttribute {
+                    offset: std::mem::size_of::<[f32; 4]>() as _,
+                    shader_location: 1,
+                    format: wgpu::VertexFormat::Float32x4,
+                },
+            ],
+        }
+    }
+}
+
 fn create_pipeline<'a>(
     ctx: &WGPUContext,
     label: impl Into<Option<&'a str>>,
@@ -45,12 +76,12 @@ fn create_pipeline<'a>(
         layout: Some(layout),
         vertex: wgpu::VertexState {
             module: shader,
-            entry_point: "vs_main",
+            entry_point: "vertex_shader",
             buffers: &[crate::Vertex::desc()],
         },
         fragment: Some(wgpu::FragmentState {
             module: shader,
-            entry_point: "fs_main",
+            entry_point: "fragment_shader_aa",
             //todo!
             targets: &[format.into()],
         }),
@@ -65,31 +96,34 @@ fn create_pipeline<'a>(
     })
 }
 
-fn create_clear_rect_pipeline(ctx: &WGPUContext) -> wgpu::RenderPipeline {
-    todo!()
-    // ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-    //     label: label.into(),
-    //     layout: Some(layout),
-    //     vertex: wgpu::VertexState {
-    //         module: shader,
-    //         entry_point: "vs_main",
-    //         buffers: &[crate::Vertex::desc()],
-    //     },
-    //     fragment: Some(wgpu::FragmentState {
-    //         module: shader,
-    //         entry_point: "fs_main",
-    //         //todo!
-    //         targets: &[format.into()],
-    //     }),
-    //     primitive: wgpu::PrimitiveState {
-    //         topology,
-    //         front_face: wgpu::FrontFace::Ccw,
-    //         cull_mode: cull_mode.into(),
-    //         ..Default::default()
-    //     },
-    //     depth_stencil: depth_stencil.into(),
-    //     multisample: wgpu::MultisampleState::default(),
-    // // })
+fn create_clear_rect_pipeline(
+    ctx: &WGPUContext,
+    shader: &ShaderModule,
+    format: wgpu::TextureFormat,
+    layout: &wgpu::PipelineLayout,
+) -> wgpu::RenderPipeline {
+    ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label: Some("clear_rect"),
+        layout: Some(layout),
+        vertex: wgpu::VertexState {
+            module: shader,
+            entry_point: "vertex_clear_rect",
+            buffers: &[crate::Vertex::desc()],
+        },
+        fragment: Some(wgpu::FragmentState {
+            module: shader,
+            entry_point: "fragment_clear_rect",
+            //todo!
+            targets: &[format.into()],
+        }),
+        primitive: wgpu::PrimitiveState {
+            topology: wgpu::PrimitiveTopology::TriangleList,
+            front_face: wgpu::FrontFace::Ccw,
+            ..Default::default()
+        },
+        depth_stencil: None,
+        multisample: wgpu::MultisampleState::default(),
+    })
 }
 
 // fn clear_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencilState {
@@ -422,6 +456,7 @@ impl WGPUPipelineStates {
     pub fn new(
         ctx: &WGPUContext,
         layout: &wgpu::PipelineLayout,
+        clear_rect_layout: &wgpu::PipelineLayout,
         blend_func: WGPUBlend,
         format: wgpu::TextureFormat,
         shader: &wgpu::ShaderModule,
@@ -569,7 +604,7 @@ impl WGPUPipelineStates {
             None,
         );
 
-        let clear_rect = create_clear_rect_pipeline(ctx);
+        let clear_rect = create_clear_rect_pipeline(ctx, shader, format, clear_rect_layout);
 
         // let convex_fill1 = create_pipeline(
         //     ctx,
@@ -625,6 +660,7 @@ pub struct WGPUPipelineCache {
     ctx: WGPUContext,
     shader: wgpu::ShaderModule,
     layout: wgpu::PipelineLayout,
+    clear_rect_layout: wgpu::PipelineLayout,
     // inner: std::rc::Rc<std::cell::RefCell<HashMap<PipelineCacheKey, WGPUPipelineState>>>,
     inner: std::cell::UnsafeCell<HashMap<PipelineCacheKey, WGPUPipelineStates>>,
     // ph: &'a std::marker::PhantomData<()>,
@@ -634,11 +670,13 @@ impl WGPUPipelineCache {
     pub fn new(
         ctx: &WGPUContext,
         layout: wgpu::PipelineLayout,
+        clear_rect_layout: wgpu::PipelineLayout,
         shader: wgpu::ShaderModule, // vert: &wgpu::
     ) -> Self {
         Self {
             shader,
             layout,
+            clear_rect_layout,
             inner: Default::default(),
             ctx: ctx.clone(),
         }
@@ -655,6 +693,7 @@ impl WGPUPipelineCache {
             let ps = WGPUPipelineStates::new(
                 &self.ctx,
                 &self.layout,
+                &self.clear_rect_layout,
                 blend_func,
                 texture_format,
                 &self.shader,

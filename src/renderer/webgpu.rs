@@ -184,6 +184,7 @@ pub struct WGPU {
     view_size: Size,
     swap_chain: WGPUSwapChain,
     bind_group_layout: wgpu::BindGroupLayout,
+    // clear_rect_bind_group_layout: wgpu::BindGroupLayout,
 }
 
 impl WGPU {
@@ -307,6 +308,39 @@ impl WGPU {
             ],
         });
 
+        // let clear_rect_bind_group_layout = ctx.device().create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        //     label: None,
+        //     entries: &[
+        //         wgpu::BindGroupLayoutEntry {
+        //             binding: 0,
+        //             visibility: wgpu::ShaderStage::VERTEX,
+        //             ty: wgpu::BindingType::Texture {
+        //                 sample_type: wgpu::TextureSampleType::Float { filterable: false },
+        //                 view_dimension: wgpu::TextureViewDimension::D2,
+        //                 multisampled: false,
+        //             },
+        //             count: None,
+        //         },
+        //         wgpu::BindGroupLayoutEntry {
+        //             binding: 1,
+        //             visibility: wgpu::ShaderStage::VERTEX,
+        //             ty: wgpu::BindingType::Texture {
+        //                 sample_type: wgpu::TextureSampleType::Float { filterable: false },
+        //                 view_dimension: wgpu::TextureViewDimension::D2,
+        //                 multisampled: false,
+        //             },
+        //             count: None,
+        //         },
+        //     ],
+        // });
+
+        let clear_rect_pipeline_layout = ctx.device().create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: None,
+            // bind_group_layouts: &[&clear_rect_bind_group_layout],
+            bind_group_layouts: &[],
+            push_constant_ranges: &[],
+        });
+
         // let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
         //     label: None,
         //     entries: &[wgpu::BindGroupLayoutEntry {
@@ -366,7 +400,7 @@ impl WGPU {
         });
 
         let clear_color = Color::white();
-        let pipeline_cache = WGPUPipelineCache::new(ctx, pipeline_layout, shader);
+        let pipeline_cache = WGPUPipelineCache::new(ctx, pipeline_layout, clear_rect_pipeline_layout, shader);
         let bind_group_cache = WGPUBindGroupCache::new();
         let swap_chain = WGPUSwapChain::new(wgpu::TextureFormat::Astc10x10RgbaUnorm, view_size);
         let pseudo_texture = WGPUTexture::new_pseudo_texture(ctx).unwrap();
@@ -388,6 +422,7 @@ impl WGPU {
             view_size,
             bind_group_layout,
             swap_chain,
+            // clear_rect_bind_group_layout,
             // swap_chain: WGPUSwapChain::new()
             // index_buffer: WGPUVec<u32>,
             // vertex_buffer: WGPUVec<Vertex>,
