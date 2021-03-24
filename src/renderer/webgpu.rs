@@ -744,6 +744,19 @@ impl WGPU {
     // }
 }
 
+enum TargetTexture<'a> {
+    Frame(wgpu::SwapChainFrame),
+    View(&'a wgpu::TextureView),
+}
+impl<'a> TargetTexture<'a> {
+    pub fn view(&'a self) -> &'a wgpu::TextureView {
+        match self {
+            Self::Frame(f) => &f.output.view,
+            Self::View(r) => r,
+        }
+    }
+}
+
 impl Renderer for WGPU {
     type Image = WGPUTexture;
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
@@ -792,18 +805,36 @@ impl Renderer for WGPU {
 
         // let mut current_frame = None;
 
-        enum TargetTexture<'a> {
-            Frame(wgpu::SwapChainFrame),
-            View(&'a wgpu::TextureView),
-        }
-        impl<'a> TargetTexture<'a> {
-            pub fn view(&'a self) -> &'a wgpu::TextureView {
-                match self {
-                    Self::Frame(f) => &f.output.view,
-                    Self::View(r) => r,
+        // process indices
+        while i < commands.len() {
+            let cmd = &commands[i];
+            match cmd.cmd_type {
+                CommandType::ConvexFill { .. } => {
+                    for drawable in &cmd.drawables {
+                        if let Some((start, count)) = drawable.fill_verts {
+                            self.index_buffer
+                                .extend_with_triange_fan_indices_cw(start as u32, count as _);
+                        }
+                    }
                 }
+                CommandType::ConcaveFill { .. } => {
+                    for drawable in &cmd.drawables {
+                        if let Some((start, count)) = drawable.fill_verts {
+                            // let offset = self.index_buffer.len();
+                            self.index_buffer
+                                .extend_with_triange_fan_indices_cw(start as _, count as _);
+                        }
+                    }
+                }
+                CommandType::Stroke { .. } => {}
+                CommandType::StencilStroke { .. } => {}
+                CommandType::Triangles { .. } => {}
+                CommandType::ClearRect { .. } => {}
+                CommandType::SetRenderTarget(_) => {}
             }
         }
+
+        i = 0;
 
         'outer: while i < commands.len() {
             //    let mut pass = {
@@ -844,6 +875,10 @@ impl Renderer for WGPU {
                 self.view_size,
             );
 
+            // let mut index_buffer_view = self.index_buffer.view_mut();
+
+            pass.set_vertex_buffer(0, self.vertex_buffer.slice());
+            pass.set_index_buffer(self.index_buffer.slice(), wgpu::IndexFormat::Uint32);
             // };
 
             // let pass_desc = new_pass_descriptor();
@@ -856,6 +891,8 @@ impl Renderer for WGPU {
             // pass.set_viewport(x, y, w, h, min_depth, max_depth)
 
             // let mut state = None;
+
+            let mut offset = 0;
 
             macro_rules! bind_group {
                 ($self_: ident, $images: ident, $cmd: ident) => {
@@ -907,17 +944,19 @@ impl Renderer for WGPU {
 
                         for drawable in &cmd.drawables {
                             if let Some((start, count)) = drawable.fill_verts {
-                                let offset = self.index_buffer.len();
+                                // let offset = self.index_buffer.len();
+
                                 // let byte_index_buffer_offset = offset * std::mem::size_of::<u32>();
 
-                                let triangle_fan_index_count = self
-                                    .index_buffer
-                                    .extend_with_triange_fan_indices_cw(start as u32, count as u32);
-                                pass.set_index_buffer(self.index_buffer.as_ref().slice(..), wgpu::IndexFormat::Uint32);
+                                // let triangle_fan_index_count = self
+                                //     .index_buffer
+                                //     .extend_with_triange_fan_indices_cw(start as u32, count as u32);
+                                // pass.set_index_buffer(self.index_buffer.as_ref().slice(), wgpu::IndexFormat::Uint32);
                                 // let fmt = wgpu::IndexFormat::Uint32;
-                                // pass.set_index_buffer(self.index_buffer.slice(..), fmt);
+                                // pass.set_index_buffer(self.index_buffer.slice(), wgpu::IndexFormat::Uint32);
 
-                                pass.draw_indexed((offset as _)..(offset + triangle_fan_index_count) as _, 0, 0..1);
+                                // pass.draw_indexed((offset as _)..(offset + triangle_fan_index_count) as _, 0, 0..1);
+                                offset += (count - 2) * 3;
                             }
                             // draw fringes
 
@@ -940,8 +979,8 @@ impl Renderer for WGPU {
                         for drawable in &cmd.drawables {
                             if let Some((start, count)) = drawable.fill_verts {
                                 let offset = self.index_buffer.len();
-                                self.index_buffer
-                                    .extend_with_triange_fan_indices_cw(start as _, count as _);
+                                // self.index_buffer
+                                // .extend_with_triange_fan_indices_cw(start as _, count as _);
                                 pass.draw_indexed(0..0, 0, 0..0);
                                 // pass.set_push_constants(stages, offset, data)p
                             }
@@ -1049,9 +1088,6 @@ impl Renderer for WGPU {
                     }
                     CommandType::SetRenderTarget(target) => {
                         render_target = *target;
-                        // let buffer = encoder.finish();
-                        // self.ctx.queue().submit(Some(buffer));
-                        // pass = encoder.begin_render_pass(&pass_desc);
                         continue 'outer;
                     }
                 }

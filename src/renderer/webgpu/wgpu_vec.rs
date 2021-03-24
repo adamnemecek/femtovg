@@ -7,6 +7,18 @@ use super::{
     WGPUVar,
 };
 
+pub struct WGPUVecViewMut<'a, T: Copy> {
+    // len:
+    inner: wgpu::BufferViewMut<'a>,
+    ph: std::marker::PhantomData<T>,
+}
+
+// impl<'a, T: Copy> WGPUVecViewMut<'a, T> {
+//     pub fn new(v: WGUPVec<T>) -> Self {
+//         todo!()
+//     }
+// }
+
 pub struct WGPUVecIterator<'a, T: Copy> {
     inner: &'a WGPUVec<T>,
     idx: usize,
@@ -177,6 +189,10 @@ impl<T: Copy> WGPUVec<T> {
     pub fn capacity(&self) -> usize {
         self.mem_align.capacity
     }
+
+    // pub fn view_mut<'a>(&'a self) -> wgpu::BufferViewMut<'a> {
+    //     self.inner.slice(..).get_mapped_range_mut()
+    // }
 
     // pub fn upload(&mut self) {
     //     // self.gpu.destroy()
