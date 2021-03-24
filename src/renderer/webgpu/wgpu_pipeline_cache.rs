@@ -5,6 +5,8 @@ use wgpu::{
 
 // use fnv::FnvHashMap;
 use super::{
+    Color,
+    Vertex,
     WGPUBlend,
     WGPUContext,
 };
@@ -36,7 +38,7 @@ impl crate::Vertex {
 }
 
 pub struct ClearRect {
-    color: crate::Color,
+    color: Color,
 }
 
 impl ClearRect {
@@ -77,7 +79,7 @@ fn create_pipeline<'a>(
         vertex: wgpu::VertexState {
             module: shader,
             entry_point: "vertex_shader",
-            buffers: &[crate::Vertex::desc()],
+            buffers: &[Vertex::desc()],
         },
         fragment: Some(wgpu::FragmentState {
             module: shader,
@@ -108,7 +110,7 @@ fn create_clear_rect_pipeline(
         vertex: wgpu::VertexState {
             module: shader,
             entry_point: "vertex_clear_rect",
-            buffers: &[crate::Vertex::desc()],
+            buffers: &[ClearRect::desc()],
         },
         fragment: Some(wgpu::FragmentState {
             module: shader,
