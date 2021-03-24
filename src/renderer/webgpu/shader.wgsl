@@ -65,8 +65,10 @@ struct ViewSize {
     y: f32;
 };
 
-[[group(0), binding(0)]]
-var viewSize: ViewSize;
+var<push_constant> viewSize: ViewSize;
+
+// [[group(0), binding(0)]]
+// var viewSize: ViewSize;
 
 [[stage(vertex)]]
 fn vertex_shader(
@@ -87,15 +89,17 @@ fn vertex_shader(
     return ret;
 }
 
-[[group(0), binding(1)]]
-var u: Uniforms;
-[[group(0), binding(2)]]
+// [[group(0), binding(1)]]
+// var u: Uniforms;
+var<push_constant> u: Uniforms;
+
+[[group(0), binding(0)]]
 var tex: texture_2d<f32>;
-[[group(0), binding(3)]]
+[[group(0), binding(1)]]
 var samplr: sampler;
-[[group(0), binding(4)]]
+[[group(0), binding(2)]]
 var alpha_tex: texture_2d<f32>;
-[[group(0), binding(5)]]
+[[group(0), binding(3)]]
 var alpha_samplr: sampler;
 
 [[stage(fragment)]]
