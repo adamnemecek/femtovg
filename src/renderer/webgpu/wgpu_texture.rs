@@ -34,12 +34,12 @@ pub struct WGPUTexture {
 }
 
 impl WGPUTexture {
-    pub fn new_pseudo_texture(ctx: &WGPUContext) -> Self {
+    pub fn new_pseudo_texture(ctx: &WGPUContext) -> Result<Self, ErrorKind> {
         let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
         Self::new(ctx, info)
     }
 
-    pub fn new(ctx: &WGPUContext, info: ImageInfo) -> Self {
+    pub fn new(ctx: &WGPUContext, info: ImageInfo) -> Result<Self, ErrorKind> {
         assert!(info.format() != PixelFormat::Rgb8);
         let ctx = ctx.clone();
 
@@ -110,13 +110,13 @@ impl WGPUTexture {
 
         let sampler = ctx.device().create_sampler(&sampler_desc);
 
-        Self {
+        Ok(Self {
             view,
             sampler,
             ctx,
             info,
             tex,
-        }
+        })
     }
 
     pub fn write_texture(&self, extent: wgpu::Extent3d, data: &[u8]) {

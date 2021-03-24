@@ -369,6 +369,7 @@ impl WGPU {
         let pipeline_cache = WGPUPipelineCache::new(ctx, pipeline_layout, shader);
         let bind_group_cache = WGPUBindGroupCache::new();
         let swap_chain = WGPUSwapChain::new(wgpu::TextureFormat::Astc10x10RgbaUnorm, view_size);
+        let pseudo_texture = WGPUTexture::new_pseudo_texture(ctx).unwrap();
         // Self {
 
         // }
@@ -381,7 +382,7 @@ impl WGPU {
             index_buffer,
             vertex_buffer,
             render_target: RenderTarget::Screen,
-            pseudo_texture: WGPUTexture::new_pseudo_texture(ctx),
+            pseudo_texture,
             pipeline_cache,   //: Default::default(),
             bind_group_cache, //: Default::default(),
             view_size,
@@ -1088,7 +1089,7 @@ impl Renderer for WGPU {
     }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
-        todo!()
+        WGPUTexture::new(&self.ctx, info)
     }
 
     fn update_image(
