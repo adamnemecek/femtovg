@@ -792,6 +792,15 @@ impl<'a> TargetTexture<'a> {
     }
 }
 
+impl<'a> Drop for TargetTexture<'a> {
+    fn drop(&mut self) {
+        match self {
+            Self::Frame(_) => println!("dropping frame"),
+            Self::View(_) => println!("dropping view"),
+        }
+    }
+}
+
 impl Renderer for WGPU {
     type Image = WGPUTexture;
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
@@ -869,20 +878,24 @@ impl Renderer for WGPU {
 
         let mut i = 0;
         'outer: while i < commands.len() {
-            let target_texture_view = match render_target {
-                RenderTarget::Screen => {
-                    if let Ok(frame) = self.swap_chain.get_current_frame() {
-                        TargetTexture::Frame(frame)
-                    } else {
-                        todo!()
-                    }
-                }
-                RenderTarget::Image(id) => TargetTexture::View(images.get(id).unwrap().view()),
-            };
+            // let target_texture_view = match render_target {
+            //     RenderTarget::Screen => {
+            //         if let Ok(frame) = self.swap_chain.get_current_frame() {
+            //             TargetTexture::Frame(frame)
+            //         } else {
+            //             todo!()
+            //         }
+            //     }
+            //     RenderTarget::Image(id) => {
+            //         TargetTexture::View(images.get(id).unwrap().view()),
+            //     }
+            // };
+            let chain = self.swap_chain.get_current_frame().unwrap();
 
             let mut pass = begin_render_pass(
                 &mut encoder,
-                target_texture_view.view(),
+                // target_texture_view.view(),
+                &chain.output.view,
                 self.clear_color,
                 &mut self.stencil_texture,
                 &self.vertex_buffer,
@@ -1113,6 +1126,8 @@ impl Renderer for WGPU {
                     }
                     CommandType::SetRenderTarget(target) => {
                         render_target = *target;
+                        // drop(pass);
+                        // drop(target_texture_view);
                         continue 'outer;
                     }
                 }
