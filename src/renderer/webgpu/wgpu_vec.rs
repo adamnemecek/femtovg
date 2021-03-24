@@ -86,7 +86,7 @@ impl<T: Copy> WGPUVec<T> {
             ctx,
             "vertex buffer",
             mem_align,
-            wgpu::BufferUsage::VERTEX,
+            wgpu::BufferUsage::VERTEX | wgpu::BufferUsage::COPY_DST
         );
         Self {
             ctx: ctx.clone(),
@@ -138,7 +138,9 @@ impl<T: Copy> WGPUVec<T> {
             ctx,
             "index buffer",
             mem_align,
-             wgpu::BufferUsage::INDEX,
+            //  wgpu::BufferUsage::INDEX,
+            wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::INDEX
+
         );
         Self {
             ctx: ctx.clone(),
