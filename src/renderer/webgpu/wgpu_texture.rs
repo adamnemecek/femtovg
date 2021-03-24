@@ -74,7 +74,7 @@ impl WGPUTexture {
             dimension: wgpu::TextureDimension::D2,
             format,
             //todo!
-            usage: wgpu::TextureUsage::SAMPLED | wgpu::TextureUsage::RENDER_ATTACHMENT,
+            usage: wgpu::TextureUsage::SAMPLED | wgpu::TextureUsage::RENDER_ATTACHMENT | wgpu::TextureUsage::COPY_DST,
         });
 
         let view = tex.create_view(&wgpu::TextureViewDescriptor::default());
@@ -133,27 +133,48 @@ impl WGPUTexture {
     }
 
     pub fn update(&mut self, src: ImageSource, x: usize, y: usize) -> Result<(), ErrorKind> {
-        let size = Size::new(0.0, 0.0);
+        let (width, height) = src.dimensions();
+        if x + width > self.info.width() {
+            return Err(ErrorKind::ImageUpdateOutOfBounds);
+        }
+
+        if y + height > self.info.height() {
+            return Err(ErrorKind::ImageUpdateOutOfBounds);
+        }
+
+        if self.info.format() != src.format() {
+            return Err(ErrorKind::ImageUpdateWithDifferentFormat);
+        }
+
+        let size = Size::new(width as _, height as _);
+        let origin = wgpu::Origin3d {
+            x: x as _,
+            y: y as _,
+            z: 1,
+        };
+        let copy_view = wgpu::TextureCopyView {
+            mip_level: 0,
+            origin,
+            texture: self.tex(),
+        };
+
         match src {
             ImageSource::Gray(data) => {
                 let data_layout = wgpu::TextureDataLayout {
-                    offset: 0,
-                    bytes_per_row: 0,
-                    rows_per_image: 0,
+                    bytes_per_row: width as _,
+                    ..Default::default()
                 };
+
+                self.ctx
+                    .queue()
+                    .write_texture(copy_view, data.buf().as_bytes(), data_layout, size.into())
             }
             ImageSource::Rgba(data) => {
                 let data_layout = wgpu::TextureDataLayout {
-                    offset: 0,
-                    bytes_per_row: 0,
-                    rows_per_image: 0,
+                    bytes_per_row: (4 * width) as _,
+                    ..Default::default()
                 };
 
-                let copy_view = wgpu::TextureCopyView {
-                    mip_level: 0,
-                    origin: wgpu::Origin3d::ZERO,
-                    texture: self.tex(),
-                };
                 self.ctx
                     .queue()
                     .write_texture(copy_view, data.buf().as_bytes(), data_layout, size.into())
@@ -164,6 +185,12 @@ impl WGPUTexture {
                 )
             }
         };
+        let generate_mipmaps = self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS);
+        if generate_mipmaps {
+            // self.tex.generate_mipmaps(&self.queue);
+            self.tex().generate_mipmaps(self.ctx.device());
+        }
+
         Ok(())
     }
 
