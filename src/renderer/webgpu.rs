@@ -397,7 +397,7 @@ impl WGPU {
         let clear_color = Color::white();
         let pipeline_cache = WGPUPipelineCache::new(ctx, pipeline_layout, clear_rect_pipeline_layout, shader);
         let bind_group_cache = WGPUBindGroupCache::new();
-        let swap_chain = WGPUSwapChain::new(ctx, wgpu::TextureFormat::Bgra8Unorm, view_size);
+        let swap_chain = WGPUSwapChain::new(ctx, view_size);
         let pseudo_texture = WGPUTexture::new_pseudo_texture(ctx).unwrap();
         // Self {
 

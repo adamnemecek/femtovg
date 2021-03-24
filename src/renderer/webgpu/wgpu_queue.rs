@@ -85,6 +85,12 @@ impl WGPUContext {
     pub fn surface(&self) -> &wgpu::Surface {
         self.instance.surface.as_ref().unwrap()
     }
+
+    pub fn get_swap_chain_preferred_format(&self) -> wgpu::TextureFormat {
+        self.adapter()
+                .get_swap_chain_preferred_format(self.surface())
+                .unwrap()
+    }
 }
 // #[derive(Clone)]
 // pub struct WGPUDevice {
