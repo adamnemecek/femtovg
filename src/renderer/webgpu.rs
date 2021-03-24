@@ -815,11 +815,6 @@ impl Renderer for WGPU {
         self.index_buffer.clear();
         self.index_buffer.resize(verts.len() * 3);
 
-        let mut encoder = self
-            .ctx
-            .device()
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
-
         // let texture_format = &self.swap_chain.format();
         // let format = texture_format.clone();
         let texture_format = self.swap_chain.format();
@@ -877,265 +872,269 @@ impl Renderer for WGPU {
         }
 
         let mut i = 0;
+
         'outer: while i < commands.len() {
-            // let target_texture_view = match render_target {
-            //     RenderTarget::Screen => {
-            //         if let Ok(frame) = self.swap_chain.get_current_frame() {
-            //             TargetTexture::Frame(frame)
-            //         } else {
-            //             todo!()
-            //         }
-            //     }
-            //     RenderTarget::Image(id) => {
-            //         TargetTexture::View(images.get(id).unwrap().view()),
-            //     }
-            // };
-            let frame = self.swap_chain.get_current_frame().unwrap();
+            let mut encoder = self
+                .ctx
+                .create_command_encoder(None);
+            {
+                // let target_texture_view = match render_target {
+                //     RenderTarget::Screen => {
+                //         if let Ok(frame) = self.swap_chain.get_current_frame() {
+                //             TargetTexture::Frame(frame)
+                //         } else {
+                //             todo!()
+                //         }
+                //     }
+                //     RenderTarget::Image(id) => {
+                //         TargetTexture::View(images.get(id).unwrap().view()),
+                //     }
+                // };
+                let frame = self.swap_chain.get_current_frame().unwrap();
 
-            let mut pass = begin_render_pass(
-                &mut encoder,
-                // target_texture_view.view(),
-                &frame.output.view,
-                self.clear_color,
-                &mut self.stencil_texture,
-                &self.vertex_buffer,
-                &self.index_buffer,
-                self.view_size,
-            );
+                let mut pass = begin_render_pass(
+                    &mut encoder,
+                    // target_texture_view.view(),
+                    &frame.output.view,
+                    self.clear_color,
+                    &mut self.stencil_texture,
+                    &self.vertex_buffer,
+                    &self.index_buffer,
+                    self.view_size,
+                );
 
-            // let mut index_buffer_view = self.index_buffer.view_mut();
+                // let mut index_buffer_view = self.index_buffer.view_mut();
 
-            // pass.set_vertex_buffer(0, self.vertex_buffer.slice());
-            // pass.set_index_buffer(self.index_buffer.slice(), wgpu::IndexFormat::Uint32);
-            // };
+                // pass.set_vertex_buffer(0, self.vertex_buffer.slice());
+                // pass.set_index_buffer(self.index_buffer.slice(), wgpu::IndexFormat::Uint32);
+                // };
 
-            // let pass_desc = new_pass_descriptor();
-            // let mut pass = encoder.begin_render_pass(&pass_desc);
+                // let pass_desc = new_pass_descriptor();
+                // let mut pass = encoder.begin_render_pass(&pass_desc);
 
-            // pass.set_bind_group(index, bind_group, offsets)
+                // pass.set_bind_group(index, bind_group, offsets)
 
-            // encoder.begin_render_pass(des c)
+                // encoder.begin_render_pass(des c)
 
-            // pass.set_viewport(x, y, w, h, min_depth, max_depth)
+                // pass.set_viewport(x, y, w, h, min_depth, max_depth)
 
-            // let mut state = None;
+                // let mut state = None;
 
-            let mut offset = 0;
+                let mut offset = 0;
 
-            macro_rules! bind_group {
-                ($self_: ident, $images: ident, $cmd: ident) => {
-                    $self_.bind_group_cache.get(
-                        &$self_.ctx,
-                        $images,
-                        &$self_.bind_group_layout,
-                        $cmd.image,
-                        $cmd.alpha_mask,
-                        &$self_.pseudo_texture,
-                    );
-                };
-            }
+                macro_rules! bind_group {
+                    ($self_: ident, $images: ident, $cmd: ident) => {
+                        $self_.bind_group_cache.get(
+                            &$self_.ctx,
+                            $images,
+                            &$self_.bind_group_layout,
+                            $cmd.image,
+                            $cmd.alpha_mask,
+                            &$self_.pseudo_texture,
+                        );
+                    };
+                }
 
-            while i < commands.len() {
-                let cmd = &commands[i];
-                i += 1;
-                // cache the pipeline states
-                let states = {
-                    let blend: WGPUBlend = cmd.composite_operation.into();
-                    let states = if let Some(prev_states) = prev_states {
-                        if prev_states.matches(blend, texture_format) {
-                            prev_states
+                while i < commands.len() {
+                    let cmd = &commands[i];
+                    i += 1;
+                    // cache the pipeline states
+                    let states = {
+                        let blend: WGPUBlend = cmd.composite_operation.into();
+                        let states = if let Some(prev_states) = prev_states {
+                            if prev_states.matches(blend, texture_format) {
+                                prev_states
+                            } else {
+                                self.pipeline_cache.get(blend, texture_format)
+                            }
                         } else {
                             self.pipeline_cache.get(blend, texture_format)
-                        }
-                    } else {
-                        self.pipeline_cache.get(blend, texture_format)
+                        };
+                        prev_states = Some(states);
+                        states
                     };
-                    prev_states = Some(states);
-                    states
-                };
 
-                // pass.set_push_constants(wgpu::ShaderStage::FRAGMENT, 0, &[]);
+                    // pass.set_push_constants(wgpu::ShaderStage::FRAGMENT, 0, &[]);
 
-                // uniforms_offset += std::mem::size_of::<Params>();
+                    // uniforms_offset += std::mem::size_of::<Params>();
 
-                match &cmd.cmd_type {
-                    CommandType::ConvexFill { params } => {
-                        pass.push_debug_group("convex fill");
-                        // set_uniforms
-                        let s = states.convex_fill();
+                    match &cmd.cmd_type {
+                        CommandType::ConvexFill { params } => {
+                            pass.push_debug_group("convex fill");
+                            // set_uniforms
+                            let s = states.convex_fill();
 
-                        // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
-                        let bg = bind_group!(self, images, cmd);
+                            // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
+                            let bg = bind_group!(self, images, cmd);
 
-                        pass.set_pipeline(s.fill_buffer());
-                        pass.set_bind_group(0, bg.as_ref(), &[]);
-                        uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
+                            pass.set_pipeline(s.fill_buffer());
+                            pass.set_bind_group(0, bg.as_ref(), &[]);
+                            uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
-                        for drawable in &cmd.drawables {
-                            if let Some((start, count)) = drawable.fill_verts {
-                                // let offset = self.index_buffer.len();
+                            for drawable in &cmd.drawables {
+                                if let Some((start, count)) = drawable.fill_verts {
+                                    // let offset = self.index_buffer.len();
 
-                                // let byte_index_buffer_offset = offset * std::mem::size_of::<u32>();
+                                    // let byte_index_buffer_offset = offset * std::mem::size_of::<u32>();
 
-                                // let triangle_fan_index_count = self
-                                //     .index_buffer
-                                //     .extend_with_triange_fan_indices_cw(start as u32, count as u32);
-                                // pass.set_index_buffer(self.index_buffer.as_ref().slice(), wgpu::IndexFormat::Uint32);
-                                // let fmt = wgpu::IndexFormat::Uint32;
-                                // pass.set_index_buffer(self.index_buffer.slice(), wgpu::IndexFormat::Uint32);
+                                    // let triangle_fan_index_count = self
+                                    //     .index_buffer
+                                    //     .extend_with_triange_fan_indices_cw(start as u32, count as u32);
+                                    // pass.set_index_buffer(self.index_buffer.as_ref().slice(), wgpu::IndexFormat::Uint32);
+                                    // let fmt = wgpu::IndexFormat::Uint32;
+                                    // pass.set_index_buffer(self.index_buffer.slice(), wgpu::IndexFormat::Uint32);
 
-                                // pass.draw_indexed((offset as _)..(offset + triangle_fan_index_count) as _, 0, 0..1);
-                                let start = (start - 2) * 3;
-                                let count = (count - 2) * 3;
-                                pass.draw_indexed(vert_range(start, count), 0, 0..1);
-                                // offset += (count as u32 - 2) * 3;
+                                    // pass.draw_indexed((offset as _)..(offset + triangle_fan_index_count) as _, 0, 0..1);
+                                    let start = (start - 2) * 3;
+                                    let count = (count - 2) * 3;
+                                    pass.draw_indexed(vert_range(start, count), 0, 0..1);
+                                    // offset += (count as u32 - 2) * 3;
+                                }
+                                // draw fringes
+
+                                if let Some((start, count)) = drawable.stroke_verts {
+                                    pass.set_pipeline(s.stroke_buffer());
+                                    pass.draw(vert_range(start, count), 0..1);
+                                }
                             }
-                            // draw fringes
-
-                            if let Some((start, count)) = drawable.stroke_verts {
-                                pass.set_pipeline(s.stroke_buffer());
-                                pass.draw(vert_range(start, count), 0..1);
-                            }
+                            pass.pop_debug_group();
                         }
-                        pass.pop_debug_group();
-                    }
-                    CommandType::ConcaveFill {
-                        stencil_params,
-                        fill_params,
-                    } => {
-                        pass.push_debug_group("concave fill");
-                        let s = states.concave_fill();
-                        // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
-                        let bg = bind_group!(self, images, cmd);
+                        CommandType::ConcaveFill {
+                            stencil_params,
+                            fill_params,
+                        } => {
+                            pass.push_debug_group("concave fill");
+                            let s = states.concave_fill();
+                            // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
+                            let bg = bind_group!(self, images, cmd);
 
-                        for drawable in &cmd.drawables {
-                            if let Some((start, count)) = drawable.fill_verts {
-                                let offset = self.index_buffer.len();
-                                // self.index_buffer
-                                // .extend_with_triange_fan_indices_cw(start as _, count as _);
-                                pass.draw_indexed(0..0, 0, 0..0);
-                                // pass.set_push_constants(stages, offset, data)p
+                            for drawable in &cmd.drawables {
+                                if let Some((start, count)) = drawable.fill_verts {
+                                    let offset = self.index_buffer.len();
+                                    // self.index_buffer
+                                    // .extend_with_triange_fan_indices_cw(start as _, count as _);
+                                    pass.draw_indexed(0..0, 0, 0..0);
+                                    // pass.set_push_constants(stages, offset, data)p
+                                }
                             }
-                        }
-                        // pass.set_pipeline(states.concave_fill1());
-                        // set_uniforms
+                            // pass.set_pipeline(states.concave_fill1());
+                            // set_uniforms
 
-                        // fringes
-                        if self.antialias {
+                            // fringes
+                            if self.antialias {
+                                match cmd.fill_rule {
+                                    FillRule::NonZero => {
+                                        pass.set_pipeline(s.fringes_nonzero());
+                                        // pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
+                                    }
+                                    FillRule::EvenOdd => {
+                                        pass.set_pipeline(s.fringes_evenodd());
+                                        // pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
+                                    }
+                                }
+
+                                for drawable in &cmd.drawables {
+                                    if let Some((start, count)) = drawable.stroke_verts {
+                                        pass.draw(vert_range(start, count), 0..1);
+                                        // pass.draw(vertices, instances)
+                                    }
+                                }
+                            }
+
+                            // todo: can be moved into the if statement below?
                             match cmd.fill_rule {
                                 FillRule::NonZero => {
-                                    pass.set_pipeline(s.fringes_nonzero());
+                                    pass.set_pipeline(s.triangle_verts_nonzero());
                                     // pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
                                 }
                                 FillRule::EvenOdd => {
-                                    pass.set_pipeline(s.fringes_evenodd());
+                                    pass.set_pipeline(s.triangle_verts_evenodd());
                                     // pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
                                 }
                             }
 
+                            if let Some((start, count)) = cmd.triangles_verts {
+                                // pass.
+                                pass.draw(vert_range(start, count), 0..1);
+                            }
+                            pass.pop_debug_group();
+                        }
+                        CommandType::Stroke { params } => {
+                            pass.push_debug_group("stroke");
+                            // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
+                            let bg = bind_group!(self, images, cmd);
+
+                            // pass.set_pipeline()
+                            pass.set_bind_group(0, bg.as_ref(), &[]);
+                            let _ = pass.set_vertex_value(0, params);
+                            // pass.set_bind_group(0, bg.as_ref(), &[]);
+                            uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
+
+                            // self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
+                            //     for drawable in &cmd.drawables {
+                            //         if let Some((start, count)) = drawable.stroke_verts {
+                            //             // pass.draw()
+                            //         }
+                            //     }
+                            pass.pop_debug_group();
+                        }
+                        CommandType::StencilStroke { params1, params2 } => {
+                            pass.push_debug_group("stencil stroke");
+                            // pipeline state + stroke_shape_stencil_state
+                            let bg = bind_group!(self, images, cmd);
+                            uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
+
                             for drawable in &cmd.drawables {
                                 if let Some((start, count)) = drawable.stroke_verts {
-                                    pass.draw(vert_range(start, count), 0..1);
-                                    // pass.draw(vertices, instances)
+                                    // encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64)
+                                    pass.draw(vert_range(start, count), 0..0);
                                 }
                             }
-                        }
 
-                        // todo: can be moved into the if statement below?
-                        match cmd.fill_rule {
-                            FillRule::NonZero => {
-                                pass.set_pipeline(s.triangle_verts_nonzero());
-                                // pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
+                            // let bg = bind_group!(self, cmd);
+                            uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
+                            pass.pop_debug_group();
+                        }
+                        CommandType::Triangles { params } => {
+                            pass.push_debug_group("triangles");
+                            let bg = bind_group!(self, images, cmd);
+                            uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
+
+                            // pass.set_bind_group(index, bind_group, offsets)
+                            if let Some((start, count)) = cmd.triangles_verts {
+                                // encoder.draw_primitives(metal::MTLPrimitiveType::Triangle, start as u64, count as u64);
+                                // pass.draw()
+                                pass.draw(vert_range(start, count), 0..1);
                             }
-                            FillRule::EvenOdd => {
-                                pass.set_pipeline(s.triangle_verts_evenodd());
-                                // pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
-                            }
+                            pass.pop_debug_group();
                         }
-
-                        if let Some((start, count)) = cmd.triangles_verts {
-                            // pass.
-                            pass.draw(vert_range(start, count), 0..1);
+                        CommandType::ClearRect {
+                            x,
+                            y,
+                            width,
+                            height,
+                            color,
+                        } => {
+                            // clear_rect(
+                            //     &mut pass,
+                            //     images,
+                            //     cmd,
+                            //     // *params,
+                            //     &self.vertex_buffer,
+                            //     &mut self.index_buffer,
+                            //     states,
+                            // );
                         }
-                        pass.pop_debug_group();
-                    }
-                    CommandType::Stroke { params } => {
-                        pass.push_debug_group("stroke");
-                        // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
-                        let bg = bind_group!(self, images, cmd);
-
-                        // pass.set_pipeline()
-                        pass.set_bind_group(0, bg.as_ref(), &[]);
-                        let _ = pass.set_vertex_value(0, params);
-                        // pass.set_bind_group(0, bg.as_ref(), &[]);
-                        uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
-
-                        // self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
-                        //     for drawable in &cmd.drawables {
-                        //         if let Some((start, count)) = drawable.stroke_verts {
-                        //             // pass.draw()
-                        //         }
-                        //     }
-                        pass.pop_debug_group();
-                    }
-                    CommandType::StencilStroke { params1, params2 } => {
-                        pass.push_debug_group("stencil stroke");
-                        // pipeline state + stroke_shape_stencil_state
-                        let bg = bind_group!(self, images, cmd);
-                        uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
-
-                        for drawable in &cmd.drawables {
-                            if let Some((start, count)) = drawable.stroke_verts {
-                                // encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64)
-                                pass.draw(vert_range(start, count), 0..0);
-                            }
+                        CommandType::SetRenderTarget(target) => {
+                            render_target = *target;
+                            continue 'outer;
                         }
-
-                        // let bg = bind_group!(self, cmd);
-                        uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
-                        pass.pop_debug_group();
-                    }
-                    CommandType::Triangles { params } => {
-                        pass.push_debug_group("triangles");
-                        let bg = bind_group!(self, images, cmd);
-                        uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
-
-                        // pass.set_bind_group(index, bind_group, offsets)
-                        if let Some((start, count)) = cmd.triangles_verts {
-                            // encoder.draw_primitives(metal::MTLPrimitiveType::Triangle, start as u64, count as u64);
-                            // pass.draw()
-                        }
-                        pass.pop_debug_group();
-                    }
-                    CommandType::ClearRect {
-                        x,
-                        y,
-                        width,
-                        height,
-                        color,
-                    } => {
-                        // clear_rect(
-                        //     &mut pass,
-                        //     images,
-                        //     cmd,
-                        //     // *params,
-                        //     &self.vertex_buffer,
-                        //     &mut self.index_buffer,
-                        //     states,
-                        // );
-                    }
-                    CommandType::SetRenderTarget(target) => {
-                        render_target = *target;
-                        // drop(pass);
-                        // drop(target_texture_view);
-                        continue 'outer;
                     }
                 }
             }
-        }
 
-        let buffer = encoder.finish();
-        self.ctx.queue().submit(Some(buffer));
+            self.ctx.queue().submit(Some(encoder.finish()));
+        }
     }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {

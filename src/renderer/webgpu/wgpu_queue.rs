@@ -86,6 +86,10 @@ impl WGPUContext {
         self.instance.surface.as_ref().unwrap()
     }
 
+    pub fn create_command_encoder(&self, label: Option<&str>) -> wgpu::CommandEncoder {
+        self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label })
+    }
+
     pub fn get_swap_chain_preferred_format(&self) -> wgpu::TextureFormat {
         let format = self.adapter().get_swap_chain_preferred_format(self.surface()).unwrap();
         format
