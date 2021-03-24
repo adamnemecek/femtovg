@@ -14,6 +14,8 @@ use super::{
     WGPUTextureExt,
 };
 
+use rgb::ComponentBytes;
+
 impl From<PixelFormat> for wgpu::TextureFormat {
     fn from(a: PixelFormat) -> Self {
         match a {
@@ -26,11 +28,11 @@ impl From<PixelFormat> for wgpu::TextureFormat {
 
 pub struct WGPUTexture {
     //
+    ctx: WGPUContext,
     info: ImageInfo,
     tex: wgpu::Texture,
     view: wgpu::TextureView,
     sampler: wgpu::Sampler,
-    ctx: WGPUContext,
 }
 
 impl WGPUTexture {
@@ -128,6 +130,41 @@ impl WGPUTexture {
     pub fn resize(&mut self, size: Size) {
         // self.tex.destroy()
         todo!()
+    }
+
+    pub fn update(&mut self, src: ImageSource, x: usize, y: usize) -> Result<(), ErrorKind> {
+        let size = Size::new(0.0, 0.0);
+        match src {
+            ImageSource::Gray(data) => {
+                let data_layout = wgpu::TextureDataLayout {
+                    offset: 0,
+                    bytes_per_row: 0,
+                    rows_per_image: 0,
+                };
+            }
+            ImageSource::Rgba(data) => {
+                let data_layout = wgpu::TextureDataLayout {
+                    offset: 0,
+                    bytes_per_row: 0,
+                    rows_per_image: 0,
+                };
+
+                let copy_view = wgpu::TextureCopyView {
+                    mip_level: 0,
+                    origin: wgpu::Origin3d::ZERO,
+                    texture: self.tex(),
+                };
+                self.ctx
+                    .queue()
+                    .write_texture(copy_view, data.buf().as_bytes(), data_layout, size.into())
+            }
+            ImageSource::Rgb(_) => {
+                unimplemented!(
+                    "wgpu doesn't support RGB pixel format. Image should have been converted in load_image_file"
+                )
+            }
+        };
+        Ok(())
     }
 
     pub fn tex(&self) -> &wgpu::Texture {

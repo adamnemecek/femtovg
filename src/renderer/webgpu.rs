@@ -1126,14 +1126,8 @@ impl Renderer for WGPU {
         WGPUTexture::new(&self.ctx, info)
     }
 
-    fn update_image(
-        &mut self,
-        image: &mut Self::Image,
-        data: ImageSource,
-        x: usize,
-        y: usize,
-    ) -> Result<(), ErrorKind> {
-        todo!()
+    fn update_image(&mut self, image: &mut Self::Image, src: ImageSource, x: usize, y: usize) -> Result<(), ErrorKind> {
+        image.update(src, x, y)
     }
 
     fn delete_image(&mut self, image: Self::Image) {
