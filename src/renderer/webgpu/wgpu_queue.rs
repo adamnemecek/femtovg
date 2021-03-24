@@ -87,9 +87,8 @@ impl WGPUContext {
     }
 
     pub fn get_swap_chain_preferred_format(&self) -> wgpu::TextureFormat {
-        self.adapter()
-                .get_swap_chain_preferred_format(self.surface())
-                .unwrap()
+        let format = self.adapter().get_swap_chain_preferred_format(self.surface()).unwrap();
+        format
     }
 }
 // #[derive(Clone)]

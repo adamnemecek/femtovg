@@ -293,6 +293,26 @@ impl Default for State {
     }
 }
 
+pub trait DynamicImageExt {
+    fn convert_rgb_if_needed(self) -> Self;
+}
+
+impl DynamicImageExt for ::image::DynamicImage {
+    fn convert_rgb_if_needed(self) -> Self {
+        #[cfg(not(feature = "convert-rgb"))]
+        {
+            self
+        }
+        #[cfg(feature = "convert-rgb")]
+        {
+            match self {
+                Self::ImageRgb8(_) => Self::ImageRgba8(self.to_rgba8()),
+                _ => self,
+            }
+        }
+    }
+}
+
 /// Main 2D drawing context.
 pub struct Canvas<T: Renderer> {
     width: u32,
@@ -539,19 +559,19 @@ where
         filename: P,
         flags: ImageFlags,
     ) -> Result<ImageId, ErrorKind> {
-        let image = ::image::open(filename)?;
+        use ::image::DynamicImage;
 
+        let image = ::image::open(filename)?.convert_rgb_if_needed();
         use std::convert::TryFrom;
 
         let src = ImageSource::try_from(&image)?;
-
         self.create_image(src, flags)
     }
 
     /// Decode an image from memory
     #[cfg(feature = "image-loading")]
     pub fn load_image_mem(&mut self, data: &[u8], flags: ImageFlags) -> Result<ImageId, ErrorKind> {
-        let image = ::image::load_from_memory(data)?;
+        let image = ::image::load_from_memory(data)?.convert_rgb_if_needed();
 
         use std::convert::TryFrom;
 

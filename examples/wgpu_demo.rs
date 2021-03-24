@@ -19,7 +19,11 @@ use winit::window::WindowBuilder;
 //use glutin::{GlRequest, Api};
 
 use femtovg::{
-    renderer::{WGPUInstance,WGPUContext, WGPU},
+    renderer::{
+        WGPUContext,
+        WGPUInstance,
+        WGPU,
+    },
     Align,
     Baseline,
     Canvas,

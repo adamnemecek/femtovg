@@ -189,7 +189,6 @@ pub struct WGPU {
 
 impl WGPU {
     pub fn new(ctx: &WGPUContext, view_size: Size) -> Self {
-
         let default_stencil_state = 0;
 
         // let clear_stencil_state = {

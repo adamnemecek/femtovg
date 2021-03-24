@@ -18,7 +18,11 @@ mod opengl;
 pub use opengl::OpenGl;
 
 mod webgpu;
-pub use webgpu::{WGPU, WGPUInstance, WGPUContext};
+pub use webgpu::{
+    WGPUContext,
+    WGPUInstance,
+    WGPU,
+};
 
 mod void;
 pub use void::Void;

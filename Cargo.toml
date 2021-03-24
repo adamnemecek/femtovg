@@ -39,9 +39,10 @@ web_sys = { version = "0.3", package = "web-sys", features = ["WebGlContextAttri
 wasm-bindgen = { version = "=0.2.69" }
 
 [features]
-default = ["image-loading"]
+default = ["image-loading", "convert-rgb"]
 image-loading = ["image"]
 debug_inspector = []
+convert-rgb = []
 
 [dev-dependencies]
 

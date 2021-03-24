@@ -30,11 +30,7 @@ impl WGPUSwapChain {
         };
 
         let inner = ctx.device().create_swap_chain(ctx.surface(), &desc);
-        Self {
-            size,
-            inner,
-            format,
-        }
+        Self { size, inner, format }
     }
 
     pub fn format(&self) -> wgpu::TextureFormat {
