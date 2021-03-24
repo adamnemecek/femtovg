@@ -745,6 +745,11 @@ impl WGPU {
     // }
 }
 
+#[inline]
+fn vert_range(start: usize, count: usize) -> std::ops::Range<u32> {
+    (start as _)..(start + count) as _
+}
+
 enum TargetTexture<'a> {
     Frame(wgpu::SwapChainFrame),
     View(&'a wgpu::TextureView),
@@ -847,9 +852,7 @@ impl Renderer for WGPU {
                         todo!()
                     }
                 }
-                RenderTarget::Image(id) => {
-                    TargetTexture::View(images.get(id).unwrap().view())
-                }
+                RenderTarget::Image(id) => TargetTexture::View(images.get(id).unwrap().view()),
             };
 
             let mut pass = begin_render_pass(
@@ -945,15 +948,14 @@ impl Renderer for WGPU {
                                 // pass.draw_indexed((offset as _)..(offset + triangle_fan_index_count) as _, 0, 0..1);
                                 let start = (start - 2) * 3;
                                 let count = (count - 2) * 3;
-                                pass.draw_indexed((start as _)..(start+count) as _, 0, 0..1);
+                                pass.draw_indexed(vert_range(start, count), 0, 0..1);
                                 // offset += (count as u32 - 2) * 3;
                             }
                             // draw fringes
 
                             if let Some((start, count)) = drawable.stroke_verts {
                                 pass.set_pipeline(s.stroke_buffer());
-                                let vertex_range = start as _..(start + count) as _;
-                                pass.draw(vertex_range, 0..0);
+                                pass.draw(vert_range(start, count), 0..1);
                             }
                         }
                         pass.pop_debug_group();
@@ -963,6 +965,7 @@ impl Renderer for WGPU {
                         fill_params,
                     } => {
                         pass.push_debug_group("concave fill");
+                        let s = states.concave_fill();
                         // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                         let bg = bind_group!(self, images, cmd);
 
@@ -982,32 +985,38 @@ impl Renderer for WGPU {
                         if self.antialias {
                             match cmd.fill_rule {
                                 FillRule::NonZero => {
+                                    pass.set_pipeline(s.fringes_nonzero());
                                     // pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
                                 }
                                 FillRule::EvenOdd => {
+                                    pass.set_pipeline(s.fringes_evenodd());
                                     // pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
                                 }
                             }
 
                             for drawable in &cmd.drawables {
                                 if let Some((start, count)) = drawable.stroke_verts {
+                                    pass.draw(vert_range(start, count), 0..1);
                                     // pass.draw(vertices, instances)
                                 }
                             }
                         }
 
-                        // todo: can be moved into the if statement
+                        // todo: can be moved into the if statement below?
                         match cmd.fill_rule {
                             FillRule::NonZero => {
+                                pass.set_pipeline(s.triangle_verts_nonzero());
                                 // pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
                             }
                             FillRule::EvenOdd => {
+                                pass.set_pipeline(s.triangle_verts_evenodd());
                                 // pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
                             }
                         }
 
                         if let Some((start, count)) = cmd.triangles_verts {
                             // pass.
+                            pass.draw(vert_range(start, count), 0..1);
                         }
                         pass.pop_debug_group();
                     }
@@ -1039,7 +1048,7 @@ impl Renderer for WGPU {
                         for drawable in &cmd.drawables {
                             if let Some((start, count)) = drawable.stroke_verts {
                                 // encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64)
-                                pass.draw(0..0, 0..0);
+                                pass.draw(vert_range(start, count), 0..0);
                             }
                         }
 

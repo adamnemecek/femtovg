@@ -65,6 +65,35 @@ fn create_pipeline<'a>(
     })
 }
 
+fn create_clear_rect_pipeline(
+    ctx: &WGPUContext,
+) -> wgpu::RenderPipeline {
+    todo!()
+    // ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+    //     label: label.into(),
+    //     layout: Some(layout),
+    //     vertex: wgpu::VertexState {
+    //         module: shader,
+    //         entry_point: "vs_main",
+    //         buffers: &[crate::Vertex::desc()],
+    //     },
+    //     fragment: Some(wgpu::FragmentState {
+    //         module: shader,
+    //         entry_point: "fs_main",
+    //         //todo!
+    //         targets: &[format.into()],
+    //     }),
+    //     primitive: wgpu::PrimitiveState {
+    //         topology,
+    //         front_face: wgpu::FrontFace::Ccw,
+    //         cull_mode: cull_mode.into(),
+    //         ..Default::default()
+    //     },
+    //     depth_stencil: depth_stencil.into(),
+    //     multisample: wgpu::MultisampleState::default(),
+    // // })
+}
+
 // fn clear_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencilState {
 //     wgpu::DepthStencilState {
 //         format,
@@ -337,6 +366,7 @@ pub struct WGPUPipelineStates {
     stroke: wgpu::RenderPipeline,
     stencil_stroke: StencilStroke,
     triangles: wgpu::RenderPipeline,
+    clear_rect: wgpu::RenderPipeline,
     // convex_fill1: wgpu::RenderPipeline,
     // convex_fill2: wgpu::RenderPipeline,
     // concave_fill1: wgpu::RenderPipeline,
@@ -385,6 +415,10 @@ impl WGPUPipelineStates {
 
     pub fn triangles(&self) -> &wgpu::RenderPipeline {
         &self.triangles
+    }
+
+    pub fn clear_rect(&self) -> &wgpu::RenderPipeline {
+        &self.clear_rect
     }
 
     // pub fn convex_fill1(&self) -> &wgpu::RenderPipeline {
@@ -553,6 +587,8 @@ impl WGPUPipelineStates {
             None,
         );
 
+        let clear_rect = create_clear_rect_pipeline(ctx);
+
         // let convex_fill1 = create_pipeline(
         //     ctx,
         //     Some("convex_fill1"),
@@ -597,6 +633,7 @@ impl WGPUPipelineStates {
             stroke,
             stencil_stroke,
             triangles,
+            clear_rect,
         }
     }
 }
