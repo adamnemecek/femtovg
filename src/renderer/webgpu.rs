@@ -105,7 +105,7 @@ fn begin_render_pass<'a>(
     clear_color: Color,
     stencil_texture: &'a mut WGPUStencilTexture,
     vertex_buffer: &'a WGPUVec<Vertex>,
-    // index_buffer: &'a WGPUVec<u32>,
+    index_buffer: &'a WGPUVec<u32>,
     view_size: Size,
     // ) -> wgpu::CommandEncoder {
 ) -> wgpu::RenderPass<'a> {
@@ -144,9 +144,9 @@ fn begin_render_pass<'a>(
     pass.set_vertex_buffer(0, vertex_buffer.slice());
     pass.set_stencil_reference(0);
 
-    // pass.set_index_buffer(index_buffer.slice(), wgpu::IndexFormat::Uint32);
+    pass.set_index_buffer(index_buffer.slice(), wgpu::IndexFormat::Uint32);
 
-    // pass.set_vertex_buffer(1, buffer_slice)
+    // pass.set_vertex_buffer(1, buffer_slice);
     pass
 
     // encoder.set_vertex_buffer(0, vertex_buffer.as_slice());
@@ -518,20 +518,20 @@ impl WGPU {
         };
     }
 
-    pub fn set_target(&mut self, images: &ImageStore<WGPUTexture>, target: RenderTarget) {
-        //
-        if self.render_target == target {}
+    // pub fn set_target(&mut self, images: &ImageStore<WGPUTexture>, target: RenderTarget) {
+    //     //
+    //     if self.render_target == target {}
 
-        let size = match target {
-            RenderTarget::Screen => todo!(),
-            RenderTarget::Image(id) => {
-                let texture = images.get(id).unwrap();
-                texture.size()
-            }
-        };
-        self.render_target = target;
-        self.view_size = size;
-    }
+    //     let size = match target {
+    //         RenderTarget::Screen => todo!(),
+    //         RenderTarget::Image(id) => {
+    //             let texture = images.get(id).unwrap();
+    //             texture.size()
+    //         }
+    //     };
+    //     self.render_target = target;
+    //     self.view_size = size;
+    // }
 }
 
 fn new_pass<'a>() -> wgpu::RenderPass<'a> {
@@ -808,12 +808,13 @@ impl Renderer for WGPU {
         // process indices
         while i < commands.len() {
             let cmd = &commands[i];
+            i += 1;
             match cmd.cmd_type {
                 CommandType::ConvexFill { .. } => {
                     for drawable in &cmd.drawables {
                         if let Some((start, count)) = drawable.fill_verts {
                             self.index_buffer
-                                .extend_with_triange_fan_indices_cw(start as u32, count as _);
+                                .extend_with_triange_fan_indices_cw(start as _, count as _);
                         }
                     }
                 }
@@ -837,31 +838,16 @@ impl Renderer for WGPU {
         i = 0;
 
         'outer: while i < commands.len() {
-            //    let mut pass = {
             let target_texture_view = match render_target {
                 RenderTarget::Screen => {
-                    // &self.swap_chain.get_current_frame().unwrap().output.view
                     if let Ok(frame) = self.swap_chain.get_current_frame() {
-                        // current_frame = Some(frame);
-                        // Some(&frame.output.view)
-                        // current_frame.unwrap().output.view
                         TargetTexture::Frame(frame)
                     } else {
                         todo!()
                     }
-                    // &frame.output.view
-                    // frame
-
-                    // println!("render target: screen");
-                    // let d = self.layer.next_drawable().unwrap().to_owned();
-                    // let tex = d.texture().to_owned();
-                    // drawable = Some(d);
-                    // tex
                 }
                 RenderTarget::Image(id) => {
                     TargetTexture::View(images.get(id).unwrap().view())
-                    // println!("render target: image: {:?}", id);
-                    // images.get(id).unwrap()
                 }
             };
 
@@ -871,14 +857,14 @@ impl Renderer for WGPU {
                 self.clear_color,
                 &mut self.stencil_texture,
                 &self.vertex_buffer,
-                // &self.index_buffer,
+                &self.index_buffer,
                 self.view_size,
             );
 
             // let mut index_buffer_view = self.index_buffer.view_mut();
 
-            pass.set_vertex_buffer(0, self.vertex_buffer.slice());
-            pass.set_index_buffer(self.index_buffer.slice(), wgpu::IndexFormat::Uint32);
+            // pass.set_vertex_buffer(0, self.vertex_buffer.slice());
+            // pass.set_index_buffer(self.index_buffer.slice(), wgpu::IndexFormat::Uint32);
             // };
 
             // let pass_desc = new_pass_descriptor();
