@@ -89,11 +89,11 @@ fn create_pipeline<'a>(
         }),
         primitive: wgpu::PrimitiveState {
             topology,
-            front_face: wgpu::FrontFace::Ccw,
-            cull_mode: cull_mode.into(),
+            // front_face: wgpu::FrontFace::Ccw,
+            // cull_mode: cull_mode.into(),
             ..Default::default()
         },
-        depth_stencil: depth_stencil.into(),
+        depth_stencil: None,
         multisample: wgpu::MultisampleState::default(),
     })
 }
