@@ -150,7 +150,7 @@ impl WGPUTexture {
         let origin = wgpu::Origin3d {
             x: x as _,
             y: y as _,
-            z: 1,
+            z: 0,
         };
         let copy_view = wgpu::TextureCopyView {
             mip_level: 0,

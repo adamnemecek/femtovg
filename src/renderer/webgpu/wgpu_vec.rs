@@ -156,7 +156,7 @@ impl<T: Copy> WGPUVec<T> {
             label: None,
             size: mem_align.byte_size as _,
             usage: wgpu::BufferUsage::COPY_DST,
-            mapped_at_creation: false,
+            mapped_at_creation: true,
         });
 
         // let inner = self.device.new_mem(
@@ -180,11 +180,6 @@ impl<T: Copy> WGPUVec<T> {
         WGPUVecIterator::new(self)
     }
 
-    #[inline]
-    pub fn as_ptr(&self) -> *const T {
-        // self.inner.slice(bounds)
-        todo!()
-    }
 
     pub fn capacity(&self) -> usize {
         self.mem_align.capacity
@@ -199,6 +194,7 @@ impl<T: Copy> WGPUVec<T> {
     //     todo!()
     // }
 
+    #[inline]
     pub fn as_slice<S: std::ops::RangeBounds<wgpu::BufferAddress>>(&self, bounds: S) -> wgpu::BufferSlice {
         self.inner.slice(bounds)
     }
@@ -211,6 +207,13 @@ impl<T: Copy> WGPUVec<T> {
         self.len = 0;
     }
 
+    #[inline]
+    pub fn as_ptr(&self) -> *const T {
+        // self.inner.slice(bounds)
+        self.slice().get_mapped_range().as_ptr() as *const T
+    }
+
+    #[inline]
     fn as_mut_ptr(&mut self) -> *mut T {
         // self.inner.slice(bounds)
         // self.slice().get_mapped_range()
