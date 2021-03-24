@@ -76,19 +76,18 @@ pub struct WGPUVec<T: Copy> {
     inner: wgpu::Buffer,
     len: usize,
     mem_align: MemAlign<T>,
+    usage: wgpu::BufferUsage,
 }
 
 impl<T: Copy> WGPUVec<T> {
     pub fn new_vertex(ctx: &WGPUContext, capacity: usize) -> Self {
         let mem_align = MemAlign::new(capacity);
 
-        let inner = create_buffer(
-            ctx,
-            "vertex buffer",
-            mem_align,
-            wgpu::BufferUsage::VERTEX | wgpu::BufferUsage::COPY_DST
-        );
+        let usage = wgpu::BufferUsage::VERTEX | wgpu::BufferUsage::COPY_DST;
+        let inner = create_buffer(ctx, "vertex buffer", mem_align, usage);
+
         Self {
+            usage,
             ctx: ctx.clone(),
             inner,
             len: 0,
@@ -134,15 +133,16 @@ impl<T: Copy> WGPUVec<T> {
     pub fn new_index(ctx: &WGPUContext, capacity: usize) -> Self {
         let mem_align = MemAlign::new(capacity);
 
+        let usage = wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::INDEX;
         let inner = create_buffer(
             ctx,
             "index buffer",
             mem_align,
             //  wgpu::BufferUsage::INDEX,
-            wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::INDEX
-
+            usage,
         );
         Self {
+            usage,
             ctx: ctx.clone(),
             inner,
             len: 0,
@@ -177,12 +177,13 @@ impl<T: Copy> WGPUVec<T> {
 
         // });
 
-        let inner = self.ctx.device().create_buffer(&wgpu::BufferDescriptor {
-            label: None,
-            size: mem_align.byte_size as _,
-            usage: wgpu::BufferUsage::COPY_DST,
-            mapped_at_creation: true,
-        });
+        // let inner = self.ctx.device().create_buffer(&wgpu::BufferDescriptor {
+        //     label: None,
+        //     size: mem_align.byte_size as _,
+
+        //     mapped_at_creation: true,
+        // });
+        let inner = create_buffer(&self.ctx, "vertex buffer", mem_align, self.usage);
 
         // let inner = self.device.new_mem(
         //     mem_align,
