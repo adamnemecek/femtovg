@@ -59,7 +59,8 @@ fn new_stencil_descriptor<'a>(size: Size) -> wgpu::TextureDescriptor<'a> {
         sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
         //todo!
-        format: wgpu::TextureFormat::R8Unorm,
+        // format: wgpu::TextureFormat::R8Unorm,
+        format: wgpu::TextureFormat::Depth24PlusStencil8,
         usage: wgpu::TextureUsage::RENDER_ATTACHMENT,
     }
 }

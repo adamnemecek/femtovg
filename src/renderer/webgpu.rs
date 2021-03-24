@@ -378,8 +378,8 @@ impl WGPU {
             .device()
             .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         let stencil_texture = WGPUStencilTexture::new(ctx, view_size);
-        let index_buffer = WGPUVec::new(ctx, 1000);
-        let vertex_buffer = WGPUVec::new(ctx, 1000);
+        let index_buffer = WGPUVec::new_index(ctx, 1000);
+        let vertex_buffer = WGPUVec::new_vertex(ctx, 1000);
 
         let mut flags = wgpu::ShaderFlags::VALIDATION;
         match ctx.adapter().get_info().backend {
@@ -925,6 +925,7 @@ impl Renderer for WGPU {
             while i < commands.len() {
                 let cmd = &commands[i];
                 i += 1;
+                // cache the pipeline states
                 let states = {
                     let blend: WGPUBlend = cmd.composite_operation.into();
                     let states = if let Some(prev_states) = prev_states {

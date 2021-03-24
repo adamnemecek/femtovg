@@ -47,6 +47,25 @@ fn as_u8_slice<T>(v: &[T]) -> &[u8] {
     unsafe { std::slice::from_raw_parts(v.as_ptr() as *const u8, std::mem::size_of::<T>() * v.len()) }
 }
 
+fn create_buffer<T: Copy>(ctx: &WGPUContext, mem_align: MemAlign<T>, usage: wgpu::BufferUsage) -> wgpu::Buffer {
+    ctx.device().create_buffer(&wgpu::BufferDescriptor {
+        label: None,
+         /// Debug label of a buffer. This will show up in graphics debuggers for easy identification.
+        // pub label: L,
+        /// Size of a buffer.
+        // pub size: BufferAddress,
+        size: mem_align.byte_size as _,
+        /// Usages of a buffer. If the buffer is used in any way that isn't specified here, the operation
+        /// will panic.
+        // pub usage: BufferUsage,
+        usage,//: wgpu::BufferUsage::COPY_DST,
+        /// Allows a buffer to be mapped immediately after they are made. It does not have to be [`BufferUsage::MAP_READ`] or
+        /// [`BufferUsage::MAP_WRITE`], all buffers are allowed to be mapped at creation.
+        // pub mapped_at_creation: bool,
+        mapped_at_creation: true,
+    })
+}
+
 pub struct WGPUVec<T: Copy> {
     ctx: WGPUContext,
     inner: wgpu::Buffer,
@@ -55,29 +74,10 @@ pub struct WGPUVec<T: Copy> {
 }
 
 impl<T: Copy> WGPUVec<T> {
-    pub fn new(ctx: &WGPUContext, capacity: usize) -> Self {
+    pub fn new_vertex(ctx: &WGPUContext, capacity: usize) -> Self {
         let mem_align = MemAlign::new(capacity);
 
-        let inner = ctx.device().create_buffer(&wgpu::BufferDescriptor {
-            label: None,
-             /// Debug label of a buffer. This will show up in graphics debuggers for easy identification.
-            // pub label: L,
-            /// Size of a buffer.
-            // pub size: BufferAddress,
-            size: mem_align.byte_size as _,
-            /// Usages of a buffer. If the buffer is used in any way that isn't specified here, the operation
-            /// will panic.
-            // pub usage: BufferUsage,
-            usage: wgpu::BufferUsage::COPY_DST,
-            /// Allows a buffer to be mapped immediately after they are made. It does not have to be [`BufferUsage::MAP_READ`] or
-            /// [`BufferUsage::MAP_WRITE`], all buffers are allowed to be mapped at creation.
-            // pub mapped_at_creation: bool,
-            mapped_at_creation: true,
-        });
-        // Self {
-        //     cpu: vec![],
-        //     gpu:
-        // }
+        let inner = create_buffer(ctx, mem_align, wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::VERTEX);
         Self {
             ctx: ctx.clone(),
             inner,
@@ -86,43 +86,51 @@ impl<T: Copy> WGPUVec<T> {
         }
     }
 
-    pub fn from_slice(ctx: &WGPUContext, slice: &[T]) -> Self {
-        // use wgpu::util::BufferInitDescriptor;
-        let mem_align = MemAlign::new(slice.len());
+    // pub fn from_slice(ctx: &WGPUContext, slice: &[T]) -> Self {
+    //     // use wgpu::util::BufferInitDescriptor;
+    //     let mem_align = MemAlign::new(slice.len());
 
-        let inner = ctx.device().create_buffer(&wgpu::BufferDescriptor {
-            label: None,
-             /// Debug label of a buffer. This will show up in graphics debuggers for easy identification.
-            // pub label: L,
-            /// Size of a buffer.
-            // pub size: BufferAddress,
-            size: mem_align.byte_size as _,
-            /// Usages of a buffer. If the buffer is used in any way that isn't specified here, the operation
-            /// will panic.
-            // pub usage: BufferUsage,
-            usage: wgpu::BufferUsage::COPY_DST,
-            /// Allows a buffer to be mapped immediately after they are made. It does not have to be [`BufferUsage::MAP_READ`] or
-            /// [`BufferUsage::MAP_WRITE`], all buffers are allowed to be mapped at creation.
-            // pub mapped_at_creation: bool,
-            mapped_at_creation: true,
-        });
-        // Self {
-        //     cpu: vec![],
-        //     gpu:
-        // }
-        let mut self_ = Self {
+    //     let inner = ctx.device().create_buffer(&wgpu::BufferDescriptor {
+    //         label: None,
+    //          /// Debug label of a buffer. This will show up in graphics debuggers for easy identification.
+    //         // pub label: L,
+    //         /// Size of a buffer.
+    //         // pub size: BufferAddress,
+    //         size: mem_align.byte_size as _,
+    //         /// Usages of a buffer. If the buffer is used in any way that isn't specified here, the operation
+    //         /// will panic.
+    //         // pub usage: BufferUsage,
+    //         usage: wgpu::BufferUsage::COPY_DST,
+    //         /// Allows a buffer to be mapped immediately after they are made. It does not have to be [`BufferUsage::MAP_READ`] or
+    //         /// [`BufferUsage::MAP_WRITE`], all buffers are allowed to be mapped at creation.
+    //         // pub mapped_at_creation: bool,
+    //         mapped_at_creation: true,
+    //     });
+    //     // Self {
+    //     //     cpu: vec![],
+    //     //     gpu:
+    //     // }
+    //     let mut self_ = Self {
+    //         ctx: ctx.clone(),
+    //         inner,
+    //         len: 0,
+    //         mem_align,
+    //     };
+
+    //     self_.extend_from_slice(slice);
+    //     self_
+    // }
+
+    pub fn new_index(ctx: &WGPUContext, capacity: usize) -> Self {
+        let mem_align = MemAlign::new(capacity);
+
+        let inner = create_buffer(ctx, mem_align, wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::INDEX);
+        Self {
             ctx: ctx.clone(),
             inner,
             len: 0,
             mem_align,
-        };
-
-        self_.extend_from_slice(slice);
-        self_
-    }
-
-    pub fn new_index(ctx: &WGPUContext) -> Self {
-        todo!()
+        }
     }
 
     pub fn len(&self) -> usize {
@@ -179,7 +187,6 @@ impl<T: Copy> WGPUVec<T> {
     pub fn iter(&self) -> WGPUVecIterator<'_, T> {
         WGPUVecIterator::new(self)
     }
-
 
     pub fn capacity(&self) -> usize {
         self.mem_align.capacity
@@ -281,7 +288,7 @@ mod tests {
         let instance = WGPUInstance::new().await.unwrap();
 
         let context = WGPUContext::new(instance).await.unwrap();
-        let mut v: WGPUVec<u32> = WGPUVec::new(&context, 10);
+        let mut v: WGPUVec<u32> = WGPUVec::new_vertex(&context, 10);
         v.extend_from_slice(&[10, 12]);
 
         // assert!(v.iter().collect() == )
