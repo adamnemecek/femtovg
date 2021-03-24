@@ -164,3 +164,64 @@ fn fragment_shader_aa(
 // enum ShaderType {
 
 // };
+
+struct Rect {
+    x: f32;
+    y: f32;
+    w: f32;
+    h: f32;
+};
+
+fn rect_vert_cw(
+    rect: Rect,
+    vid: i32
+) -> vec2<f32> {
+    var pos: vec2<f32>;
+
+    const left: f32 = rect.x;
+    const right: f32 = rect.x + rect.w;
+    const bottom: f32 = rect.y;
+    const top: f32 = rect.y + rect.h;
+
+    switch (vid) {
+        case 0: {
+            pos = vec2<f32>(right, top);
+            // break;
+        }
+        case 1: {
+            pos = vec2<f32>(left, top);
+            // break;
+        }
+        case 2: {
+            pos = vec2<f32>(right, bottom);
+            // break;
+        }
+        case 3: {
+            pos = vec2<f32>(left, bottom);
+            // break;
+        }
+        default: {
+            pos = vec2<f32>(0.0, 0.0);
+        }
+    };
+    // de
+    return pos;
+}
+
+struct ClearRectOut {
+
+};
+
+[[stage(vertex)]]
+fn vertex_clear_rect(
+
+) {
+
+}
+
+[[stage(fragment)]]
+fn fragment_clear_rect(
+    in: RasterizerData
+) {
+
+}

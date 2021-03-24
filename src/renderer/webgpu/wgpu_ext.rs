@@ -10,10 +10,10 @@ impl WGPUDeviceExt for wgpu::CommandEncoder {
 }
 
 pub trait RenderPassExt {
-    #[must_use]
+    // #[must_use]
     fn set_vertex_value<T: Copy>(&mut self, offset: u32, value: &T) -> u32;
 
-    #[must_use]
+    // #[must_use]
     fn set_fragment_value<T: Copy>(&mut self, offset: u32, value: &T) -> u32;
 }
 

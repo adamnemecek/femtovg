@@ -1023,7 +1023,7 @@ impl Renderer for WGPU {
 
                         // pass.set_pipeline()
                         pass.set_bind_group(0, bg.as_ref(), &[]);
-
+                        let _ = pass.set_vertex_value(0, params);
                         // pass.set_bind_group(0, bg.as_ref(), &[]);
                         uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
