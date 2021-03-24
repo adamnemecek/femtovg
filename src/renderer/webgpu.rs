@@ -291,7 +291,7 @@ impl WGPU {
         });
 
         let view_size_size: u32 = std::mem::size_of::<Size>() as _;
-        let vertex_size: u32 = std::mem::size_of::<Vertex>() as _;
+        let param_size: u32 = std::mem::size_of::<Params>() as _;
         let pipeline_layout = ctx.device().create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: None,
             bind_group_layouts: &[&bind_group_layout],
@@ -302,7 +302,7 @@ impl WGPU {
                 },
                 wgpu::PushConstantRange {
                     stages: wgpu::ShaderStage::FRAGMENT,
-                    range: view_size_size..(view_size_size + vertex_size),
+                    range: view_size_size..(view_size_size + param_size),
                 },
             ],
         });
@@ -942,7 +942,10 @@ impl Renderer for WGPU {
                                 // pass.set_index_buffer(self.index_buffer.slice(), wgpu::IndexFormat::Uint32);
 
                                 // pass.draw_indexed((offset as _)..(offset + triangle_fan_index_count) as _, 0, 0..1);
-                                offset += (count - 2) * 3;
+                                let start = (start - 2) * 3;
+                                let count = (count - 2) * 3;
+                                pass.draw_indexed((start as _)..(start+count) as _, 0, 0..1);
+                                // offset += (count as u32 - 2) * 3;
                             }
                             // draw fringes
 
