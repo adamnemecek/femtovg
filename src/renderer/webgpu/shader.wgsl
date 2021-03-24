@@ -173,32 +173,32 @@ struct Rect {
 };
 
 fn rect_vert_cw(
-    rect: Rect,
+    rect: vec4<f32>,
     vid: i32
 ) -> vec2<f32> {
     var pos: vec2<f32>;
+    const x = rect.x;
+    const y = rect.y;
+    const w = rect.z;
+    const h = rect.w;
 
-    const left: f32 = rect.x;
-    const right: f32 = rect.x + rect.w;
-    const bottom: f32 = rect.y;
-    const top: f32 = rect.y + rect.h;
+    const left: f32 = x;
+    const right: f32 = x + w;
+    const bottom: f32 = y;
+    const top: f32 = y + h;
 
     switch (vid) {
         case 0: {
             pos = vec2<f32>(right, top);
-            // break;
         }
         case 1: {
             pos = vec2<f32>(left, top);
-            // break;
         }
         case 2: {
             pos = vec2<f32>(right, bottom);
-            // break;
         }
         case 3: {
             pos = vec2<f32>(left, bottom);
-            // break;
         }
         default: {
             pos = vec2<f32>(0.0, 0.0);
@@ -220,8 +220,10 @@ fn vertex_clear_rect(
     [[location(1)]] color: vec4<f32>,
     [[builtin(vertex_index)]] vid: u32,
 ) -> ClearRectOut {
+    const pos = rect_vert_cw(rect, i32(vid));
+
     var out: ClearRectOut;
-    // out.pos = vec4<f32>(rect_vert_cw(rect, i32(vid)), 0.0, 1.0);
+    out.pos = vec4<f32>(pos, 0.0, 1.0);
     out.color = color;
 
     return out;
