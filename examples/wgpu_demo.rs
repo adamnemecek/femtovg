@@ -19,7 +19,7 @@ use winit::window::WindowBuilder;
 //use glutin::{GlRequest, Api};
 
 use femtovg::{
-    renderer::WGPU,
+    renderer::{WGPUInstance,WGPUContext, WGPU},
     Align,
     Baseline,
     Canvas,
@@ -126,7 +126,9 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
         .await
         .expect("Failed to create device");
 
-    let renderer = WGPU::new(device, Size::new(size.width as _, size.height as _));
+    let instance = WGPUInstance::from_window(&window).await.unwrap();
+    let ctx = WGPUContext::new(instance).await.unwrap();
+    let renderer = WGPU::new(&ctx, Size::new(size.width as _, size.height as _));
 
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
