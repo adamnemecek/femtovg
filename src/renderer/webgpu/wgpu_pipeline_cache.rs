@@ -65,9 +65,7 @@ fn create_pipeline<'a>(
     })
 }
 
-fn create_clear_rect_pipeline(
-    ctx: &WGPUContext,
-) -> wgpu::RenderPipeline {
+fn create_clear_rect_pipeline(ctx: &WGPUContext) -> wgpu::RenderPipeline {
     todo!()
     // ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
     //     label: label.into(),
@@ -420,22 +418,6 @@ impl WGPUPipelineStates {
     pub fn clear_rect(&self) -> &wgpu::RenderPipeline {
         &self.clear_rect
     }
-
-    // pub fn convex_fill1(&self) -> &wgpu::RenderPipeline {
-    //     &self.convex_fill1
-    // }
-
-    // pub fn convex_fill2(&self) -> &wgpu::RenderPipeline {
-    //     &self.convex_fill2
-    // }
-
-    // pub fn concave_fill1(&self) -> &wgpu::RenderPipeline {
-    //     &self.concave_fill1
-    // }
-
-    // pub fn concave_fill2(&self) -> &wgpu::RenderPipeline {
-    //     &self.concave_fill2
-    // }
 
     pub fn new(
         ctx: &WGPUContext,

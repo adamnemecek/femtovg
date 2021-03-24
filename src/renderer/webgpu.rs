@@ -804,7 +804,6 @@ impl Renderer for WGPU {
         // let mut state: Option<WGPUPipelineState> = None;
         let mut prev_states: Option<&WGPUPipelineStates> = None;
         // let mut prev_bind_group: Option<&WGPUBindGroup> = None;
-        let mut i = 0;
 
         // let bind_groups = vec![];
         let mut uniforms_offset: u32 = 0;
@@ -812,9 +811,7 @@ impl Renderer for WGPU {
         // let mut current_frame = None;
 
         // process indices
-        while i < commands.len() {
-            let cmd = &commands[i];
-            i += 1;
+        for cmd in commands.iter() {
             match cmd.cmd_type {
                 CommandType::ConvexFill { .. } => {
                     for drawable in &cmd.drawables {
@@ -841,8 +838,7 @@ impl Renderer for WGPU {
             }
         }
 
-        i = 0;
-
+        let mut i = 0;
         'outer: while i < commands.len() {
             let target_texture_view = match render_target {
                 RenderTarget::Screen => {
