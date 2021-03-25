@@ -67,7 +67,7 @@ fn create_buffer<T: Copy>(
         /// Allows a buffer to be mapped immediately after they are made. It does not have to be [`BufferUsage::MAP_READ`] or
         /// [`BufferUsage::MAP_WRITE`], all buffers are allowed to be mapped at creation.
         // pub mapped_at_creation: bool,
-        mapped_at_creation: true,
+        mapped_at_creation: false,
     })
 }
 

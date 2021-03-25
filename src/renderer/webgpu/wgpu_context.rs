@@ -39,8 +39,6 @@ impl WGPUInstance {
     }
 }
 
-
-
 pub trait WGPUQueueExt {
     fn sync_buffer<T: Copy>(&self, buffer: &wgpu::Buffer, data: &[T]);
 }

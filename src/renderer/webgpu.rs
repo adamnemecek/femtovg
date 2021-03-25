@@ -54,7 +54,7 @@ use super::{
     Renderer,
 };
 
-use self::{VecExt};
+use self::VecExt;
 
 // use fnv::FnvHashMap;
 use imgref::ImgVec;
@@ -456,10 +456,12 @@ impl Renderer for WGPU {
 
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         self.vertex_buffer.clear();
-        self.vertex_buffer.extend_from_slice(verts);
+        // self.vertex_buffer.extend_from_slice(verts);
+        self.ctx.queue().sync_buffer(self.vertex_buffer.as_ref(), verts);
 
-        self.index_buffer.clear();
-        self.index_buffer.resize(verts.len() * 3);
+        self.temp_index_buffer.clear();
+        // self.index_buffer.clear();
+        self.temp_index_buffer.resize(verts.len() * 3, 0);
 
         // let texture_format = &self.swap_chain.format();
         // let format = texture_format.clone();
@@ -516,6 +518,9 @@ impl Renderer for WGPU {
                 CommandType::SetRenderTarget(_) => {}
             }
         }
+
+
+        self.ctx.queue().sync_buffer(self.index_buffer.as_ref(), &self.temp_index_buffer);
 
         let mut i = 0;
 
