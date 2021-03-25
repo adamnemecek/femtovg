@@ -19,29 +19,29 @@ pub struct WGPUVecViewMut<'a, T: Copy> {
 //     }
 // }
 
-pub struct WGPUVecIterator<'a, T: Copy> {
-    inner: &'a WGPUVec<T>,
-    idx: usize,
-}
+// pub struct WGPUVecIterator<'a, T: Copy> {
+//     inner: &'a WGPUVec<T>,
+//     idx: usize,
+// }
 
-impl<'a, T: Copy> WGPUVecIterator<'a, T> {
-    fn new(inner: &'a WGPUVec<T>) -> Self {
-        Self { inner, idx: 0 }
-    }
-}
+// impl<'a, T: Copy> WGPUVecIterator<'a, T> {
+//     fn new(inner: &'a WGPUVec<T>) -> Self {
+//         Self { inner, idx: 0 }
+//     }
+// }
 
-impl<'a, T: Copy> Iterator for WGPUVecIterator<'a, T> {
-    type Item = T;
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.idx >= self.inner.len() {
-            None
-        } else {
-            let res = self.inner[self.idx];
-            self.idx += 1;
-            Some(res)
-        }
-    }
-}
+// impl<'a, T: Copy> Iterator for WGPUVecIterator<'a, T> {
+//     type Item = T;
+//     fn next(&mut self) -> Option<Self::Item> {
+//         if self.idx >= self.inner.len() {
+//             None
+//         } else {
+//             let res = self.inner[self.idx];
+//             self.idx += 1;
+//             Some(res)
+//         }
+//     }
+// }
 
 pub fn as_u8_slice<T>(v: &[T]) -> &[u8] {
     unsafe { std::slice::from_raw_parts(v.as_ptr() as *const u8, std::mem::size_of::<T>() * v.len()) }
@@ -95,9 +95,9 @@ impl<T: Copy> WGPUVec<T> {
         }
     }
 
-    pub fn map_async(&self) -> impl std::future::Future<Output = Result<(), wgpu::BufferAsyncError>> + Send {
-        self.slice().map_async(wgpu::MapMode::Write)
-    }
+    // pub fn map_async(&self) -> impl std::future::Future<Output = Result<(), wgpu::BufferAsyncError>> + Send {
+    //     self.slice().map_async(wgpu::MapMode::Write)
+    // }
 
     // pub fn from_slice(ctx: &WGPUContext, slice: &[T]) -> Self {
     //     // use wgpu::util::BufferInitDescriptor;
@@ -158,24 +158,26 @@ impl<T: Copy> WGPUVec<T> {
         self.len
     }
 
-    pub fn extend_from_slice(&mut self, other: &[T]) {
-        let new_len = self.len() + other.len();
+    // pub fn extend_from_slice(&mut self, other: &[T]) {
+    //     let new_len = self.len() + other.len();
 
-        self.resize(new_len);
+    //     self.resize(new_len);
 
-        unsafe {
-            std::ptr::copy(other.as_ptr(), self.as_mut_ptr().offset(self.len() as _), other.len());
-        }
-        // self.ctx.queue().write_buffer(&self.inner, 0, as_u8_slice(other));
+    //     unsafe {
+    //         std::ptr::copy(other.as_ptr(), self.as_mut_ptr().offset(self.len() as _), other.len());
+    //     }
+    //     // self.ctx.queue().write_buffer(&self.inner, 0, as_u8_slice(other));
 
-        self.len = new_len;
-    }
+    //     self.len = new_len;
+    // }
 
     pub fn resize(&mut self, capacity: usize) {
         if capacity <= self.capacity() {
             return;
         }
+
         let mem_align = MemAlign::<T>::new(capacity);
+        println!("resize to {:?}", mem_align.byte_size);
 
         // let inner = ctx.device().create_buffer(&wgpu::BufferDescriptor {
 
@@ -193,22 +195,23 @@ impl<T: Copy> WGPUVec<T> {
         //     mem_align,
         //     metal::MTLResourceOptions::CPUCacheModeDefaultCache,
         // );
-        unsafe {
-            std::ptr::copy(
-                self.as_ptr(),
-                // inner.contents() as *mut T,
-                inner.slice(..).get_mapped_range_mut().as_mut_ptr() as *mut T,
-                self.len(),
-            );
-        }
+        // unsafe {
+        //     std::ptr::copy(
+        //         self.as_ptr(),
+        //         // inner.contents() as *mut T,
+        //         inner.slice(..).get_mapped_range_mut().as_mut_ptr() as *mut T,
+        //         self.len(),
+        //     );
+        // }
         // self.ctx.queue.write_buffer(self, offset, data)
         self.mem_align = mem_align;
+        self.inner.destroy();
         self.inner = inner;
     }
 
-    pub fn iter(&self) -> WGPUVecIterator<'_, T> {
-        WGPUVecIterator::new(self)
-    }
+    // pub fn iter(&self) -> WGPUVecIterator<'_, T> {
+    //     WGPUVecIterator::new(self)
+    // }
 
     pub fn capacity(&self) -> usize {
         self.mem_align.capacity
@@ -223,57 +226,57 @@ impl<T: Copy> WGPUVec<T> {
     //     todo!()
     // }
 
-    #[inline]
-    pub fn as_slice<S: std::ops::RangeBounds<wgpu::BufferAddress>>(&self, bounds: S) -> wgpu::BufferSlice {
-        self.inner.slice(bounds)
-    }
-
-    pub fn slice(&self) -> wgpu::BufferSlice {
-        self.inner.slice(..)
-    }
-
-    pub fn clear(&mut self) {
-        self.len = 0;
-    }
-
-    #[inline]
-    pub fn as_ptr(&self) -> *const T {
-        // self.inner.slice(bounds)
-        self.slice().get_mapped_range().as_ptr() as *const T
-    }
-
-    #[inline]
-    fn as_mut_ptr(&mut self) -> *mut T {
-        // self.inner.slice(bounds)
-        // self.slice().get_mapped_range()
-        // todo!()
-        self.slice().get_mapped_range_mut().as_mut_ptr() as *mut T
-    }
-
-    // pub fn as_slice<'a>(&'a self) -> wgpu::BufferSlice<'a> {
-    //     // self.gpu.slice(0..0)
-    //     todo!()
+    // #[inline]
+    // pub fn as_slice<S: std::ops::RangeBounds<wgpu::BufferAddress>>(&self, bounds: S) -> wgpu::BufferSlice {
+    //     self.inner.slice(bounds)
     // }
 
-    // pub fn as_mut_slice<'a>(&'a mut self) -> wgpu::BufferMutSlice<'a> {
-    //     todo!()
+    // pub fn slice(&self) -> wgpu::BufferSlice {
+    //     self.inner.slice(..)
     // }
 
-    fn element_byte_size() -> usize {
-        std::mem::size_of::<T>()
-    }
+    // pub fn clear(&mut self) {
+    //     self.len = 0;
+    // }
+
+    // #[inline]
+    // pub fn as_ptr(&self) -> *const T {
+    //     // self.inner.slice(bounds)
+    //     self.slice().get_mapped_range().as_ptr() as *const T
+    // }
+
+    // #[inline]
+    // fn as_mut_ptr(&mut self) -> *mut T {
+    //     // self.inner.slice(bounds)
+    //     // self.slice().get_mapped_range()
+    //     // todo!()
+    //     self.slice().get_mapped_range_mut().as_mut_ptr() as *mut T
+    // }
+
+    // // pub fn as_slice<'a>(&'a self) -> wgpu::BufferSlice<'a> {
+    // //     // self.gpu.slice(0..0)
+    // //     todo!()
+    // // }
+
+    // // pub fn as_mut_slice<'a>(&'a mut self) -> wgpu::BufferMutSlice<'a> {
+    // //     todo!()
+    // // }
+
+    // fn element_byte_size() -> usize {
+    //     std::mem::size_of::<T>()
+    // }
 }
 
-impl<T: Copy> std::ops::Index<usize> for WGPUVec<T> {
-    type Output = T;
-    fn index(&self, index: usize) -> &Self::Output {
-        let view = self.slice().get_mapped_range();
-        assert!(self.capacity() * Self::element_byte_size() == view.len());
-        // let z = z.len();
-        let slice = unsafe { std::slice::from_raw_parts(view.as_ptr() as *const T, self.capacity()) };
-        &slice[index]
-    }
-}
+// impl<T: Copy> std::ops::Index<usize> for WGPUVec<T> {
+//     type Output = T;
+//     fn index(&self, index: usize) -> &Self::Output {
+//         let view = self.slice().get_mapped_range();
+//         assert!(self.capacity() * Self::element_byte_size() == view.len());
+//         // let z = z.len();
+//         let slice = unsafe { std::slice::from_raw_parts(view.as_ptr() as *const T, self.capacity()) };
+//         &slice[index]
+//     }
+// }
 
 impl<T: Copy> Drop for WGPUVec<T> {
     fn drop(&mut self) {
@@ -322,21 +325,21 @@ mod tests {
         WGPUVec,
     };
 
-    async fn async_vec_test() {
-        let instance = WGPUInstance::new().await.unwrap();
+    // async fn async_vec_test() {
+    //     let instance = WGPUInstance::new().await.unwrap();
 
-        let context = WGPUContext::new(instance).await.unwrap();
-        let mut v: WGPUVec<u32> = WGPUVec::new_vertex(&context, 10);
-        v.extend_from_slice(&[10, 12]);
+    //     let context = WGPUContext::new(instance).await.unwrap();
+    //     let mut v: WGPUVec<u32> = WGPUVec::new_vertex(&context, 10);
+    //     v.extend_from_slice(&[10, 12]);
 
-        // assert!(v.iter().collect() == )
-        for e in v.iter() {
-            println!("{:?}", e);
-        }
-    }
+    //     // assert!(v.iter().collect() == )
+    //     for e in v.iter() {
+    //         println!("{:?}", e);
+    //     }
+    // }
 
-    #[test]
-    fn vec_test() {
-        pollster::block_on(async_vec_test());
-    }
+    // #[test]
+    // fn vec_test() {
+    //     pollster::block_on(async_vec_test());
+    // }
 }

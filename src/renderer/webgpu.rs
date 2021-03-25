@@ -143,10 +143,10 @@ fn begin_render_pass<'a>(
     let mut pass = encoder.begin_render_pass(&pass_desc);
     pass.set_viewport(0.0, 0.0, view_size.w as _, view_size.h as _, 0.0, 1.0);
 
-    pass.set_vertex_buffer(0, vertex_buffer.slice());
+    pass.set_vertex_buffer(0, vertex_buffer.as_ref().slice(..));
     pass.set_stencil_reference(0);
 
-    pass.set_index_buffer(index_buffer.slice(), wgpu::IndexFormat::Uint32);
+    pass.set_index_buffer(index_buffer.as_ref().slice(..), wgpu::IndexFormat::Uint32);
 
     // pass.set_vertex_buffer(1, buffer_slice);
     pass
@@ -455,8 +455,10 @@ impl Renderer for WGPU {
     }
 
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
-        self.vertex_buffer.clear();
+        // self.vertex_buffer.clear();
         // self.vertex_buffer.extend_from_slice(verts);
+        println!("verts len {:?}", verts.len());
+        self.vertex_buffer.resize(verts.len());
         self.ctx.queue().sync_buffer(self.vertex_buffer.as_ref(), verts);
 
         self.temp_index_buffer.clear();
@@ -519,8 +521,9 @@ impl Renderer for WGPU {
             }
         }
 
-
-        self.ctx.queue().sync_buffer(self.index_buffer.as_ref(), &self.temp_index_buffer);
+        self.ctx
+            .queue()
+            .sync_buffer(self.index_buffer.as_ref(), &self.temp_index_buffer);
 
         let mut i = 0;
 
