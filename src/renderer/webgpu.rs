@@ -685,6 +685,10 @@ impl Renderer for WGPU {
                             // pass.set_pipeline(states.concave_fill1());
                             // set_uniforms
 
+                            let bg = bind_group!(self, images, None, None);
+                            pass.set_bind_group(0, bg.as_ref(), &[]);
+                            uniforms_offset += pass.set_fragment_value(uniforms_offset, fill_params);
+
                             // fringes
                             if self.antialias {
                                 match cmd.fill_rule {
