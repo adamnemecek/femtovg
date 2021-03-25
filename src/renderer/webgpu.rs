@@ -2,8 +2,8 @@ mod wgpu_vec;
 use wgpu::util::RenderEncoder;
 pub use wgpu_vec::*;
 
-mod wgpu_queue;
-pub use wgpu_queue::*;
+mod wgpu_context;
+pub use wgpu_context::*;
 
 mod wgpu_texture;
 pub use wgpu_texture::*;

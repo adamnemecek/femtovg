@@ -43,7 +43,7 @@ impl<'a, T: Copy> Iterator for WGPUVecIterator<'a, T> {
     }
 }
 
-fn as_u8_slice<T>(v: &[T]) -> &[u8] {
+pub fn as_u8_slice<T>(v: &[T]) -> &[u8] {
     unsafe { std::slice::from_raw_parts(v.as_ptr() as *const u8, std::mem::size_of::<T>() * v.len()) }
 }
 

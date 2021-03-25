@@ -38,6 +38,19 @@ impl WGPUInstance {
         }
     }
 }
+
+
+
+pub trait WGPUQueueExt {
+    fn sync_buffer<T: Copy>(&self, buffer: &wgpu::Buffer, data: &[T]);
+}
+
+impl WGPUQueueExt for wgpu::Queue {
+    fn sync_buffer<T: Copy>(&self, buffer: &wgpu::Buffer, data: &[T]) {
+        self.write_buffer(buffer, 0, super::as_u8_slice(data));
+    }
+}
+
 #[derive(Clone)]
 pub struct WGPUContext {
     instance: WGPUInstance,
