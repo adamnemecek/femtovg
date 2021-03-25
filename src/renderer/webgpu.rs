@@ -625,9 +625,10 @@ impl Renderer for WGPU {
                             let s = states.convex_fill();
 
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
-                            let bg = bind_group!(self, images, cmd);
 
                             pass.set_pipeline(s.fill_buffer());
+                            // set uniforms
+                            let bg = bind_group!(self, images, cmd);
                             pass.set_bind_group(0, bg.as_ref(), &[]);
                             uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
@@ -665,17 +666,19 @@ impl Renderer for WGPU {
                         } => {
                             pass.push_debug_group("concave fill");
                             let s = states.concave_fill();
-                            // pass.set_pipeline(s.)
+                            pass.set_pipeline(s.fill_verts());
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                             let bg = bind_group!(self, images, cmd);
+                            pass.set_bind_group(0, bg.as_ref(), &[]);
+                            uniforms_offset += pass.set_fragment_value(uniforms_offset, stencil_params);
 
                             for drawable in &cmd.drawables {
                                 if let Some((start, count)) = drawable.fill_verts {
-                                    let offset = self.index_buffer.len();
+                                    // let offset = self.index_buffer.len();
                                     // self.index_buffer
                                     // .extend_with_triange_fan_indices_cw(start as _, count as _);
-                                    pass.draw_indexed(0..0, 0, 0..1);
-                                    // pass.set_push_constants(stages, offset, data)p
+                                    pass.draw_indexed(vert_range(start, count), 0, 0..1);
+                                    // pass.set_push_constants(stages, offset, data)
                                 }
                             }
                             // pass.set_pipeline(states.concave_fill1());
@@ -686,18 +689,15 @@ impl Renderer for WGPU {
                                 match cmd.fill_rule {
                                     FillRule::NonZero => {
                                         pass.set_pipeline(s.fringes_nonzero());
-                                        // pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
                                     }
                                     FillRule::EvenOdd => {
                                         pass.set_pipeline(s.fringes_evenodd());
-                                        // pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
                                     }
                                 }
 
                                 for drawable in &cmd.drawables {
                                     if let Some((start, count)) = drawable.stroke_verts {
                                         pass.draw(vert_range(start, count), 0..1);
-                                        // pass.draw(vertices, instances)
                                     }
                                 }
                             }
@@ -706,11 +706,9 @@ impl Renderer for WGPU {
                             match cmd.fill_rule {
                                 FillRule::NonZero => {
                                     pass.set_pipeline(s.triangle_verts_nonzero());
-                                    // pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
                                 }
                                 FillRule::EvenOdd => {
                                     pass.set_pipeline(s.triangle_verts_evenodd());
-                                    // pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
                                 }
                             }
 
