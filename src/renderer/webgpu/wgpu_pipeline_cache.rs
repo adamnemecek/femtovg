@@ -102,6 +102,35 @@ fn create_pipeline<'a>(
     })
 }
 
+fn create_stencil_only_pipeline<'a>(
+    ctx: &WGPUContext,
+    label: impl Into<Option<&'a str>>,
+    layout: &wgpu::PipelineLayout,
+    shader: &wgpu::ShaderModule,
+    format: wgpu::TextureFormat,
+    topology: wgpu::PrimitiveTopology,
+    cull_mode: impl Into<Option<wgpu::Face>>,
+    depth_stencil: impl Into<Option<wgpu::DepthStencilState>>,
+) -> wgpu::RenderPipeline {
+    ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label: label.into(),
+        layout: Some(layout),
+        vertex: wgpu::VertexState {
+            module: shader,
+            entry_point: "vertex_shader",
+            buffers: &[Vertex::desc()],
+        },
+        fragment: None,
+        primitive: wgpu::PrimitiveState {
+            topology,
+            // front_face: wgpu::FrontFace::Ccw,
+            cull_mode: cull_mode.into(),
+            ..Default::default()
+        },
+        depth_stencil: depth_stencil.into(),
+        multisample: wgpu::MultisampleState::default(),
+    })
+}
 fn create_clear_rect_pipeline(
     ctx: &WGPUContext,
     shader: &ShaderModule,
@@ -377,7 +406,7 @@ impl ConcaveFill {
 
 pub struct StencilStroke {
     stroke_base: wgpu::RenderPipeline,
-    pixels: wgpu::RenderPipeline,
+    aa_pixels: wgpu::RenderPipeline,
     clear_stencil: wgpu::RenderPipeline,
 }
 
@@ -386,8 +415,8 @@ impl StencilStroke {
         &self.stroke_base
     }
 
-    pub fn pixels(&self) -> &wgpu::RenderPipeline {
-        &self.pixels
+    pub fn aa_pixels(&self) -> &wgpu::RenderPipeline {
+        &self.aa_pixels
     }
 
     pub fn clear_stencil(&self) -> &wgpu::RenderPipeline {
@@ -503,7 +532,7 @@ impl WGPUPipelineStates {
 
         let concave_fill = ConcaveFill {
             // stencil only pipeline state
-            fill_verts: create_pipeline(
+            fill_verts: create_stencil_only_pipeline(
                 ctx,
                 "concave_fill/fill_verts",
                 layout,
@@ -519,7 +548,7 @@ impl WGPUPipelineStates {
                 layout,
                 shader,
                 format,
-                wgpu::PrimitiveTopology::TriangleList,
+                wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::Face::Back,
                 fill_anti_alias_stencil_state_nonzero(format),
             ),
@@ -529,7 +558,7 @@ impl WGPUPipelineStates {
                 layout,
                 shader,
                 format,
-                wgpu::PrimitiveTopology::TriangleList,
+                wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::Face::Back,
                 fill_anti_alias_stencil_state_evenodd(format),
             ),
@@ -539,9 +568,9 @@ impl WGPUPipelineStates {
                 layout,
                 shader,
                 format,
-                wgpu::PrimitiveTopology::TriangleList,
+                wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::Face::Back,
-                None,
+                fill_stencil_state_nonzero(format),
             ),
             triangle_verts_evenodd: create_pipeline(
                 ctx,
@@ -551,7 +580,7 @@ impl WGPUPipelineStates {
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
                 wgpu::Face::Back,
-                None,
+                fill_stencil_state_evenodd(format),
             ),
         };
 
@@ -573,19 +602,19 @@ impl WGPUPipelineStates {
                 layout,
                 shader,
                 format,
-                wgpu::PrimitiveTopology::TriangleList,
+                wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::Face::Back,
-                Some(stroke_shape_stencil_state(format)),
+                stroke_shape_stencil_state(format),
             ),
-            pixels: create_pipeline(
+            aa_pixels: create_stencil_only_pipeline(
                 ctx,
-                "pixels",
+                "aa_pixels",
                 layout,
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
                 wgpu::Face::Back,
-                None,
+                stroke_anti_alias_stencil_state(format),
             ),
             clear_stencil: create_pipeline(
                 ctx,

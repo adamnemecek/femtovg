@@ -73,22 +73,22 @@ fn create_bind_group(
             // },
             // texture
             wgpu::BindGroupEntry {
-                binding: 2,
+                binding: 0,
                 resource: wgpu::BindingResource::TextureView(&tex.view()),
             },
             // sampler
             wgpu::BindGroupEntry {
-                binding: 3,
+                binding: 1,
                 resource: wgpu::BindingResource::Sampler(tex.sampler()),
             },
             // alpha texture
             wgpu::BindGroupEntry {
-                binding: 4,
+                binding: 2,
                 resource: wgpu::BindingResource::TextureView(&alpha_tex.view()),
             },
             // alpha sampler
             wgpu::BindGroupEntry {
-                binding: 5,
+                binding: 3,
                 resource: wgpu::BindingResource::Sampler(alpha_tex.sampler()),
             },
         ],

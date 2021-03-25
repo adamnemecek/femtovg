@@ -177,7 +177,7 @@ impl<T: Copy> WGPUVec<T> {
         }
 
         let mem_align = MemAlign::<T>::new(capacity);
-        println!("resize to {:?}", mem_align.byte_size);
+        // println!("resize to {:?}", mem_align.byte_size);
 
         // let inner = ctx.device().create_buffer(&wgpu::BufferDescriptor {
 

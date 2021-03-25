@@ -665,6 +665,7 @@ impl Renderer for WGPU {
                         } => {
                             pass.push_debug_group("concave fill");
                             let s = states.concave_fill();
+                            // pass.set_pipeline(s.)
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                             let bg = bind_group!(self, images, cmd);
 
@@ -673,7 +674,7 @@ impl Renderer for WGPU {
                                     let offset = self.index_buffer.len();
                                     // self.index_buffer
                                     // .extend_with_triange_fan_indices_cw(start as _, count as _);
-                                    pass.draw_indexed(0..0, 0, 0..0);
+                                    pass.draw_indexed(0..0, 0, 0..1);
                                     // pass.set_push_constants(stages, offset, data)p
                                 }
                             }
@@ -750,7 +751,7 @@ impl Renderer for WGPU {
                             for drawable in &cmd.drawables {
                                 if let Some((start, count)) = drawable.stroke_verts {
                                     // encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64)
-                                    pass.draw(vert_range(start, count), 0..0);
+                                    pass.draw(vert_range(start, count), 0..1);
                                 }
                             }
 
@@ -779,31 +780,33 @@ impl Renderer for WGPU {
                             height,
                             color,
                         } => {
-                            pass.push_debug_group("clear rect");
-                            let ndc_rect = Rect {
-                                x: -1.0,
-                                y: -1.0,
-                                w: 2.0,
-                                h: 2.0,
-                            };
+                            if false {
+                                pass.push_debug_group("clear rect");
+                                let ndc_rect = Rect {
+                                    x: -1.0,
+                                    y: -1.0,
+                                    w: 2.0,
+                                    h: 2.0,
+                                };
 
-                            let clear_rect = ClearRect {
-                                rect: ndc_rect,
-                                color: *color,
-                            };
+                                let clear_rect = ClearRect {
+                                    rect: ndc_rect,
+                                    color: *color,
+                                };
 
-                            let bg = bind_group!(self, images, cmd);
+                                let bg = bind_group!(self, images, cmd);
 
-                            pass.set_pipeline(states.clear_rect());
+                                pass.set_pipeline(states.clear_rect());
 
-                            pass.set_scissor_rect(*x as _, *y as _, *width as _, *height as _);
-                            pass.set_vertex_value(0, &clear_rect);
+                                pass.set_scissor_rect(*x as _, *y as _, *width as _, *height as _);
+                                pass.set_vertex_value(0, &clear_rect);
 
-                            let size = self.view_size;
-                            pass.set_scissor_rect(0, 0, size.w as _, size.h as _);
-                            // pass.draw()
+                                let size = self.view_size;
+                                pass.set_scissor_rect(0, 0, size.w as _, size.h as _);
+                                // pass.draw()
 
-                            pass.pop_debug_group();
+                                pass.pop_debug_group();
+                            }
                         }
                         CommandType::SetRenderTarget(target) => {
                             render_target = *target;
