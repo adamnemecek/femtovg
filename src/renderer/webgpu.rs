@@ -54,6 +54,8 @@ use super::{
     Renderer,
 };
 
+use self::{VecExt};
+
 // use fnv::FnvHashMap;
 use imgref::ImgVec;
 use rgb::RGBA8;
@@ -160,7 +162,10 @@ pub struct WGPU {
     ctx: WGPUContext,
     antialias: bool,
     stencil_texture: WGPUStencilTexture,
+
     index_buffer: WGPUVec<u32>,
+    temp_index_buffer: Vec<u32>,
+
     vertex_buffer: WGPUVec<Vertex>,
     render_target: RenderTarget,
     pseudo_texture: WGPUTexture,
@@ -372,6 +377,7 @@ impl WGPU {
             stencil_texture,
             ctx: ctx.clone(),
             index_buffer,
+            temp_index_buffer: vec![],
             vertex_buffer,
             render_target: RenderTarget::Screen,
             pseudo_texture,
@@ -489,7 +495,7 @@ impl Renderer for WGPU {
                 CommandType::ConvexFill { .. } => {
                     for drawable in &cmd.drawables {
                         if let Some((start, count)) = drawable.fill_verts {
-                            self.index_buffer
+                            self.temp_index_buffer
                                 .extend_with_triange_fan_indices_cw(start as _, count as _);
                         }
                     }
@@ -498,7 +504,7 @@ impl Renderer for WGPU {
                     for drawable in &cmd.drawables {
                         if let Some((start, count)) = drawable.fill_verts {
                             // let offset = self.index_buffer.len();
-                            self.index_buffer
+                            self.temp_index_buffer
                                 .extend_with_triange_fan_indices_cw(start as _, count as _);
                         }
                     }
@@ -788,6 +794,14 @@ impl Renderer for WGPU {
                             // drop(pass);
                             // drop(frame);
                             // drop(encoder);
+                            // self.ctx.queue().submit(Some(encoder.finish()));
+                            // continue 'frame;
+                            println!("set render target");
+                            render_target = *target;
+                            drop(pass);
+                            //drop(encoder);
+                            self.ctx.queue().submit(Some(encoder.finish()));
+                            drop(frame);
                             continue 'frame;
                         }
                     }

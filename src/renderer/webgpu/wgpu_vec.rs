@@ -95,6 +95,10 @@ impl<T: Copy> WGPUVec<T> {
         }
     }
 
+    pub fn map_async(&self) -> impl std::future::Future<Output = Result<(), wgpu::BufferAsyncError>> + Send {
+        self.slice().map_async(wgpu::MapMode::Write)
+    }
+
     // pub fn from_slice(ctx: &WGPUContext, slice: &[T]) -> Self {
     //     // use wgpu::util::BufferInitDescriptor;
     //     let mem_align = MemAlign::new(slice.len());
@@ -277,8 +281,12 @@ impl<T: Copy> Drop for WGPUVec<T> {
     }
 }
 
-impl WGPUVec<u32> {
-    pub fn extend_with_triange_fan_indices_cw(&mut self, start: u32, count: u32) -> usize {
+pub trait VecExt {
+    fn extend_with_triange_fan_indices_cw(&mut self, start: u32, count: u32) -> usize;
+}
+
+impl VecExt for Vec<u32> {
+    fn extend_with_triange_fan_indices_cw(&mut self, start: u32, count: u32) -> usize {
         let mut added = 0;
         for index in 1..(count - 1) {
             self.extend_from_slice(&[start, start + index, start + index + 1]);
@@ -288,6 +296,18 @@ impl WGPUVec<u32> {
         added
     }
 }
+
+// impl WGPUVec<u32> {
+//     pub fn extend_with_triange_fan_indices_cw(&mut self, start: u32, count: u32) -> usize {
+//         let mut added = 0;
+//         for index in 1..(count - 1) {
+//             self.extend_from_slice(&[start, start + index, start + index + 1]);
+//             added += 3;
+//         }
+
+//         added
+//     }
+// }
 
 impl<T: Copy> AsRef<wgpu::Buffer> for WGPUVec<T> {
     fn as_ref(&self) -> &wgpu::Buffer {
