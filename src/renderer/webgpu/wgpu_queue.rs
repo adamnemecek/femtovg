@@ -48,6 +48,7 @@ pub struct WGPUContext {
 impl WGPUContext {
     pub fn new(instance: WGPUInstance) -> impl Future<Output = Result<Self, wgpu::RequestDeviceError>> {
         // instance.adapter.request_device(desc, trace_path)
+        let path = std::path::Path::new("/Users/adamnemecek/Code/femtovg3/tracing");
         let f = instance.adapter.request_device(
             &wgpu::DeviceDescriptor {
                 label: None,
@@ -57,7 +58,7 @@ impl WGPUContext {
                     ..Default::default()
                 },
             },
-            None,
+            Some(path),
         );
         async move {
             f.await.map(|(device, queue)| Self {

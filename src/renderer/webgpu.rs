@@ -159,19 +159,6 @@ fn begin_render_pass<'a>(
 pub struct WGPU {
     ctx: WGPUContext,
     antialias: bool,
-    // default_stencil_state: wgpu::RenderPipeline,
-    // fill_shape_stencil_state: wgpu::RenderPipeline,
-    // fill_anti_alias_stencil_state_nonzero: wgpu::RenderPipeline,
-    // fill_anti_alias_stencil_state_evenodd: wgpu::RenderPipeline,
-    // fill_stencil_state_nonzero: wgpu::RenderPipeline,
-    // fill_stencil_state_evenodd: wgpu::RenderPipeline,
-
-    // stroke_shape_stencil_state: wgpu::RenderPipeline,
-    // stroke_anti_alias_stencil_state: wgpu::RenderPipeline,
-    // stroke_clear_stencil_state: wgpu::RenderPipeline,
-
-    // convex_fill1: wgpu::RenderPipeline,
-    // convex_fill2: wgpu::RenderPipeline,
     stencil_texture: WGPUStencilTexture,
     index_buffer: WGPUVec<u32>,
     vertex_buffer: WGPUVec<Vertex>,
@@ -354,26 +341,6 @@ impl WGPU {
         //  * viewsize
         // fragment shader
 
-        // let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-        //     label: None,
-        //     layout: &bind_group_layout,
-        //     entries: &[wgpu::BindGroupEntry {
-        //         binding: 0,
-        //         resource: wgpu::BindingResource::TextureViewArray(&[]),
-        //     }],
-        // });
-
-        // bind_group.destroy();
-
-        // let fill_shape_stencil_state = 0;
-        // let fill_anti_alias_stencil_state_nonzero = 0;
-        // let fill_anti_alias_stencil_state_evenodd = 0;
-        // let fill_stencil_state_nonzero = 0;
-        // let fill_stencil_state_evenodd = 0;
-        // let stroke_shape_stencil_state = 0;
-        // let stroke_anti_alias_stencil_state = 0;
-        // let stroke_clear_stencil_state = 0;
-
         let encoder = ctx
             .device()
             .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
@@ -398,10 +365,7 @@ impl WGPU {
         let bind_group_cache = WGPUBindGroupCache::new();
         let swap_chain = WGPUSwapChain::new(ctx, view_size);
         let pseudo_texture = WGPUTexture::new_pseudo_texture(ctx).unwrap();
-        // Self {
 
-        // }
-        // todo!();
         Self {
             clear_color,
             antialias: true,
@@ -411,157 +375,13 @@ impl WGPU {
             vertex_buffer,
             render_target: RenderTarget::Screen,
             pseudo_texture,
-            pipeline_cache,   //: Default::default(),
-            bind_group_cache, //: Default::default(),
+            pipeline_cache,
+            bind_group_cache,
             view_size,
             bind_group_layout,
             swap_chain,
-            // clear_rect_bind_group_layout,
-            // swap_chain: WGPUSwapChain::new()
-            // index_buffer: WGPUVec<u32>,
-            // vertex_buffer: WGPUVec<Vertex>,
-            // render_target: RenderTarget,
-            // pseudo_texture: WGPUTexture,
-
-            // pipeline_cache: WGPUPipelineCache,
-            // bind_group_cache: WGPUBindGroupCache,
-
-            // view_size: Size,
-            // swap_chain: WGPUSwapChain,
-            // bind_group_layout: wgpu::BindGroupLayout,
         }
     }
-
-    // fn convex_fill<'a, 'b>(
-    //     &'b mut self,
-    //     pass: &'a mut wgpu::RenderPass<'b>,
-    //     images: &ImageStore<WGPUTexture>,
-    //     cmd: &Command,
-    //     paint: Params,
-    // ) where 'b : 'a
-    // {
-    //     // encoder.push_debug_group("convex_fill");
-
-    //     for drawable in &cmd.drawables {
-    //         if let Some((start, count)) = drawable.fill_verts {
-    //             //
-    //             pass.set_pipeline(&self.convex_fill1);
-
-    //             let offset = self.index_buffer.len();
-    //             let triangle_fan_index_count = self
-    //                 .index_buffer
-    //                 .extend_with_triange_fan_indices_cw(start as u32, count as u32);
-
-    //             // encoder.begin_render_pass(desc)
-    //             // render_pass.draw_indexed(indices, base_vertex, instances)
-    //             // pass.set_index_buffer(buffer_slice, );
-    //             let fmt = wgpu::IndexFormat::Uint32;
-    //             // pass.set_index_buffer(self.index_buffer, fmt);
-    //             pass.draw_indexed(0..0, 0, 0..0);
-    //         }
-
-    //         if let Some((start, count)) = drawable.stroke_verts {
-    //             pass.set_pipeline(&self.convex_fill2);
-    //             let vertex_range = start as _..(start + count) as _;
-    //             pass.draw(vertex_range, 0..0);
-    //         }
-    //     }
-    // }
-
-    // fn stroke<'a>(
-    //     &'a mut self,
-    //     pass: &mut wgpu::RenderPass<'a>,
-    //     images: &ImageStore<WGPUTexture>,
-    //     cmd: &Command,
-    //     paint: Params,
-    // ) {
-    //     //
-    //     // draws triangle strip
-    //     self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
-    //     for drawable in &cmd.drawables {
-    //         if let Some((start, count)) = drawable.stroke_verts {
-    //             // pass.draw()
-    //         }
-    //     }
-    // }
-
-    // fn stencil_stroke<'a, 'b>(
-    //     &'a mut self,
-    //     pass: &'a mut wgpu::RenderPass<'b>,
-    //     images: &ImageStore<WGPUTexture>,
-    //     cmd: &Command,
-    //     paint1: Params,
-    //     paint2: Params,
-    // ) {
-    //     //
-    //     // pass.set_pipeline(pipeline);
-    //     // self.set_uniforms(pass, images, image_tex, alpha_tex)
-    // }
-
-    // fn triangles<'a>(
-    //     &'a mut self,
-    //     pass: &mut wgpu::RenderPass<'a>,
-    //     images: &ImageStore<WGPUTexture>,
-    //     cmd: &Command,
-    //     paint: Params,
-    // ) {
-    //     //
-    //     // self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
-    //     // pass.set_pipeline(pipeline)
-    //     if let Some((start, count)) = cmd.triangles_verts {
-    //         // pass.draw(vertices, instances)
-    //     }
-    // }
-
-    // fn set_uniforms<'a>(
-    //     &self,
-    //     pass: &wgpu::RenderPass<'a>,
-    //     images: &ImageStore<WGPUTexture>,
-    //     paint: Params,
-    //     image_tex: Option<ImageId>,
-    //     alpha_tex: Option<ImageId>,
-    // ) {
-    //     let tex = if let Some(id) = image_tex {
-    //         images.get(id).unwrap()
-    //     } else {
-    //         &self.pseudo_texture
-    //     };
-    //     // pass.set_viewport(x, y, w, h, min_depth, max_depth)
-    // }
-
-    fn clear_rect<'a>(
-        &'a mut self,
-        pass: &mut wgpu::RenderPass<'a>,
-        images: &ImageStore<WGPUTexture>,
-        x: u32,
-        y: u32,
-        width: u32,
-        height: u32,
-        color: Color,
-    ) {
-        //
-        let ndc_rect = Rect {
-            x: -1.0,
-            y: -1.0,
-            w: 2.0,
-            h: 2.0,
-        };
-    }
-
-    // pub fn set_target(&mut self, images: &ImageStore<WGPUTexture>, target: RenderTarget) {
-    //     //
-    //     if self.render_target == target {}
-
-    //     let size = match target {
-    //         RenderTarget::Screen => todo!(),
-    //         RenderTarget::Image(id) => {
-    //             let texture = images.get(id).unwrap();
-    //             texture.size()
-    //         }
-    //     };
-    //     self.render_target = target;
-    //     self.view_size = size;
-    // }
 }
 
 fn new_pass<'a>() -> wgpu::RenderPass<'a> {
@@ -575,186 +395,6 @@ fn new_pass_descriptor<'a, 'b>() -> wgpu::RenderPassDescriptor<'a, 'b> {
 pub struct TextureBindings {
     // tex_tex:
 }
-
-// fn convex_fill<'a, 'b>(
-//     // &'a mut self,
-//     pass: &'a mut wgpu::RenderPass<'b>,
-//     images: &ImageStore<WGPUTexture>,
-//     cmd: &Command,
-//     paint: Params,
-//     vertex_buffer: &WGPUVec<Vertex>,
-//     index_buffer: &mut WGPUVec<u32>,
-//     states: &'b WGPUPipelineStates,
-// ) {
-//     // encoder.push_debug_group("convex_fill");
-
-//     for drawable in &cmd.drawables {
-//         if let Some((start, count)) = drawable.fill_verts {
-//             //
-//             pass.set_pipeline(&states.convex_fill1());
-
-//             // pass.set_pipeline(&state.convex_fill1());
-
-//             let offset = index_buffer.len();
-//             let triangle_fan_index_count = index_buffer.extend_with_triange_fan_indices_cw(start as u32, count as u32);
-
-//             // encoder.begin_render_pass(desc)
-//             // render_pass.draw_indexed(indices, base_vertex, instances)
-//             // pass.set_index_buffer(buffer_slice, );
-//             let fmt = wgpu::IndexFormat::Uint32;
-//             // pass.set_index_buffer(self.index_buffer, fmt);
-//             pass.draw_indexed(0..0, 0, 0..0);
-//         }
-
-//         if let Some((start, count)) = drawable.stroke_verts {
-//             pass.set_pipeline(&states.convex_fill2());
-//             let vertex_range = start as _..(start + count) as _;
-//             pass.draw(vertex_range, 0..0);
-//         }
-//     }
-// }
-
-// fn stroke<'a, 'b>(
-//     ctx: &WGPUContext,
-//     pass: &'a mut wgpu::RenderPass<'a>,
-//     images: &ImageStore<WGPUTexture>,
-//     view_size: WGPUVar<Size>,
-//     cmd: &Command,
-//     uniforms: WGPUVar<Params>,
-//     vertex_buffer: &WGPUVec<Vertex>,
-//     index_buffer: &mut WGPUVec<u32>,
-//     image_tex: Option<ImageId>,
-//     alpha_tex: Option<ImageId>,
-//     pseudo_tex: &WGPUTexture,
-//     bind_group_layout: wgpu::BindGroupLayout,
-//     states: &'b WGPUPipelineStates,
-
-//     // cache: &'a BindingGroupCache
-//     bind_groups: &'a mut Vec<wgpu::BindGroup>,
-// ) {
-//     // set_uniforms()
-//     //di
-//     // draws triangle strip
-//     let bind_group = create_bind_group(
-//         ctx,
-//         images,
-//         view_size,
-//         uniforms,
-//         image_tex,
-//         alpha_tex,
-//         pseudo_tex,
-//         bind_group_layout,
-//     );
-
-//     // let bind = cache.get();
-//     // pass.set_bind_group(0, bind, &[]);
-//     bind_groups.push(bind_group);
-//     let bind_group = bind_groups.last().unwrap();
-//     pass.set_bind_group(0, bind_group, &[]);
-
-//     // pass.set_pipeline(pipeline);
-//     // pass.set_bind_group(0, &bind_group, &[]);
-//     for drawable in &cmd.drawables {
-//         if let Some((start, count)) = drawable.stroke_verts {
-//             // pass.draw()
-//         }
-//     }
-// }
-
-// fn stencil_stroke<'a, 'b>(
-//     pass: &'a mut wgpu::RenderPass<'b>,
-//     images: &ImageStore<WGPUTexture>,
-//     cmd: &Command,
-//     paint1: Params,
-//     paint2: Params,
-//     vertex_buffer: &WGPUVec<Vertex>,
-//     index_buffer: &mut WGPUVec<u32>,
-//     states: &'b WGPUPipelineStates,
-// ) {
-//     // pass.set_pipeline()
-//     //
-//     // pass.set_pipeline(pipeline);
-//     // self.set_uniforms(pass, images, image_tex, alpha_tex)
-
-//     // pass.set_pipeline();
-// }
-
-// fn concave_fill<'a, 'b>(
-//     pass: &'a mut wgpu::RenderPass<'b>,
-//     images: &ImageStore<WGPUTexture>,
-//     cmd: &Command,
-//     antialias: bool,
-//     stencil_paint: Params,
-//     fill_paint: Params,
-//     vertex_buffer: &WGPUVec<Vertex>,
-//     index_buffer: &mut WGPUVec<u32>,
-//     states: &'b WGPUPipelineStates,
-// ) {
-//     for drawable in &cmd.drawables {
-//         if let Some((start, count)) = drawable.fill_verts {
-//             let offset = index_buffer.len();
-//             index_buffer.extend_with_triange_fan_indices_cw(start as _, count as _);
-//             pass.draw_indexed(0..0, 0, 0..0);
-//             // pass.set_push_constants(stages, offset, data)p
-//         }
-//     }
-//     pass.set_pipeline(states.concave_fill1());
-//     // set_uniforms
-
-//     // fringes
-//     if antialias {
-//         match cmd.fill_rule {
-//             FillRule::NonZero => {
-//                 pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
-//             }
-//             FillRule::EvenOdd => {
-//                 pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
-//             }
-//         }
-
-//         for drawable in &cmd.drawables {
-//             if let Some((start, count)) = drawable.stroke_verts {
-//                 // pass.draw(vertices, instances)
-//             }
-//         }
-//     }
-
-//     // todo: can be moved into the if statement
-//     match cmd.fill_rule {
-//         FillRule::NonZero => {
-//             pass.set_pipeline(states.fill_anti_alias_stencil_state_nonzero());
-//         }
-//         FillRule::EvenOdd => {
-//             pass.set_pipeline(states.fill_anti_alias_stencil_state_evenodd());
-//         }
-//     }
-
-//     if let Some((start, count)) = cmd.triangles_verts {
-//         // pass.
-//     }
-//     // pass.set_pipeline(pipeline)
-// }
-
-// fn triangles<'a, 'b>(
-//     pass: &'a mut wgpu::RenderPass<'b>,
-//     images: &ImageStore<WGPUTexture>,
-//     cmd: &Command,
-//     params: Params,
-//     vertex_buffer: &WGPUVec<Vertex>,
-//     index_buffer: &mut WGPUVec<u32>,
-//     states: &'b WGPUPipelineStates,
-// ) {
-// }
-
-// fn clear_rect<'a, 'b>(
-//     pass: &'a mut wgpu::RenderPass<'b>,
-//     images: &ImageStore<WGPUTexture>,
-//     cmd: &Command,
-//     vertex_buffer: &WGPUVec<Vertex>,
-//     index_buffer: &mut WGPUVec<u32>,
-//     states: &'b WGPUPipelineStates,
-// ) {
-// }
 
 impl WGPU {
     // pub fn bind_group_for(
@@ -873,7 +513,8 @@ impl Renderer for WGPU {
 
         let mut i = 0;
 
-        'outer: while i < commands.len() {
+        'frame: while i < commands.len() {
+            let frame = self.swap_chain.get_current_frame().unwrap();
             let mut encoder = self.ctx.create_command_encoder(None);
             {
                 // let target_texture_view = match render_target {
@@ -888,7 +529,6 @@ impl Renderer for WGPU {
                 //         TargetTexture::View(images.get(id).unwrap().view()),
                 //     }
                 // };
-                let frame = self.swap_chain.get_current_frame().unwrap();
 
                 let mut pass = begin_render_pass(
                     &mut encoder,
@@ -1078,7 +718,10 @@ impl Renderer for WGPU {
                         }
                         CommandType::StencilStroke { params1, params2 } => {
                             pass.push_debug_group("stencil stroke");
+                            let s = states.stencil_stroke();
+
                             // pipeline state + stroke_shape_stencil_state
+                            pass.set_pipeline(s.stroke_base());
                             let bg = bind_group!(self, images, cmd);
                             uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
 
@@ -1096,6 +739,7 @@ impl Renderer for WGPU {
                         CommandType::Triangles { params } => {
                             pass.push_debug_group("triangles");
                             let bg = bind_group!(self, images, cmd);
+                            pass.set_pipeline(states.triangles());
                             uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
                             // pass.set_bind_group(index, bind_group, offsets)
@@ -1132,22 +776,19 @@ impl Renderer for WGPU {
 
                             pass.set_scissor_rect(*x as _, *y as _, *width as _, *height as _);
                             pass.set_vertex_value(0, &clear_rect);
+
+                            let size = self.view_size;
+                            pass.set_scissor_rect(0, 0, size.w as _, size.h as _);
                             // pass.draw()
 
                             pass.pop_debug_group();
-                            // clear_rect(
-                            //     &mut pass,
-                            //     images,
-                            //     cmd,
-                            //     // *params,
-                            //     &self.vertex_buffer,
-                            //     &mut self.index_buffer,
-                            //     states,
-                            // );
                         }
                         CommandType::SetRenderTarget(target) => {
                             render_target = *target;
-                            continue 'outer;
+                            // drop(pass);
+                            // drop(frame);
+                            // drop(encoder);
+                            continue 'frame;
                         }
                     }
                 }
