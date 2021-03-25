@@ -583,13 +583,13 @@ impl Renderer for WGPU {
                 let mut offset = 0;
 
                 macro_rules! bind_group {
-                    ($self_: ident, $images: ident, $cmd: ident) => {
+                    ($self_: expr, $images: expr, $img: expr, $alpha: expr) => {
                         $self_.bind_group_cache.get(
                             &$self_.ctx,
                             $images,
                             &$self_.bind_group_layout,
-                            $cmd.image,
-                            $cmd.alpha_mask,
+                            $img,
+                            $alpha,
                             &$self_.pseudo_texture,
                         );
                     };
@@ -628,7 +628,7 @@ impl Renderer for WGPU {
 
                             pass.set_pipeline(s.fill_buffer());
                             // set uniforms
-                            let bg = bind_group!(self, images, cmd);
+                            let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_bind_group(0, bg.as_ref(), &[]);
                             uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
@@ -668,7 +668,8 @@ impl Renderer for WGPU {
                             let s = states.concave_fill();
                             pass.set_pipeline(s.fill_verts());
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
-                            let bg = bind_group!(self, images, cmd);
+                            // need for none, none
+                            let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_bind_group(0, bg.as_ref(), &[]);
                             uniforms_offset += pass.set_fragment_value(uniforms_offset, stencil_params);
 
@@ -720,8 +721,10 @@ impl Renderer for WGPU {
                         }
                         CommandType::Stroke { params } => {
                             pass.push_debug_group("stroke");
+
+                            pass.set_pipeline(states.stroke());
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
-                            let bg = bind_group!(self, images, cmd);
+                            let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
 
                             // pass.set_pipeline()
                             pass.set_bind_group(0, bg.as_ref(), &[]);
@@ -743,7 +746,7 @@ impl Renderer for WGPU {
 
                             // pipeline state + stroke_shape_stencil_state
                             pass.set_pipeline(s.stroke_base());
-                            let bg = bind_group!(self, images, cmd);
+                            let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
 
                             for drawable in &cmd.drawables {
@@ -759,7 +762,7 @@ impl Renderer for WGPU {
                         }
                         CommandType::Triangles { params } => {
                             pass.push_debug_group("triangles");
-                            let bg = bind_group!(self, images, cmd);
+                            let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_pipeline(states.triangles());
                             uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
@@ -792,7 +795,7 @@ impl Renderer for WGPU {
                                     color: *color,
                                 };
 
-                                let bg = bind_group!(self, images, cmd);
+                                let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
 
                                 pass.set_pipeline(states.clear_rect());
 
