@@ -45,7 +45,9 @@ pub trait WGPUQueueExt {
 
 impl WGPUQueueExt for wgpu::Queue {
     fn sync_buffer<T: Copy>(&self, buffer: &wgpu::Buffer, data: &[T]) {
+        // println!("before");
         self.write_buffer(buffer, 0, super::as_u8_slice(data));
+        // println!("after");
     }
 }
 
