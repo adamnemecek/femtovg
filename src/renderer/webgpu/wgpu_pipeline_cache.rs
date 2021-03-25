@@ -74,6 +74,7 @@ fn create_pipeline<'a>(
     shader: &wgpu::ShaderModule,
     format: wgpu::TextureFormat,
     topology: wgpu::PrimitiveTopology,
+    strip_index_format: impl Into<Option<wgpu::IndexFormat>>,
     cull_mode: impl Into<Option<wgpu::Face>>,
     depth_stencil: impl Into<Option<wgpu::DepthStencilState>>,
 ) -> wgpu::RenderPipeline {
@@ -93,6 +94,7 @@ fn create_pipeline<'a>(
         }),
         primitive: wgpu::PrimitiveState {
             topology,
+            strip_index_format: strip_index_format.into(),
             // front_face: wgpu::FrontFace::Ccw,
             cull_mode: cull_mode.into(),
             ..Default::default()
@@ -109,6 +111,7 @@ fn create_stencil_only_pipeline<'a>(
     shader: &wgpu::ShaderModule,
     format: wgpu::TextureFormat,
     topology: wgpu::PrimitiveTopology,
+    strip_index_format: impl Into<Option<wgpu::IndexFormat>>,
     cull_mode: impl Into<Option<wgpu::Face>>,
     depth_stencil: impl Into<Option<wgpu::DepthStencilState>>,
 ) -> wgpu::RenderPipeline {
@@ -120,7 +123,14 @@ fn create_stencil_only_pipeline<'a>(
             entry_point: "vertex_shader",
             buffers: &[Vertex::desc()],
         },
-        fragment: None,
+        // fragment: None,
+        // todo: in the original this is not set
+        fragment: Some(wgpu::FragmentState {
+            module: shader,
+            entry_point: "fragment_shader_aa",
+            //todo!
+            targets: &[format.into()],
+        }),
         primitive: wgpu::PrimitiveState {
             topology,
             // front_face: wgpu::FrontFace::Ccw,
@@ -515,6 +525,7 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
+                None,
                 wgpu::Face::Back,
                 None,
             ),
@@ -525,6 +536,7 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleStrip,
+                wgpu::IndexFormat::Uint32,
                 wgpu::Face::Back,
                 None,
             ),
@@ -540,6 +552,7 @@ impl WGPUPipelineStates {
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
                 None,
+                None,
                 fill_shape_stencil_state(format),
             ),
             fringes_nonzero: create_pipeline(
@@ -549,6 +562,7 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleStrip,
+                wgpu::IndexFormat::Uint32,
                 wgpu::Face::Back,
                 fill_anti_alias_stencil_state_nonzero(format),
             ),
@@ -559,6 +573,7 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleStrip,
+                wgpu::IndexFormat::Uint32,
                 wgpu::Face::Back,
                 fill_anti_alias_stencil_state_evenodd(format),
             ),
@@ -569,6 +584,7 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleStrip,
+                wgpu::IndexFormat::Uint32,
                 wgpu::Face::Back,
                 fill_stencil_state_nonzero(format),
             ),
@@ -579,6 +595,7 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
+                None,
                 wgpu::Face::Back,
                 fill_stencil_state_evenodd(format),
             ),
@@ -591,6 +608,7 @@ impl WGPUPipelineStates {
             shader,
             format,
             wgpu::PrimitiveTopology::TriangleStrip,
+            wgpu::IndexFormat::Uint32,
             wgpu::Face::Back,
             None,
         );
@@ -603,6 +621,7 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleStrip,
+                wgpu::IndexFormat::Uint32,
                 wgpu::Face::Back,
                 stroke_shape_stencil_state(format),
             ),
@@ -613,6 +632,7 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleList,
+                None,
                 wgpu::Face::Back,
                 stroke_anti_alias_stencil_state(format),
             ),
@@ -623,8 +643,9 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 wgpu::PrimitiveTopology::TriangleStrip,
+                wgpu::IndexFormat::Uint32,
                 wgpu::Face::Back,
-                None,
+                stroke_clear_stencil_state(format),
             ),
         };
 
@@ -635,6 +656,7 @@ impl WGPUPipelineStates {
             shader,
             format,
             wgpu::PrimitiveTopology::TriangleList,
+            None,
             wgpu::Face::Back,
             None,
         );
