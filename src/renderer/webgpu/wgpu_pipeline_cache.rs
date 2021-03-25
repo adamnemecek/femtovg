@@ -590,7 +590,7 @@ impl WGPUPipelineStates {
             layout,
             shader,
             format,
-            wgpu::PrimitiveTopology::TriangleList,
+            wgpu::PrimitiveTopology::TriangleStrip,
             wgpu::Face::Back,
             None,
         );
@@ -606,7 +606,7 @@ impl WGPUPipelineStates {
                 wgpu::Face::Back,
                 stroke_shape_stencil_state(format),
             ),
-            aa_pixels: create_stencil_only_pipeline(
+            aa_pixels: create_pipeline(
                 ctx,
                 "aa_pixels",
                 layout,
@@ -616,13 +616,13 @@ impl WGPUPipelineStates {
                 wgpu::Face::Back,
                 stroke_anti_alias_stencil_state(format),
             ),
-            clear_stencil: create_pipeline(
+            clear_stencil: create_stencil_only_pipeline(
                 ctx,
                 "clear_stencil",
                 layout,
                 shader,
                 format,
-                wgpu::PrimitiveTopology::TriangleList,
+                wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::Face::Back,
                 None,
             ),
