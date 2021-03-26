@@ -171,6 +171,8 @@ fn fragment_shader_aa(
 
 // };
 
+
+
 [[stage(fragment)]]
 fn passthrough(
     in: RasterizerData,
@@ -184,6 +186,8 @@ struct Rect {
     w: f32;
     h: f32;
 };
+
+
 
 fn rect_vert_cw(
     rect: vec4<f32>,
@@ -221,23 +225,31 @@ fn rect_vert_cw(
     return pos;
 }
 
+[[block]]
+struct ClearRectIn {
+    rect: vec4<f32>;
+    [[location(0)]] color: vec4<f32>;
+};
+
 // [[block]]
 struct ClearRectOut {
     [[builtin(position)]] pos: vec4<f32>;
     [[location(0)]] color: vec4<f32>;
 };
 
+
+[[group(1), binding(0)]]
+var<uniform> u: ClearRectIn;
+
 [[stage(vertex)]]
 fn vertex_clear_rect(
-    [[location(0)]] rect: vec4<f32>,
-    [[location(1)]] color: vec4<f32>,
     [[builtin(vertex_index)]] vid: u32,
 ) -> ClearRectOut {
-    const pos = rect_vert_cw(rect, i32(vid));
+    const pos = rect_vert_cw(u.rect, i32(vid));
 
     var out: ClearRectOut;
     out.pos = vec4<f32>(pos, 0.0, 1.0);
-    out.color = color;
+    out.color = u.color;
 
     return out;
 }

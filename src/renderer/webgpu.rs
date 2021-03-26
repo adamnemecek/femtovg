@@ -436,14 +436,6 @@ impl WGPU {
     }
 }
 
-fn new_pass<'a>() -> wgpu::RenderPass<'a> {
-    todo!()
-}
-
-fn new_pass_descriptor<'a, 'b>() -> wgpu::RenderPassDescriptor<'a, 'b> {
-    todo!()
-}
-
 pub struct TextureBindings {
     // tex_tex:
 }
@@ -951,33 +943,31 @@ impl Renderer for WGPU {
                             height,
                             color,
                         } => {
-                            if false {
-                                pass.cfg_push_debug_group("clear rect");
-                                let ndc_rect = Rect {
-                                    x: -1.0,
-                                    y: -1.0,
-                                    w: 2.0,
-                                    h: 2.0,
-                                };
+                            pass.cfg_push_debug_group("clear rect");
+                            let ndc_rect = Rect {
+                                x: -1.0,
+                                y: -1.0,
+                                w: 2.0,
+                                h: 2.0,
+                            };
 
-                                let clear_rect = ClearRect {
-                                    rect: ndc_rect,
-                                    color: *color,
-                                };
+                            let clear_rect = ClearRect {
+                                rect: ndc_rect,
+                                color: *color,
+                            };
 
-                                let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
+                            let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
 
-                                pass.set_pipeline(states.clear_rect());
+                            pass.set_pipeline(states.clear_rect());
 
-                                pass.set_scissor_rect(*x as _, *y as _, *width as _, *height as _);
-                                uniforms_offset += pass.set_vertex_value(uniforms_offset, &clear_rect);
+                            pass.set_scissor_rect(*x as _, *y as _, *width as _, *height as _);
+                            uniforms_offset += pass.set_vertex_value(uniforms_offset, &clear_rect);
 
-                                let size = self.view_size;
-                                pass.set_scissor_rect(0, 0, size.w as _, size.h as _);
-                                // pass.draw()
+                            let size = self.view_size;
+                            pass.set_scissor_rect(0, 0, size.w as _, size.h as _);
+                            // pass.draw()
 
-                                pass.cfg_pop_debug_group();
-                            }
+                            pass.cfg_pop_debug_group();
                         }
                         CommandType::SetRenderTarget(target) => {
                             render_target = *target;
@@ -986,8 +976,8 @@ impl Renderer for WGPU {
                             // drop(encoder);
                             // self.ctx.queue().submit(Some(encoder.finish()));
                             // continue 'frame;
-                            println!("set render target");
-                            render_target = *target;
+                            println!("set render target {:?}", target);
+                            // render_target = *target;
                             drop(pass);
                             //drop(encoder);
                             self.ctx.queue().submit(Some(encoder.finish()));
