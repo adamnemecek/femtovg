@@ -168,14 +168,15 @@ pub struct WGPU {
     antialias: bool,
     stencil_texture: WGPUStencilTexture,
 
+    vertex_buffer: WGPUVec<Vertex>,
+
     index_buffer: WGPUVec<u32>,
     temp_index_buffer: Vec<u32>,
+    index_ranges: Vec<IndexRange>,
 
     uniform_buffer: WGPUVec<Params>,
     temp_uniform_buffer: Vec<Params>,
-    index_ranges: Vec<IndexRange>,
 
-    vertex_buffer: WGPUVec<Vertex>,
     render_target: RenderTarget,
     pseudo_texture: WGPUTexture,
 
@@ -185,7 +186,11 @@ pub struct WGPU {
     view_size: Size,
     swap_chain: WGPUSwapChain,
     bind_group_layout: wgpu::BindGroupLayout,
+
+    temp_clear_rect_buffer: Vec<ClearRect>,
+    clear_rect_buffer: WGPUVec<ClearRect>,
     // clear_rect_bind_group_layout: wgpu::BindGroupLayout,
+    // clear_rect_pipeline_layout: wgpu::PipelineLayout,
 }
 
 #[derive(Clone, Copy)]
@@ -321,31 +326,31 @@ impl WGPU {
             ],
         });
 
-        // let clear_rect_bind_group_layout = ctx.device().create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-        //     label: None,
-        //     entries: &[
-        //         wgpu::BindGroupLayoutEntry {
-        //             binding: 0,
-        //             visibility: wgpu::ShaderStage::VERTEX,
-        //             ty: wgpu::BindingType::Texture {
-        //                 sample_type: wgpu::TextureSampleType::Float { filterable: false },
-        //                 view_dimension: wgpu::TextureViewDimension::D2,
-        //                 multisampled: false,
-        //             },
-        //             count: None,
-        //         },
-        //         wgpu::BindGroupLayoutEntry {
-        //             binding: 1,
-        //             visibility: wgpu::ShaderStage::VERTEX,
-        //             ty: wgpu::BindingType::Texture {
-        //                 sample_type: wgpu::TextureSampleType::Float { filterable: false },
-        //                 view_dimension: wgpu::TextureViewDimension::D2,
-        //                 multisampled: false,
-        //             },
-        //             count: None,
-        //         },
-        //     ],
-        // });
+        let clear_rect_bind_group_layout = ctx.device().create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: None,
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStage::VERTEX,
+                    ty: wgpu::BindingType::Texture {
+                        sample_type: wgpu::TextureSampleType::Float { filterable: false },
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        multisampled: false,
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStage::VERTEX,
+                    ty: wgpu::BindingType::Texture {
+                        sample_type: wgpu::TextureSampleType::Float { filterable: false },
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        multisampled: false,
+                    },
+                    count: None,
+                },
+            ],
+        });
 
         let clear_rect_pipeline_layout = ctx.device().create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: None,
@@ -399,6 +404,8 @@ impl WGPU {
         let swap_chain = WGPUSwapChain::new(ctx, view_size);
         let pseudo_texture = WGPUTexture::new_pseudo_texture(ctx).unwrap();
 
+        let clear_rect_buffer = WGPUVec::new_vertex(ctx, 16);
+
         Self {
             clear_color,
             antialias: true,
@@ -421,6 +428,11 @@ impl WGPU {
             view_size,
             bind_group_layout,
             swap_chain,
+
+            clear_rect_buffer,
+            temp_clear_rect_buffer: vec![],
+            // clear_rect_pipeline_layout,
+
         }
     }
 }
