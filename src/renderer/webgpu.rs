@@ -432,7 +432,6 @@ impl WGPU {
             clear_rect_buffer,
             temp_clear_rect_buffer: vec![],
             // clear_rect_pipeline_layout,
-
         }
     }
 }
@@ -597,7 +596,21 @@ impl Renderer for WGPU {
                 CommandType::Triangles { params } => {
                     self.temp_uniform_buffer.push(params);
                 }
-                CommandType::ClearRect { .. } => {}
+                CommandType::ClearRect {
+                    x,
+                    y,
+                    width,
+                    height,
+                    color,
+                } => self.temp_clear_rect_buffer.push(ClearRect {
+                    rect: Rect {
+                        x: x as _,
+                        y: y as _,
+                        w: width as _,
+                        h: height as _,
+                    },
+                    color,
+                }),
                 CommandType::SetRenderTarget(_) => {}
             }
         }
@@ -629,6 +642,11 @@ impl Renderer for WGPU {
             .queue()
             .sync_buffer(self.uniform_buffer.as_ref(), &self.temp_uniform_buffer);
         // println!("index before");
+
+        self.clear_rect_buffer.resize(self.temp_clear_rect_buffer.len());
+        self.ctx
+            .queue()
+            .sync_buffer(self.clear_rect_buffer.as_ref(), &self.temp_clear_rect_buffer);
 
         let mut i = 0;
 
