@@ -399,6 +399,17 @@ fn stroke_clear_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencil
     }
 }
 
+fn default_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencilState {
+    wgpu::DepthStencilState {
+        format,
+        depth_write_enabled: false,
+        depth_compare: wgpu::CompareFunction::Always,
+        stencil: Default::default(),
+        bias: wgpu::DepthBiasState::default(),
+        clamp_depth: false,
+    }
+}
+
 pub struct ConvexFill {
     fill_buffer: wgpu::RenderPipeline,
     stroke_buffer: wgpu::RenderPipeline,
