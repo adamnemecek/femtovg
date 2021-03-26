@@ -514,6 +514,7 @@ impl Renderer for WGPU {
         self.temp_index_buffer.clear();
         self.temp_uniform_buffer.clear();
 
+        // let start = std::time::Instant::now();
         for cmd in commands.iter() {
             match cmd.cmd_type {
                 CommandType::ConvexFill { params } => {
@@ -553,6 +554,8 @@ impl Renderer for WGPU {
                 CommandType::SetRenderTarget(_) => {}
             }
         }
+        // let end = std::time::Instant::now();
+        // println!("uniforms vec {:?}", end - start);
 
         println!("command count {:?}", commands.len());
         println!("temp_uniforms len {:?}", self.temp_uniform_buffer.len());
@@ -679,7 +682,6 @@ impl Renderer for WGPU {
                             pass.set_pipeline(s.fill_buffer());
 
                             if should_set_vertex_uniforms {
-                                assert!(uniforms_offset == 0);
                                 let _ = pass.set_vertex_value(0, &self.view_size);
                                 should_set_vertex_uniforms = false;
                             }
@@ -687,9 +689,7 @@ impl Renderer for WGPU {
                             // set uniforms
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
-                            // uniforms_offset += std::mem::size_of::<Params>() as u32;
                             uniforms_offset += std::mem::size_of::<Params>() as u32;
-                            // uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
                             for drawable in &cmd.drawables {
                                 if let Some((start, count)) = drawable.fill_verts {
@@ -721,7 +721,7 @@ impl Renderer for WGPU {
                         }
                         CommandType::ConcaveFill {
                             stencil_params,
-                            fill_params,
+                            fill_params
                         } => {
                             pass.cfg_push_debug_group("concave fill");
                             let s = states.concave_fill();
@@ -738,7 +738,6 @@ impl Renderer for WGPU {
                             // pass.set_bind_group(0, bg.as_ref(), &[]);
                             // uniforms_offset += pass.set_fragment_value(uniforms_offset, stencil_params);
                             pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
-                            // uniforms_offset += std::mem::size_of::<Params>() as u32;
                             uniforms_offset += std::mem::size_of::<Params>() as u32;
 
                             for drawable in &cmd.drawables {
@@ -755,7 +754,6 @@ impl Renderer for WGPU {
 
                             let bg = bind_group!(self, images, None, None);
                             pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
-                            // uniforms_offset += std::mem::size_of::<Params>() as u32;
                             uniforms_offset += std::mem::size_of::<Params>() as u32;
                             // pass.set_bind_group(0, bg.as_ref(), &[]);
                             // uniforms_offset += pass.set_fragment_value(uniforms_offset, fill_params);
@@ -806,7 +804,6 @@ impl Renderer for WGPU {
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
-                            // uniforms_offset += std::mem::size_of::<Params>() as u32;
                             uniforms_offset += std::mem::size_of::<Params>() as u32;
 
                             // pass.set_pipeline()
@@ -836,7 +833,6 @@ impl Renderer for WGPU {
                             }
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
-                            // uniforms_offset += std::mem::size_of::<Params>() as u32;
                             uniforms_offset += std::mem::size_of::<Params>() as u32;
                             // uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
 
@@ -863,7 +859,6 @@ impl Renderer for WGPU {
                             }
                             // uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
                             pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
-                            // uniforms_offset += std::mem::size_of::<Params>() as u32;
                             uniforms_offset += std::mem::size_of::<Params>() as u32;
 
                             // pass.set_bind_group(index, bind_group, offsets)
