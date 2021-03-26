@@ -15,6 +15,10 @@ pub trait RenderPassExt {
 
     #[must_use]
     fn set_fragment_value<T: Copy>(&mut self, offset: u32, value: &T) -> u32;
+
+    fn cfg_push_debug_group(&mut self, label: &str);
+
+    fn cfg_pop_debug_group(&mut self);
 }
 
 // pub trait ByteSliceExt {
@@ -30,6 +34,18 @@ pub trait RenderPassExt {
 // }
 
 impl<'a> RenderPassExt for wgpu::RenderPass<'a> {
+    #[inline]
+    fn cfg_push_debug_group(&mut self, label: &str) {
+        #[cfg(debug_assertions)]
+        self.push_debug_group(label)
+    }
+
+    #[inline]
+    fn cfg_pop_debug_group(&mut self) {
+        #[cfg(debug_assertions)]
+        self.pop_debug_group();
+    }
+
     fn set_vertex_value<T: Copy>(&mut self, offset: u32, value: &T) -> u32 {
         let size = std::mem::size_of::<T>();
         debug_assert!(offset % 4 == 0);

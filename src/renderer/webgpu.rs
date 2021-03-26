@@ -670,7 +670,7 @@ impl Renderer for WGPU {
 
                     match &cmd.cmd_type {
                         CommandType::ConvexFill { params } => {
-                            pass.push_debug_group("convex fill");
+                            pass.cfg_push_debug_group("convex fill");
                             // set_uniforms
                             let s = states.convex_fill();
 
@@ -717,13 +717,13 @@ impl Renderer for WGPU {
                                     pass.draw(vert_range(start, count), 0..1);
                                 }
                             }
-                            pass.pop_debug_group();
+                            pass.cfg_pop_debug_group();
                         }
                         CommandType::ConcaveFill {
                             stencil_params,
                             fill_params,
                         } => {
-                            pass.push_debug_group("concave fill");
+                            pass.cfg_push_debug_group("concave fill");
                             let s = states.concave_fill();
                             pass.set_pipeline(s.fill_verts());
 
@@ -792,10 +792,10 @@ impl Renderer for WGPU {
                                 // pass.
                                 pass.draw(vert_range(start, count), 0..1);
                             }
-                            pass.pop_debug_group();
+                            pass.cfg_pop_debug_group();
                         }
                         CommandType::Stroke { params } => {
-                            pass.push_debug_group("stroke");
+                            pass.cfg_push_debug_group("stroke");
 
                             pass.set_pipeline(states.stroke());
                             if should_set_vertex_uniforms {
@@ -821,10 +821,10 @@ impl Renderer for WGPU {
                             //             // pass.draw()
                             //         }
                             //     }
-                            pass.pop_debug_group();
+                            pass.cfg_pop_debug_group();
                         }
                         CommandType::StencilStroke { params1, params2 } => {
-                            pass.push_debug_group("stencil stroke");
+                            pass.cfg_push_debug_group("stencil stroke");
                             let s = states.stencil_stroke();
 
                             // pipeline state + stroke_shape_stencil_state
@@ -850,10 +850,10 @@ impl Renderer for WGPU {
 
                             // let bg = bind_group!(self, cmd);
                             // uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
-                            pass.pop_debug_group();
+                            pass.cfg_pop_debug_group();
                         }
                         CommandType::Triangles { params } => {
-                            pass.push_debug_group("triangles");
+                            pass.cfg_push_debug_group("triangles");
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_pipeline(states.triangles());
                             if should_set_vertex_uniforms {
@@ -872,7 +872,7 @@ impl Renderer for WGPU {
                                 // pass.draw()
                                 pass.draw(vert_range(start, count), 0..1);
                             }
-                            pass.pop_debug_group();
+                            pass.cfg_pop_debug_group();
                         }
                         CommandType::ClearRect {
                             x,
@@ -882,7 +882,7 @@ impl Renderer for WGPU {
                             color,
                         } => {
                             if false {
-                                pass.push_debug_group("clear rect");
+                                pass.cfg_push_debug_group("clear rect");
                                 let ndc_rect = Rect {
                                     x: -1.0,
                                     y: -1.0,
@@ -906,7 +906,7 @@ impl Renderer for WGPU {
                                 pass.set_scissor_rect(0, 0, size.w as _, size.h as _);
                                 // pass.draw()
 
-                                pass.pop_debug_group();
+                                pass.cfg_pop_debug_group();
                             }
                         }
                         CommandType::SetRenderTarget(target) => {

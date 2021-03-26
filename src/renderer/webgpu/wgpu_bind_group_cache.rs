@@ -50,7 +50,6 @@ fn create_bind_group(
         pseudo_tex
     };
 
-
     ctx.device().create_bind_group(&wgpu::BindGroupDescriptor {
         label: None,
         layout,
