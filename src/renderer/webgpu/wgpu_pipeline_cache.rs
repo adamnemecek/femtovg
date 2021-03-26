@@ -486,13 +486,6 @@ pub struct WGPUPipelineStates {
     stencil_stroke: StencilStroke,
     triangles: wgpu::RenderPipeline,
     clear_rect: wgpu::RenderPipeline,
-    // convex_fill1: wgpu::RenderPipeline,
-    // convex_fill2: wgpu::RenderPipeline,
-    // concave_fill1: wgpu::RenderPipeline,
-    // concave_fill2: wgpu::RenderPipeline,
-    // fill_anti_alias_stencil_state_nonzero: wgpu::RenderPipeline,
-    // fill_anti_alias_stencil_state_evenodd: wgpu::RenderPipeline,
-    // stroke_shape_stencil_state: wgpu::RenderPipeline,
 }
 
 impl WGPUPipelineStates {
