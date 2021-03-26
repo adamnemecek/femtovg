@@ -753,12 +753,10 @@ impl Renderer for WGPU {
                                 }
                                 // draw fringes
 
-                                if let Some((_start, _count)) = drawable.stroke_verts {
-                                    let index_range = self.index_ranges[index_range_offset];
+                                if let Some((start, count)) = drawable.stroke_verts {
                                     pass.set_pipeline(s.stroke_buffer());
                                     // pass.draw(vert_range(start, count), 0..1);
-                                    pass.draw(index_range.into(), 0..1);
-                                    index_range_offset += 1;
+                                    pass.draw(vert_range(start, count), 0..1);
                                 }
                             }
                             pass.cfg_pop_debug_group();
