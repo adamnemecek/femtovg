@@ -108,6 +108,7 @@ fn begin_render_pass<'a>(
     stencil_texture: &'a mut WGPUStencilTexture,
     vertex_buffer: &'a WGPUVec<Vertex>,
     index_buffer: &'a WGPUVec<u32>,
+    uniform_buffer: &'a WGPUVec<Params>,
     view_size: Size,
     // ) -> wgpu::CommandEncoder {
 ) -> wgpu::RenderPass<'a> {
@@ -551,6 +552,9 @@ impl Renderer for WGPU {
             }
         }
 
+        println!("command count {:?}", commands.len());
+        println!("temp_uniforms len {:?}", self.temp_uniform_buffer.len());
+
         println!("verts len {:?}", verts.len());
         self.vertex_buffer.resize(verts.len());
         self.ctx.queue().sync_buffer(self.vertex_buffer.as_ref(), verts);
@@ -602,6 +606,7 @@ impl Renderer for WGPU {
                     &mut self.stencil_texture,
                     &self.vertex_buffer,
                     &self.index_buffer,
+                    &self.uniform_buffer,
                     self.view_size,
                 );
                 // uniforms_offset += offset;
@@ -630,6 +635,7 @@ impl Renderer for WGPU {
                             &$self_.ctx,
                             $images,
                             &$self_.bind_group_layout,
+                            &$self_.uniform_buffer,
                             $img,
                             $alpha,
                             &$self_.pseudo_texture,
@@ -672,14 +678,16 @@ impl Renderer for WGPU {
 
                             if should_set_vertex_value {
                                 assert!(uniforms_offset == 0);
-                                uniforms_offset += pass.set_vertex_value(0, &self.view_size);
+                                let _ = pass.set_vertex_value(0, &self.view_size);
                                 should_set_vertex_value = false;
                             }
 
                             // set uniforms
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
-                            pass.set_bind_group(0, bg.as_ref(), &[]);
-                            uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
+                            pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
+                            // uniforms_offset += std::mem::size_of::<Params>() as u32;
+                            uniforms_offset += std::mem::size_of::<Params>() as u32;
+                            // uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
                             for drawable in &cmd.drawables {
                                 if let Some((start, count)) = drawable.fill_verts {
@@ -716,16 +724,20 @@ impl Renderer for WGPU {
                             pass.push_debug_group("concave fill");
                             let s = states.concave_fill();
                             pass.set_pipeline(s.fill_verts());
+
                             if should_set_vertex_value {
                                 assert!(uniforms_offset == 0);
-                                uniforms_offset += pass.set_vertex_value(0, &self.view_size);
+                                let _ = pass.set_vertex_value(0, &self.view_size);
                                 should_set_vertex_value = false;
                             }
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                             // need for none, none
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
-                            pass.set_bind_group(0, bg.as_ref(), &[]);
-                            uniforms_offset += pass.set_fragment_value(uniforms_offset, stencil_params);
+                            // pass.set_bind_group(0, bg.as_ref(), &[]);
+                            // uniforms_offset += pass.set_fragment_value(uniforms_offset, stencil_params);
+                            pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
+                            // uniforms_offset += std::mem::size_of::<Params>() as u32;
+                            uniforms_offset += std::mem::size_of::<Params>() as u32;
 
                             for drawable in &cmd.drawables {
                                 if let Some((start, count)) = drawable.fill_verts {
@@ -740,8 +752,11 @@ impl Renderer for WGPU {
                             // set_uniforms
 
                             let bg = bind_group!(self, images, None, None);
-                            pass.set_bind_group(0, bg.as_ref(), &[]);
-                            uniforms_offset += pass.set_fragment_value(uniforms_offset, fill_params);
+                            pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
+                            // uniforms_offset += std::mem::size_of::<Params>() as u32;
+                            uniforms_offset += std::mem::size_of::<Params>() as u32;
+                            // pass.set_bind_group(0, bg.as_ref(), &[]);
+                            // uniforms_offset += pass.set_fragment_value(uniforms_offset, fill_params);
 
                             // fringes
                             if self.antialias {
@@ -783,17 +798,20 @@ impl Renderer for WGPU {
                             pass.set_pipeline(states.stroke());
                             if should_set_vertex_value {
                                 assert!(uniforms_offset == 0);
-                                uniforms_offset += pass.set_vertex_value(0, &self.view_size);
+                                let _ = pass.set_vertex_value(0, &self.view_size);
                                 should_set_vertex_value = false;
                             }
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
+                            pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
+                            // uniforms_offset += std::mem::size_of::<Params>() as u32;
+                            uniforms_offset += std::mem::size_of::<Params>() as u32;
 
                             // pass.set_pipeline()
-                            pass.set_bind_group(0, bg.as_ref(), &[]);
+                            // pass.set_bind_group(0, bg.as_ref(), &[]);
                             // let _ = pass.set_vertex_value(0, params);
                             // pass.set_bind_group(0, bg.as_ref(), &[]);
-                            uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
+                            // uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
                             // self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
                             //     for drawable in &cmd.drawables {
@@ -811,11 +829,14 @@ impl Renderer for WGPU {
                             pass.set_pipeline(s.stroke_base());
                             if should_set_vertex_value {
                                 assert!(uniforms_offset == 0);
-                                uniforms_offset += pass.set_vertex_value(0, &self.view_size);
+                                let _ = pass.set_vertex_value(0, &self.view_size);
                                 should_set_vertex_value = false;
                             }
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
-                            uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
+                            pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
+                            // uniforms_offset += std::mem::size_of::<Params>() as u32;
+                            uniforms_offset += std::mem::size_of::<Params>() as u32;
+                            // uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
 
                             for drawable in &cmd.drawables {
                                 if let Some((start, count)) = drawable.stroke_verts {
@@ -835,10 +856,13 @@ impl Renderer for WGPU {
                             pass.set_pipeline(states.triangles());
                             if should_set_vertex_value {
                                 assert!(uniforms_offset == 0);
-                                uniforms_offset += pass.set_vertex_value(0, &self.view_size);
+                                let _ = pass.set_vertex_value(0, &self.view_size);
                                 should_set_vertex_value = false;
                             }
-                            uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
+                            // uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
+                            pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
+                            // uniforms_offset += std::mem::size_of::<Params>() as u32;
+                            uniforms_offset += std::mem::size_of::<Params>() as u32;
 
                             // pass.set_bind_group(index, bind_group, offsets)
                             if let Some((start, count)) = cmd.triangles_verts {

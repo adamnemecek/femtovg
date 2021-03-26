@@ -30,6 +30,7 @@ fn create_bind_group(
     // pass: &'a mut wgpu::RenderPass<'b>,
     images: &ImageStore<WGPUTexture>,
     layout: &wgpu::BindGroupLayout,
+    uniforms: &WGPUVec<Params>,
     // view_size: WGPUVar<Size>,
     // uniforms: WGPUVar<Params>,
     image_tex: Option<ImageId>,
@@ -63,32 +64,32 @@ fn create_bind_group(
             //     },
             // },
             //uniforms
-            // wgpu::BindGroupEntry {
-            //     binding: 1,
-            //     resource: wgpu::BindingResource::Buffer {
-            //         buffer: uniforms.as_ref(),
-            //         offset: 0,
-            //         size: None,
-            //     },
-            // },
-            // texture
             wgpu::BindGroupEntry {
                 binding: 0,
+                resource: wgpu::BindingResource::Buffer {
+                    buffer: uniforms.as_ref(),
+                    offset: 0,
+                    size: wgpu::BufferSize::new(std::mem::size_of::<Params>() as _),
+                },
+            },
+            // texture
+            wgpu::BindGroupEntry {
+                binding: 1,
                 resource: wgpu::BindingResource::TextureView(&tex.view()),
             },
             // sampler
             wgpu::BindGroupEntry {
-                binding: 1,
+                binding: 2,
                 resource: wgpu::BindingResource::Sampler(tex.sampler()),
             },
             // alpha texture
             wgpu::BindGroupEntry {
-                binding: 2,
+                binding: 3,
                 resource: wgpu::BindingResource::TextureView(&alpha_tex.view()),
             },
             // alpha sampler
             wgpu::BindGroupEntry {
-                binding: 3,
+                binding: 4,
                 resource: wgpu::BindingResource::Sampler(alpha_tex.sampler()),
             },
         ],
@@ -141,6 +142,7 @@ impl WGPUBindGroupCache {
         // pass: &'a mut wgpu::RenderPass<'b>,
         images: &ImageStore<WGPUTexture>,
         layout: &wgpu::BindGroupLayout,
+        uniforms: &WGPUVec<Params>,
         // view_size: WGPUVar<Size>,
         // uniforms: WGPUVar<Params>,
         image_tex: Option<ImageId>,
@@ -159,7 +161,7 @@ impl WGPUBindGroupCache {
         // inner.get(&key).unwrap()
 
         if !r.contains_key(&key) {
-            let inner = create_bind_group(ctx, images, layout, image_tex, alpha_tex, pseudo_tex);
+            let inner = create_bind_group(ctx, images, layout, uniforms, image_tex, alpha_tex, pseudo_tex);
             r.insert(
                 key,
                 WGPUBindGroup {
