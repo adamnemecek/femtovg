@@ -596,7 +596,7 @@ impl Renderer for WGPU {
                 //     }
                 // };
 
-                let mut should_set_vertex_value = true;
+                let mut should_set_vertex_uniforms = true;
 
                 let mut pass = begin_render_pass(
                     &mut encoder,
@@ -676,10 +676,10 @@ impl Renderer for WGPU {
 
                             pass.set_pipeline(s.fill_buffer());
 
-                            if should_set_vertex_value {
+                            if should_set_vertex_uniforms {
                                 assert!(uniforms_offset == 0);
                                 let _ = pass.set_vertex_value(0, &self.view_size);
-                                should_set_vertex_value = false;
+                                should_set_vertex_uniforms = false;
                             }
 
                             // set uniforms
@@ -725,10 +725,10 @@ impl Renderer for WGPU {
                             let s = states.concave_fill();
                             pass.set_pipeline(s.fill_verts());
 
-                            if should_set_vertex_value {
+                            if should_set_vertex_uniforms {
                                 assert!(uniforms_offset == 0);
                                 let _ = pass.set_vertex_value(0, &self.view_size);
-                                should_set_vertex_value = false;
+                                should_set_vertex_uniforms = false;
                             }
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                             // need for none, none
@@ -796,10 +796,10 @@ impl Renderer for WGPU {
                             pass.push_debug_group("stroke");
 
                             pass.set_pipeline(states.stroke());
-                            if should_set_vertex_value {
+                            if should_set_vertex_uniforms {
                                 assert!(uniforms_offset == 0);
                                 let _ = pass.set_vertex_value(0, &self.view_size);
-                                should_set_vertex_value = false;
+                                should_set_vertex_uniforms = false;
                             }
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
@@ -827,10 +827,10 @@ impl Renderer for WGPU {
 
                             // pipeline state + stroke_shape_stencil_state
                             pass.set_pipeline(s.stroke_base());
-                            if should_set_vertex_value {
+                            if should_set_vertex_uniforms {
                                 assert!(uniforms_offset == 0);
                                 let _ = pass.set_vertex_value(0, &self.view_size);
-                                should_set_vertex_value = false;
+                                should_set_vertex_uniforms = false;
                             }
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
@@ -854,10 +854,10 @@ impl Renderer for WGPU {
                             pass.push_debug_group("triangles");
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_pipeline(states.triangles());
-                            if should_set_vertex_value {
+                            if should_set_vertex_uniforms {
                                 assert!(uniforms_offset == 0);
                                 let _ = pass.set_vertex_value(0, &self.view_size);
-                                should_set_vertex_value = false;
+                                should_set_vertex_uniforms = false;
                             }
                             // uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
                             pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
