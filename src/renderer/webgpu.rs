@@ -173,6 +173,7 @@ pub struct WGPU {
 
     uniform_buffer: WGPUVec<Params>,
     temp_uniform_buffer: Vec<Params>,
+    index_ranges: Vec<IndexRange>,
 
     vertex_buffer: WGPUVec<Vertex>,
     render_target: RenderTarget,
@@ -185,6 +186,11 @@ pub struct WGPU {
     swap_chain: WGPUSwapChain,
     bind_group_layout: wgpu::BindGroupLayout,
     // clear_rect_bind_group_layout: wgpu::BindGroupLayout,
+}
+
+struct IndexRange {
+    start: u32,
+    end: u32,
 }
 
 impl WGPU {
@@ -396,6 +402,7 @@ impl WGPU {
 
             index_buffer,
             temp_index_buffer: vec![],
+            index_ranges: vec![],
 
             uniform_buffer,
             temp_uniform_buffer: vec![],
@@ -478,6 +485,7 @@ impl Renderer for WGPU {
     }
 
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+        println!("render start");
         // self.vertex_buffer.clear();
         // self.vertex_buffer.extend_from_slice(verts);
 
@@ -514,14 +522,25 @@ impl Renderer for WGPU {
         self.temp_index_buffer.clear();
         self.temp_uniform_buffer.clear();
 
+        self.index_ranges.clear();
+
         // let start = std::time::Instant::now();
         for cmd in commands.iter() {
             match cmd.cmd_type {
                 CommandType::ConvexFill { params } => {
                     for drawable in &cmd.drawables {
                         if let Some((start, count)) = drawable.fill_verts {
+                            let index_range_start = self.temp_index_buffer.len();
+
                             self.temp_index_buffer
                                 .extend_with_triange_fan_indices_cw(start as _, count as _);
+
+                            let index_range_end = self.temp_index_buffer.len();
+
+                            self.index_ranges.push(IndexRange {
+                                start: index_range_start as _,
+                                end: index_range_end as _,
+                            });
                             self.temp_uniform_buffer.push(params);
                         }
                     }
@@ -532,9 +551,18 @@ impl Renderer for WGPU {
                 } => {
                     for drawable in &cmd.drawables {
                         if let Some((start, count)) = drawable.fill_verts {
-                            // let offset = self.index_buffer.len();
+                            let index_range_start = self.temp_index_buffer.len();
+
                             self.temp_index_buffer
                                 .extend_with_triange_fan_indices_cw(start as _, count as _);
+
+                            let index_range_end = self.temp_index_buffer.len();
+
+                            self.index_ranges.push(IndexRange {
+                                start: index_range_start as _,
+                                end: index_range_end as _,
+                            });
+
                             self.temp_uniform_buffer.push(fill_params);
                             self.temp_uniform_buffer.push(stencil_params);
                         }
@@ -559,6 +587,7 @@ impl Renderer for WGPU {
 
         println!("command count {:?}", commands.len());
         println!("temp_uniforms len {:?}", self.temp_uniform_buffer.len());
+        println!("index len {:?}", self.temp_index_buffer.len());
 
         println!("verts len {:?}", verts.len());
         self.vertex_buffer.resize(verts.len());
@@ -721,14 +750,15 @@ impl Renderer for WGPU {
                         }
                         CommandType::ConcaveFill {
                             stencil_params,
-                            fill_params
+                            fill_params,
                         } => {
                             pass.cfg_push_debug_group("concave fill");
                             let s = states.concave_fill();
                             pass.set_pipeline(s.fill_verts());
 
                             if should_set_vertex_uniforms {
-                                assert!(uniforms_offset == 0);
+                                // assert!(uniforms_offset == 0);
+
                                 let _ = pass.set_vertex_value(0, &self.view_size);
                                 should_set_vertex_uniforms = false;
                             }
@@ -797,7 +827,7 @@ impl Renderer for WGPU {
 
                             pass.set_pipeline(states.stroke());
                             if should_set_vertex_uniforms {
-                                assert!(uniforms_offset == 0);
+                                // assert!(uniforms_offset == 0);
                                 let _ = pass.set_vertex_value(0, &self.view_size);
                                 should_set_vertex_uniforms = false;
                             }
@@ -827,7 +857,7 @@ impl Renderer for WGPU {
                             // pipeline state + stroke_shape_stencil_state
                             pass.set_pipeline(s.stroke_base());
                             if should_set_vertex_uniforms {
-                                assert!(uniforms_offset == 0);
+                                // assert!(uniforms_offset == 0);
                                 let _ = pass.set_vertex_value(0, &self.view_size);
                                 should_set_vertex_uniforms = false;
                             }
@@ -853,7 +883,7 @@ impl Renderer for WGPU {
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_pipeline(states.triangles());
                             if should_set_vertex_uniforms {
-                                assert!(uniforms_offset == 0);
+                                // assert!(uniforms_offset == 0);
                                 let _ = pass.set_vertex_value(0, &self.view_size);
                                 should_set_vertex_uniforms = false;
                             }
@@ -924,6 +954,7 @@ impl Renderer for WGPU {
             }
 
             self.ctx.queue().submit(Some(encoder.finish()));
+            println!("render end");
         }
     }
 
