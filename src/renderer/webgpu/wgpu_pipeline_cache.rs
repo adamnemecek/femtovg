@@ -782,12 +782,16 @@ impl WGPUPipelineCache {
         }
     }
 
+    fn inner(&self) -> &mut HashMap<PipelineCacheKey, WGPUPipelineStates> {
+        unsafe { self.inner.get().as_mut().unwrap() }
+    }
+
     pub fn get<'a>(&'a self, blend_func: WGPUBlend, texture_format: wgpu::TextureFormat) -> &'a WGPUPipelineStates {
         let key = PipelineCacheKey {
             blend_func,
             texture_format,
         };
-        let r = unsafe { self.inner.get().as_mut().unwrap() };
+        let r = self.inner();
 
         if !r.contains_key(&key) {
             let ps = WGPUPipelineStates::new(
@@ -810,4 +814,5 @@ impl WGPUPipelineCache {
         // self.inner.borrow().get(&key).as_ref().unwrap()
         // todo!()
     }
+
 }

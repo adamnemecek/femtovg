@@ -473,6 +473,8 @@ impl Renderer for WGPU {
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
         let size = Size::new(width as f32, height as f32);
         self.view_size = size;
+
+        self.bind_group_cache.clear();
     }
 
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
