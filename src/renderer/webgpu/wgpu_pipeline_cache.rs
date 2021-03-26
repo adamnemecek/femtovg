@@ -226,10 +226,10 @@ fn create_clear_rect_pipeline(
 //     }
 // }
 
-fn fill_shape_stencil_state(_format: wgpu::TextureFormat) -> wgpu::DepthStencilState {
+fn fill_shape_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencilState {
     // println!("format {:?}", format);
     wgpu::DepthStencilState {
-        format: wgpu::TextureFormat::Depth24PlusStencil8,
+        format,
         depth_write_enabled: false,
         depth_compare: wgpu::CompareFunction::Always,
         stencil: wgpu::StencilState {
@@ -537,6 +537,7 @@ impl WGPUPipelineStates {
         shader: &wgpu::ShaderModule,
         // vertex_desc: &wgpu::VertexBufferLayout,
     ) -> Self {
+        let stencil_format = wgpu::TextureFormat::Depth24PlusStencil8;
         // let convex_fill_stroke_buffer = create_pipeline(
         //     ctx,
         //     Some("convex_fill/stroke_buffer"),
@@ -586,7 +587,7 @@ impl WGPUPipelineStates {
                 wgpu::PrimitiveTopology::TriangleList,
                 None,
                 None,
-                fill_shape_stencil_state(format),
+                fill_shape_stencil_state(stencil_format),
             ),
             fringes_nonzero: create_pipeline(
                 ctx,
@@ -598,7 +599,7 @@ impl WGPUPipelineStates {
                 wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::IndexFormat::Uint32,
                 wgpu::Face::Back,
-                fill_anti_alias_stencil_state_nonzero(format),
+                fill_anti_alias_stencil_state_nonzero(stencil_format),
             ),
             fringes_evenodd: create_pipeline(
                 ctx,
@@ -610,7 +611,7 @@ impl WGPUPipelineStates {
                 wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::IndexFormat::Uint32,
                 wgpu::Face::Back,
-                fill_anti_alias_stencil_state_evenodd(format),
+                fill_anti_alias_stencil_state_evenodd(stencil_format),
             ),
             triangle_verts_nonzero: create_pipeline(
                 ctx,
@@ -622,7 +623,7 @@ impl WGPUPipelineStates {
                 wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::IndexFormat::Uint32,
                 wgpu::Face::Back,
-                fill_stencil_state_nonzero(format),
+                fill_stencil_state_nonzero(stencil_format),
             ),
             triangle_verts_evenodd: create_pipeline(
                 ctx,
@@ -634,7 +635,7 @@ impl WGPUPipelineStates {
                 wgpu::PrimitiveTopology::TriangleList,
                 None,
                 wgpu::Face::Back,
-                fill_stencil_state_evenodd(format),
+                fill_stencil_state_evenodd(stencil_format),
             ),
         };
 
@@ -662,7 +663,7 @@ impl WGPUPipelineStates {
                 wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::IndexFormat::Uint32,
                 wgpu::Face::Back,
-                stroke_shape_stencil_state(format),
+                stroke_shape_stencil_state(stencil_format),
             ),
             aa_pixels: create_pipeline(
                 ctx,

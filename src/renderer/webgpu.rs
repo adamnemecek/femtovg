@@ -847,7 +847,7 @@ impl Renderer for WGPU {
                             // todo:
 
                             // let bg = bind_group!(self, cmd);
-                            uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
+                            // uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
                             pass.pop_debug_group();
                         }
                         CommandType::Triangles { params } => {
