@@ -216,8 +216,8 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
             Event::WindowEvent { ref event, .. } => match event {
                 #[cfg(not(target_arch = "wasm32"))]
                 WindowEvent::Resized(physical_size) => {
-                    // windowed_context.resize(*physical_size);
-                    todo!("resize");
+                    canvas.set_size(physical_size.width as _, physical_size.height as _, 1.0);
+                    // todo!("resize");
                 }
                 WindowEvent::CursorMoved {
                     device_id: _, position, ..
