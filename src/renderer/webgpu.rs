@@ -188,9 +188,16 @@ pub struct WGPU {
     // clear_rect_bind_group_layout: wgpu::BindGroupLayout,
 }
 
+#[derive(Clone, Copy)]
 struct IndexRange {
     start: u32,
     end: u32,
+}
+
+impl From<IndexRange> for std::ops::Range<u32> {
+    fn from(a: IndexRange) -> Self {
+        a.start..a.end
+    }
 }
 
 impl WGPU {
@@ -613,6 +620,8 @@ impl Renderer for WGPU {
 
         let mut i = 0;
 
+        let mut index_range_offset = 0;
+
         'frame: while i < commands.len() {
             let frame = self.swap_chain.get_current_frame().unwrap();
             let mut encoder = self.ctx.create_command_encoder(None);
@@ -680,6 +689,7 @@ impl Renderer for WGPU {
                 while i < commands.len() {
                     let cmd = &commands[i];
                     i += 1;
+
                     // cache the pipeline states
                     let states = {
                         let blend: WGPUBlend = cmd.composite_operation.into();
@@ -721,7 +731,7 @@ impl Renderer for WGPU {
                             uniforms_offset += std::mem::size_of::<Params>() as u32;
 
                             for drawable in &cmd.drawables {
-                                if let Some((start, count)) = drawable.fill_verts {
+                                if let Some((_start, _count)) = drawable.fill_verts {
                                     // let offset = self.index_buffer.len();
 
                                     // let byte_index_buffer_offset = offset * std::mem::size_of::<u32>();
@@ -734,16 +744,21 @@ impl Renderer for WGPU {
                                     // pass.set_index_buffer(self.index_buffer.slice(), wgpu::IndexFormat::Uint32);
 
                                     // pass.draw_indexed((offset as _)..(offset + triangle_fan_index_count) as _, 0, 0..1);
-                                    let start = (start - 2) * 3;
-                                    let count = (count - 2) * 3;
-                                    pass.draw_indexed(vert_range(start, count), 0, 0..1);
+                                    let index_range = self.index_ranges[index_range_offset];
+                                    // let start = (start - 2) * 3;
+                                    // let count = (count - 2) * 3;
+                                    pass.draw_indexed(index_range.into(), 0, 0..1);
+                                    index_range_offset += 1;
                                     // offset += (count as u32 - 2) * 3;
                                 }
                                 // draw fringes
 
-                                if let Some((start, count)) = drawable.stroke_verts {
+                                if let Some((_start, _count)) = drawable.stroke_verts {
+                                    let index_range = self.index_ranges[index_range_offset];
                                     pass.set_pipeline(s.stroke_buffer());
-                                    pass.draw(vert_range(start, count), 0..1);
+                                    // pass.draw(vert_range(start, count), 0..1);
+                                    pass.draw(index_range.into(), 0..1);
+                                    index_range_offset += 1;
                                 }
                             }
                             pass.cfg_pop_debug_group();
@@ -771,11 +786,13 @@ impl Renderer for WGPU {
                             uniforms_offset += std::mem::size_of::<Params>() as u32;
 
                             for drawable in &cmd.drawables {
-                                if let Some((start, count)) = drawable.fill_verts {
+                                if let Some((_start, _count)) = drawable.fill_verts {
                                     // let offset = self.index_buffer.len();
                                     // self.index_buffer
+                                    let index_range = self.index_ranges[index_range_offset];
                                     // .extend_with_triange_fan_indices_cw(start as _, count as _);
-                                    pass.draw_indexed(vert_range(start, count), 0, 0..1);
+                                    pass.draw_indexed(index_range.into(), 0, 0..1);
+                                    index_range_offset += 1;
                                     // pass.set_push_constants(stages, offset, data)
                                 }
                             }
