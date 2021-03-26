@@ -416,7 +416,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 canvas.flush();
                 // #[cfg(not(target_arch = "wasm32"))]
                 // windowed_context.swap_buffers().unwrap();
-                todo!("swap buffers");
+                // todo!("swap buffers");
             }
             Event::MainEventsCleared => {
                 //scroll = 1.0;
