@@ -91,15 +91,17 @@ fn vertex_shader(
 
 // [[group(0), binding(1)]]
 // var u: Uniforms;
-var<push_constant> u: Uniforms;
-
+// var<push_constant> u: Uniforms;
 [[group(0), binding(0)]]
-var tex: texture_2d<f32>;
+var<uniform> u: Uniforms;
+
 [[group(0), binding(1)]]
-var samplr: sampler;
+var tex: texture_2d<f32>;
 [[group(0), binding(2)]]
-var alpha_tex: texture_2d<f32>;
+var samplr: sampler;
 [[group(0), binding(3)]]
+var alpha_tex: texture_2d<f32>;
+[[group(0), binding(4)]]
 var alpha_samplr: sampler;
 
 [[stage(fragment)]]
@@ -168,6 +170,13 @@ fn fragment_shader_aa(
 // enum ShaderType {
 
 // };
+
+[[stage(fragment)]]
+fn passthrough(
+    in: RasterizerData,
+) -> [[location(0)]] vec4<f32> {
+    return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+}
 
 struct Rect {
     x: f32;
@@ -239,3 +248,4 @@ fn fragment_clear_rect(
 ) -> [[location(0)]] vec4<f32> {
     return in.color;
 }
+

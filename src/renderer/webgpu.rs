@@ -130,7 +130,11 @@ fn begin_render_pass<'a>(
                 store: false,
             }),
             // todo: what is this?
-            stencil_ops: None, //Option<Operations<u32>>,
+            stencil_ops: None,
+            // stencil_ops: Some(wgpu::Operations {
+            //     load: wgpu::LoadOp::Clear(0),
+            //     store: true,
+            // }), //Option<Operations<u32>>,
         }),
     };
 
@@ -165,6 +169,9 @@ pub struct WGPU {
 
     index_buffer: WGPUVec<u32>,
     temp_index_buffer: Vec<u32>,
+
+    uniform_buffer: WGPUVec<Params>,
+    temp_uniform_buffer: Vec<Params>,
 
     vertex_buffer: WGPUVec<Vertex>,
     render_target: RenderTarget,
@@ -222,19 +229,19 @@ impl WGPU {
                 //     count: None,
                 // },
                 // //uniforms
-                // wgpu::BindGroupLayoutEntry {
-                //     binding: 1,
-                //     visibility: wgpu::ShaderStage::FRAGMENT,
-                //     ty: wgpu::BindingType::Buffer {
-                //         ty: wgpu::BufferBindingType::Uniform,
-                //         has_dynamic_offset: false,
-                //         min_binding_size: None,
-                //     },
-                //     count: None,
-                // },
-                // texture
                 wgpu::BindGroupLayoutEntry {
                     binding: 0,
+                    visibility: wgpu::ShaderStage::FRAGMENT,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: true,
+                        min_binding_size: wgpu::BufferSize::new(std::mem::size_of::<Params>() as _),
+                    },
+                    count: None,
+                },
+                // texture
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Texture {
                         sample_type: wgpu::TextureSampleType::Float { filterable: false },
@@ -245,7 +252,7 @@ impl WGPU {
                 },
                 // sampler
                 wgpu::BindGroupLayoutEntry {
-                    binding: 1,
+                    binding: 2,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Sampler {
                         filtering: false,
@@ -255,7 +262,7 @@ impl WGPU {
                 },
                 // alpha texture
                 wgpu::BindGroupLayoutEntry {
-                    binding: 2,
+                    binding: 3,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Texture {
                         sample_type: wgpu::TextureSampleType::Float { filterable: false },
@@ -266,7 +273,7 @@ impl WGPU {
                 },
                 //alpha sampler
                 wgpu::BindGroupLayoutEntry {
-                    binding: 3,
+                    binding: 4,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Sampler {
                         filtering: false,
@@ -278,7 +285,9 @@ impl WGPU {
         });
 
         let view_size_size: u32 = std::mem::size_of::<Size>() as _;
-        let param_size: u32 = std::mem::size_of::<Params>() as _;
+        // let param_size: u32 = std::mem::size_of::<Params>() as _;
+        // println!("param_size {:?}", param_size);
+
         let pipeline_layout = ctx.device().create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: None,
             bind_group_layouts: &[&bind_group_layout],
@@ -287,10 +296,14 @@ impl WGPU {
                     stages: wgpu::ShaderStage::VERTEX,
                     range: 0..view_size_size,
                 },
-                wgpu::PushConstantRange {
-                    stages: wgpu::ShaderStage::FRAGMENT,
-                    range: view_size_size..(view_size_size + param_size),
-                },
+                // wgpu::PushConstantRange {
+                //     stages: wgpu::ShaderStage::FRAGMENT,
+                //     range: view_size_size..(view_size_size + param_size),
+                // },
+                // wgpu::PushConstantRange {
+                //     stages: wgpu::ShaderStage::FRAGMENT,
+                //     range: (view_size_size + param_size)..(view_size_size + param_size),
+                // },
             ],
         });
 
@@ -346,12 +359,13 @@ impl WGPU {
         //  * viewsize
         // fragment shader
 
-        let encoder = ctx
-            .device()
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        // let encoder = ctx
+        //     .device()
+        //     .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         let stencil_texture = WGPUStencilTexture::new(ctx, view_size);
-        let index_buffer = WGPUVec::new_index(ctx, 1000);
-        let vertex_buffer = WGPUVec::new_vertex(ctx, 1000);
+        let vertex_buffer = WGPUVec::new_vertex(ctx, 1024);
+        let index_buffer = WGPUVec::new_index(ctx, 1024);
+        let uniform_buffer = WGPUVec::new_uniform(ctx, 32);
 
         let mut flags = wgpu::ShaderFlags::VALIDATION;
         match ctx.adapter().get_info().backend {
@@ -376,9 +390,15 @@ impl WGPU {
             antialias: true,
             stencil_texture,
             ctx: ctx.clone(),
+
+            vertex_buffer,
+
             index_buffer,
             temp_index_buffer: vec![],
-            vertex_buffer,
+
+            uniform_buffer,
+            temp_uniform_buffer: vec![],
+
             render_target: RenderTarget::Screen,
             pseudo_texture,
             pipeline_cache,
@@ -461,6 +481,7 @@ impl Renderer for WGPU {
         // let texture_format = &self.swap_chain.format();
         // let format = texture_format.clone();
         let texture_format = self.swap_chain.format();
+        println!("texture format {:?}", texture_format);
 
         let mut render_target = self.render_target;
 
@@ -488,29 +509,43 @@ impl Renderer for WGPU {
 
         // process indices
         self.temp_index_buffer.clear();
+        self.temp_uniform_buffer.clear();
 
         for cmd in commands.iter() {
             match cmd.cmd_type {
-                CommandType::ConvexFill { .. } => {
+                CommandType::ConvexFill { params } => {
                     for drawable in &cmd.drawables {
                         if let Some((start, count)) = drawable.fill_verts {
                             self.temp_index_buffer
                                 .extend_with_triange_fan_indices_cw(start as _, count as _);
+                            self.temp_uniform_buffer.push(params);
                         }
                     }
                 }
-                CommandType::ConcaveFill { .. } => {
+                CommandType::ConcaveFill {
+                    fill_params,
+                    stencil_params,
+                } => {
                     for drawable in &cmd.drawables {
                         if let Some((start, count)) = drawable.fill_verts {
                             // let offset = self.index_buffer.len();
                             self.temp_index_buffer
                                 .extend_with_triange_fan_indices_cw(start as _, count as _);
+                            self.temp_uniform_buffer.push(fill_params);
+                            self.temp_uniform_buffer.push(stencil_params);
                         }
                     }
                 }
-                CommandType::Stroke { .. } => {}
-                CommandType::StencilStroke { .. } => {}
-                CommandType::Triangles { .. } => {}
+                CommandType::Stroke { params } => {
+                    self.temp_uniform_buffer.push(params);
+                }
+                CommandType::StencilStroke { params1, params2 } => {
+                    self.temp_uniform_buffer.push(params1);
+                    self.temp_uniform_buffer.push(params2);
+                }
+                CommandType::Triangles { params } => {
+                    self.temp_uniform_buffer.push(params);
+                }
                 CommandType::ClearRect { .. } => {}
                 CommandType::SetRenderTarget(_) => {}
             }
@@ -531,6 +566,11 @@ impl Renderer for WGPU {
         self.ctx
             .queue()
             .sync_buffer(self.index_buffer.as_ref(), &self.temp_index_buffer);
+
+        self.uniform_buffer.resize(self.temp_uniform_buffer.len());
+        self.ctx
+            .queue()
+            .sync_buffer(self.uniform_buffer.as_ref(), &self.temp_uniform_buffer);
         // println!("index before");
 
         let mut i = 0;
@@ -552,6 +592,8 @@ impl Renderer for WGPU {
                 //     }
                 // };
 
+                let mut should_set_vertex_value = true;
+
                 let mut pass = begin_render_pass(
                     &mut encoder,
                     // target_texture_view.view(),
@@ -562,7 +604,7 @@ impl Renderer for WGPU {
                     &self.index_buffer,
                     self.view_size,
                 );
-
+                // uniforms_offset += offset;
                 // let mut index_buffer_view = self.index_buffer.view_mut();
 
                 // pass.set_vertex_buffer(0, self.vertex_buffer.slice());
@@ -627,6 +669,13 @@ impl Renderer for WGPU {
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
 
                             pass.set_pipeline(s.fill_buffer());
+
+                            if should_set_vertex_value {
+                                assert!(uniforms_offset == 0);
+                                uniforms_offset += pass.set_vertex_value(0, &self.view_size);
+                                should_set_vertex_value = false;
+                            }
+
                             // set uniforms
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_bind_group(0, bg.as_ref(), &[]);
@@ -667,6 +716,11 @@ impl Renderer for WGPU {
                             pass.push_debug_group("concave fill");
                             let s = states.concave_fill();
                             pass.set_pipeline(s.fill_verts());
+                            if should_set_vertex_value {
+                                assert!(uniforms_offset == 0);
+                                uniforms_offset += pass.set_vertex_value(0, &self.view_size);
+                                should_set_vertex_value = false;
+                            }
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                             // need for none, none
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
@@ -727,12 +781,17 @@ impl Renderer for WGPU {
                             pass.push_debug_group("stroke");
 
                             pass.set_pipeline(states.stroke());
+                            if should_set_vertex_value {
+                                assert!(uniforms_offset == 0);
+                                uniforms_offset += pass.set_vertex_value(0, &self.view_size);
+                                should_set_vertex_value = false;
+                            }
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
 
                             // pass.set_pipeline()
                             pass.set_bind_group(0, bg.as_ref(), &[]);
-                            let _ = pass.set_vertex_value(0, params);
+                            // let _ = pass.set_vertex_value(0, params);
                             // pass.set_bind_group(0, bg.as_ref(), &[]);
                             uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
@@ -750,6 +809,11 @@ impl Renderer for WGPU {
 
                             // pipeline state + stroke_shape_stencil_state
                             pass.set_pipeline(s.stroke_base());
+                            if should_set_vertex_value {
+                                assert!(uniforms_offset == 0);
+                                uniforms_offset += pass.set_vertex_value(0, &self.view_size);
+                                should_set_vertex_value = false;
+                            }
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
 
@@ -769,6 +833,11 @@ impl Renderer for WGPU {
                             pass.push_debug_group("triangles");
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_pipeline(states.triangles());
+                            if should_set_vertex_value {
+                                assert!(uniforms_offset == 0);
+                                uniforms_offset += pass.set_vertex_value(0, &self.view_size);
+                                should_set_vertex_value = false;
+                            }
                             uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
 
                             // pass.set_bind_group(index, bind_group, offsets)
@@ -805,7 +874,7 @@ impl Renderer for WGPU {
                                 pass.set_pipeline(states.clear_rect());
 
                                 pass.set_scissor_rect(*x as _, *y as _, *width as _, *height as _);
-                                pass.set_vertex_value(0, &clear_rect);
+                                uniforms_offset += pass.set_vertex_value(uniforms_offset, &clear_rect);
 
                                 let size = self.view_size;
                                 pass.set_scissor_rect(0, 0, size.w as _, size.h as _);

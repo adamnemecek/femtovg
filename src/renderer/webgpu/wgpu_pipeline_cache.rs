@@ -3,7 +3,6 @@ use wgpu::{
     ShaderModule,
 };
 
-
 // use fnv::FnvHashMap;
 use super::{
     Color,
@@ -68,6 +67,23 @@ impl ClearRect {
     }
 }
 
+impl From<WGPUBlend> for wgpu::BlendState {
+    fn from(a: WGPUBlend) -> Self {
+        Self {
+            color: wgpu::BlendComponent {
+                src_factor: a.src_rgb,
+                dst_factor: a.dst_rgb,
+                operation: wgpu::BlendOperation::Add,
+            },
+            alpha: wgpu::BlendComponent {
+                src_factor: a.src_alpha,
+                dst_factor: a.dst_alpha,
+                operation: wgpu::BlendOperation::Add,
+            },
+        }
+    }
+}
+
 fn create_pipeline<'a>(
     ctx: &WGPUContext,
     label: impl Into<Option<&'a str>>,
@@ -92,12 +108,17 @@ fn create_pipeline<'a>(
             module: shader,
             entry_point: "fragment_shader_aa",
             //todo!
-            targets: &[format.into()],
+            targets: &[wgpu::ColorTargetState {
+                format,
+                blend: Some(blend_func.into()),
+                write_mask: wgpu::ColorWrite::all(),
+            }],
         }),
+        // front_face is ccw by default
         primitive: wgpu::PrimitiveState {
             topology,
             strip_index_format: strip_index_format.into(),
-            // front_face: wgpu::FrontFace::Ccw,
+
             cull_mode: cull_mode.into(),
             ..Default::default()
         },
@@ -130,12 +151,17 @@ fn create_stencil_only_pipeline<'a>(
         // todo: in the original this is not set
         fragment: Some(wgpu::FragmentState {
             module: shader,
-            entry_point: "fragment_shader_aa",
+            entry_point: "passthrough",
             //todo!
-            targets: &[format.into()],
+            targets: &[wgpu::ColorTargetState {
+                format,
+                blend: Some(blend_func.into()),
+                write_mask: wgpu::ColorWrite::empty(),
+            }],
         }),
         primitive: wgpu::PrimitiveState {
             topology,
+            strip_index_format: strip_index_format.into(),
             // front_face: wgpu::FrontFace::Ccw,
             cull_mode: cull_mode.into(),
             ..Default::default()
@@ -200,9 +226,10 @@ fn create_clear_rect_pipeline(
 //     }
 // }
 
-fn fill_shape_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencilState {
+fn fill_shape_stencil_state(_format: wgpu::TextureFormat) -> wgpu::DepthStencilState {
+    // println!("format {:?}", format);
     wgpu::DepthStencilState {
-        format,
+        format: wgpu::TextureFormat::Depth24PlusStencil8,
         depth_write_enabled: false,
         depth_compare: wgpu::CompareFunction::Always,
         stencil: wgpu::StencilState {

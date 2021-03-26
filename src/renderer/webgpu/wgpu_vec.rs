@@ -95,6 +95,21 @@ impl<T: Copy> WGPUVec<T> {
         }
     }
 
+    pub fn new_uniform(ctx: &WGPUContext, capacity: usize) -> Self {
+        let mem_align = MemAlign::new(capacity);
+
+        let usage = wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST;
+        let inner = create_buffer(ctx, "uniform buffer", mem_align, usage);
+
+        Self {
+            usage,
+            ctx: ctx.clone(),
+            inner,
+            len: 0,
+            mem_align,
+        }
+    }
+
     // pub fn map_async(&self) -> impl std::future::Future<Output = Result<(), wgpu::BufferAsyncError>> + Send {
     //     self.slice().map_async(wgpu::MapMode::Write)
     // }
