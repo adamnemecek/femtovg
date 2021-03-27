@@ -108,14 +108,14 @@ fn begin_render_pass<'a>(
     stencil_texture: &'a mut WGPUStencilTexture,
     vertex_buffer: &'a WGPUVec<Vertex>,
     index_buffer: &'a WGPUVec<u32>,
-    uniform_buffer: &'a WGPUVec<Params>,
+    // uniform_buffer: &'a WGPUVec<Params>,
     view_size: Size,
     // ) -> wgpu::CommandEncoder {
 ) -> wgpu::RenderPass<'a> {
     stencil_texture.resize(view_size);
 
     let pass_desc = wgpu::RenderPassDescriptor {
-        label: None,
+        label: Some("render pass"),
         color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
             attachment: target,
             resolve_target: None, // todo! what's this?
@@ -694,7 +694,7 @@ impl Renderer for WGPU {
                     &mut self.stencil_texture,
                     &self.vertex_buffer,
                     &self.index_buffer,
-                    &self.uniform_buffer,
+                    // &self.uniform_buffer,
                     self.view_size,
                 );
                 // uniforms_offset += offset;

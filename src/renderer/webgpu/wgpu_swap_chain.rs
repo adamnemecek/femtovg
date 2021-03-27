@@ -8,7 +8,7 @@ fn sc_desc(format: wgpu::TextureFormat, size: Size) -> wgpu::SwapChainDescriptor
         format,
         width: size.w as _,
         height: size.h as _,
-        present_mode: wgpu::PresentMode::Mailbox,
+        present_mode: wgpu::PresentMode::Fifo,
     }
 }
 
