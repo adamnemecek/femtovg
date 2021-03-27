@@ -672,9 +672,7 @@ impl Renderer for WGPU {
             let mut encoder = self.ctx.create_command_encoder(None);
             {
                 let target_view = match render_target {
-                    RenderTarget::Screen => {
-                        view
-                    }
+                    RenderTarget::Screen => view,
                     RenderTarget::Image(id) => images.get(id).unwrap().view(),
                 };
 
