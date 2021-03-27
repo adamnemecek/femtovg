@@ -978,6 +978,8 @@ impl Renderer for WGPU {
                             pass.set_bind_group(0, bg, &[clear_rect_uniform_offset]);
 
                             pass.set_scissor_rect(*x as _, *y as _, *width as _, *height as _);
+
+                            pass.draw(0..4, 0..4);
                             // clear_rect_uniform_offset += pass.set_vertex_value(clear_rect_uniform_offset, &clear_rect);
 
                             let size = self.view_size;
