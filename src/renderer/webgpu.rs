@@ -662,9 +662,12 @@ impl Renderer for WGPU {
 
         let mut needs_to_submit = true;
 
+        let frame = self.swap_chain.get_current_frame().unwrap();
+        let view = &frame.output.view;
+
         'frame: while i < commands.len() {
             needs_to_submit = true;
-            let frame = self.swap_chain.get_current_frame().unwrap();
+
             let mut encoder = self.ctx.create_command_encoder(None);
             {
                 // let target_texture_view = match render_target {
@@ -683,7 +686,8 @@ impl Renderer for WGPU {
                 let mut pass = begin_render_pass(
                     &mut encoder,
                     // target_texture_view.view(),
-                    &frame.output.view,
+                    // &frame.output.view,
+                    view,
                     self.clear_color,
                     &mut self.stencil_texture,
                     &self.vertex_buffer,
@@ -982,9 +986,9 @@ impl Renderer for WGPU {
                             render_target = *target;
                             println!("set render target {:?}", target);
                             drop(pass);
-
                             self.ctx.queue().submit(Some(encoder.finish()));
-                            drop(frame);
+
+                            // drop(frame);
                             needs_to_submit = false;
                             continue 'frame;
                         }
