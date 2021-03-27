@@ -95,6 +95,10 @@ impl Color {
         Self::rgbaf(0.0, 0.0, 0.0, 1.0)
     }
 
+    pub fn red() -> Self {
+        Self::rgbaf(1.0, 0.0, 0.0, 1.0)
+    }
+
     /// Sets transparency of a color value.
     pub fn set_alpha(&mut self, a: u8) {
         self.set_alphaf(a as f32 / 255.0);
