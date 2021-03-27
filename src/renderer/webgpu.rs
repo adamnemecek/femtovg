@@ -234,7 +234,7 @@ impl WGPU {
         // };
 
         let bind_group_layout = ctx.device().create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: None,
+            label: Some("bind group layout"),
             entries: &[
                 //viewsize
                 // wgpu::BindGroupLayoutEntry {
@@ -327,7 +327,7 @@ impl WGPU {
         });
 
         let clear_rect_bind_group_layout = ctx.device().create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: None,
+            label: Some("clear rect bind group layout 1"),
             entries: &[wgpu::BindGroupLayoutEntry {
                 binding: 0,
                 visibility: wgpu::ShaderStage::VERTEX,
@@ -341,10 +341,15 @@ impl WGPU {
         });
 
         let clear_rect_pipeline_layout = ctx.device().create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: None,
+            label: Some("clear rect pipeline layout"),
             bind_group_layouts: &[&clear_rect_bind_group_layout],
             push_constant_ranges: &[],
         });
+
+        let clear_rect_buffer = WGPUVec::new_uniform(ctx, 16);
+
+        let clear_rect_bind_group =
+            self::create_clear_rect_bind_group(ctx, &clear_rect_bind_group_layout, &clear_rect_buffer);
 
         // let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
         //     label: None,
@@ -390,16 +395,6 @@ impl WGPU {
         let bind_group_cache = WGPUBindGroupCache::new();
         let swap_chain = WGPUSwapChain::new(ctx, view_size);
         let pseudo_texture = WGPUTexture::new_pseudo_texture(ctx).unwrap();
-
-        let clear_rect_buffer = WGPUVec::new_vertex(ctx, 16);
-
-        let clear_rect_bind_group_layout = ctx.device().create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: None,
-            entries: &[],
-        });
-
-        let clear_rect_bind_group =
-            self::create_clear_rect_bind_group(ctx, &clear_rect_bind_group_layout, &clear_rect_buffer);
 
         Self {
             clear_color,
@@ -671,9 +666,7 @@ impl Renderer for WGPU {
                 //             todo!()
                 //         }
                 //     }
-                //     RenderTarget::Image(id) => {
-                //         TargetTexture::View(images.get(id).unwrap().view()),
-                //     }
+                //     RenderTarget::Image(id) => TargetTexture::View(images.get(id).unwrap().view()),
                 // };
 
                 let mut should_set_vertex_uniforms = true;

@@ -52,7 +52,7 @@ fn create_bind_group(
     };
 
     ctx.device().create_bind_group(&wgpu::BindGroupDescriptor {
-        label: None,
+        label: Some("fvg bind group"),
         layout,
         entries: &[
             //viewsize
@@ -104,7 +104,7 @@ pub fn create_clear_rect_bind_group(
     uniforms: &WGPUVec<super::ClearRect>,
 ) -> wgpu::BindGroup {
     ctx.device().create_bind_group(&wgpu::BindGroupDescriptor {
-        label: None,
+        label: Some("clear rect bind group"),
         layout,
         entries: &[wgpu::BindGroupEntry {
             binding: 0,
