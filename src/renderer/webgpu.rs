@@ -594,12 +594,6 @@ impl Renderer for WGPU {
                     height,
                     color,
                 } => self.temp_clear_rect_buffer.push({
-                    // let rect = Rect {
-                    //     x: x as _,
-                    //     y: y as _,
-                    //     w: width as _,
-                    //     h: height as _,
-                    // };
                     let rect = Rect {
                         x: -1.0,
                         y: -1.0,

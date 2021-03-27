@@ -65,7 +65,7 @@ fn main() {
 
         //let windowed_context = ContextBuilder::new().with_gl(GlRequest::Specific(Api::OpenGlEs, (2, 0))).with_vsync(false).build_windowed(wb, &el).unwrap();
         //let windowed_context = ContextBuilder::new().with_vsync(false).with_multisampling(8).build_windowed(wb, &el).unwrap();
-        let windowed_context = ContextBuilder::new().with_vsync(false).build_windowed(wb, &el).unwrap();
+        let windowed_context = ContextBuilder::new().with_vsync(true).build_windowed(wb, &el).unwrap();
         let windowed_context = unsafe { windowed_context.make_current().unwrap() };
 
         let renderer =
