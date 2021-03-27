@@ -106,7 +106,7 @@ fn main() {
 
 async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
     let size = window.inner_size();
-    let instance = wgpu::Instance::new(wgpu::BackendBit::all());
+    // let instance = wgpu::Instance::new(wgpu::BackendBit::all());
     // let surface = unsafe { instance.create_surface(&window) };
     // let adapter = instance
     //     .request_adapter(&wgpu::RequestAdapterOptions {
@@ -136,17 +136,17 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
 
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
-    let fonts = Fonts {
-        regular: canvas
-            .add_font_mem(&resource!("examples/assets/Roboto-Regular.ttf"))
-            .expect("Cannot add font"),
-        bold: canvas
-            .add_font_mem(&resource!("examples/assets/Roboto-Light.ttf"))
-            .expect("Cannot add font"),
-        icons: canvas
-            .add_font_mem(&resource!("examples/assets/entypo.ttf"))
-            .expect("Cannot add font"),
-    };
+    // let fonts = Fonts {
+    //     regular: canvas
+    //         .add_font_mem(&resource!("examples/assets/Roboto-Regular.ttf"))
+    //         .expect("Cannot add font"),
+    //     bold: canvas
+    //         .add_font_mem(&resource!("examples/assets/Roboto-Light.ttf"))
+    //         .expect("Cannot add font"),
+    //     icons: canvas
+    //         .add_font_mem(&resource!("examples/assets/entypo.ttf"))
+    //         .expect("Cannot add font"),
+    // };
 
     //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
 
@@ -222,29 +222,29 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 WindowEvent::CursorMoved {
                     device_id: _, position, ..
                 } => {
-                    if dragging {
-                        let p0 = canvas.transform().inversed().transform_point(mousex, mousey);
-                        let p1 = canvas
-                            .transform()
-                            .inversed()
-                            .transform_point(position.x as f32, position.y as f32);
+                    // if dragging {
+                    //     let p0 = canvas.transform().inversed().transform_point(mousex, mousey);
+                    //     let p1 = canvas
+                    //         .transform()
+                    //         .inversed()
+                    //         .transform_point(position.x as f32, position.y as f32);
 
-                        canvas.translate(p1.0 - p0.0, p1.1 - p0.1);
-                    }
+                    //     canvas.translate(p1.0 - p0.0, p1.1 - p0.1);
+                    // }
 
-                    mousex = position.x as f32;
-                    mousey = position.y as f32;
+                    // mousex = position.x as f32;
+                    // mousey = position.y as f32;
                 }
                 WindowEvent::MouseWheel {
                     device_id: _, delta, ..
-                } => match delta {
-                    winit::event::MouseScrollDelta::LineDelta(_, y) => {
-                        let pt = canvas.transform().inversed().transform_point(mousex, mousey);
-                        canvas.translate(pt.0, pt.1);
-                        canvas.scale(1.0 + (y / 10.0), 1.0 + (y / 10.0));
-                        canvas.translate(-pt.0, -pt.1);
-                    }
-                    _ => (),
+                } => { //match delta {
+                    // winit::event::MouseScrollDelta::LineDelta(_, y) => {
+                    //     let pt = canvas.transform().inversed().transform_point(mousex, mousey);
+                    //     canvas.translate(pt.0, pt.1);
+                    //     canvas.scale(1.0 + (y / 10.0), 1.0 + (y / 10.0));
+                    //     canvas.translate(-pt.0, -pt.1);
+                    // }
+                    // _ => (),
                 },
                 WindowEvent::MouseInput {
                     button: MouseButton::Left,
@@ -287,7 +287,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // let t = start.elapsed().as_secs_f32();
 
                 canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
-                canvas.clear_rect(0, 0, size.width as u32, size.height as u32, Color::rgbf(0.3, 0.3, 0.32));
+                canvas.clear_rect(0, 0, size.width as u32, size.height as u32, Color::rgbf(0.0, 0.3, 1.0));
 
                 // let height = size.height as f32;
                 // let width = size.width as f32;
