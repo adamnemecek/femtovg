@@ -459,27 +459,27 @@ fn vert_range(start: usize, count: usize) -> std::ops::Range<u32> {
     (start as _)..(start + count) as _
 }
 
-enum TargetTexture<'a> {
-    Frame(wgpu::SwapChainFrame),
-    View(&'a wgpu::TextureView),
-}
-impl<'a> TargetTexture<'a> {
-    pub fn view(&'a self) -> &'a wgpu::TextureView {
-        match self {
-            Self::Frame(f) => &f.output.view,
-            Self::View(r) => r,
-        }
-    }
-}
+// enum TargetTexture<'a> {
+//     Frame(wgpu::SwapChainFrame),
+//     View(&'a wgpu::TextureView),
+// }
+// impl<'a> TargetTexture<'a> {
+//     pub fn view(&'a self) -> &'a wgpu::TextureView {
+//         match self {
+//             Self::Frame(f) => &f.output.view,
+//             Self::View(r) => r,
+//         }
+//     }
+// }
 
-impl<'a> Drop for TargetTexture<'a> {
-    fn drop(&mut self) {
-        match self {
-            Self::Frame(_) => println!("dropping frame"),
-            Self::View(_) => println!("dropping view"),
-        }
-    }
-}
+// impl<'a> Drop for TargetTexture<'a> {
+//     fn drop(&mut self) {
+//         match self {
+//             Self::Frame(_) => println!("dropping frame"),
+//             Self::View(_) => println!("dropping view"),
+//         }
+//     }
+// }
 
 impl Renderer for WGPU {
     type Image = WGPUTexture;
@@ -660,26 +660,27 @@ impl Renderer for WGPU {
 
         let mut index_range_offset = 0;
 
-        let mut needs_to_submit = true;
+        let mut should_submit = true;
 
         let frame = self.swap_chain.get_current_frame().unwrap();
         let view = &frame.output.view;
 
         'frame: while i < commands.len() {
-            needs_to_submit = true;
+            should_submit = true;
 
             let mut encoder = self.ctx.create_command_encoder(None);
             {
-                // let target_texture_view = match render_target {
-                //     RenderTarget::Screen => {
-                //         if let Ok(frame) = self.swap_chain.get_current_frame() {
-                //             TargetTexture::Frame(frame)
-                //         } else {
-                //             todo!()
-                //         }
-                //     }
-                //     RenderTarget::Image(id) => TargetTexture::View(images.get(id).unwrap().view()),
-                // };
+                let target_view = match render_target {
+                    RenderTarget::Screen => {
+                        // if let Ok(frame) =
+                        // TargetTexture::Frame(frame)
+                        // } else {
+                        // todo!()
+                        // }
+                        view
+                    }
+                    RenderTarget::Image(id) => images.get(id).unwrap().view(),
+                };
 
                 let mut should_set_vertex_uniforms = true;
 
@@ -687,7 +688,7 @@ impl Renderer for WGPU {
                     &mut encoder,
                     // target_texture_view.view(),
                     // &frame.output.view,
-                    view,
+                    target_view,
                     self.clear_color,
                     &mut self.stencil_texture,
                     &self.vertex_buffer,
@@ -984,19 +985,19 @@ impl Renderer for WGPU {
                         }
                         CommandType::SetRenderTarget(target) => {
                             render_target = *target;
-                            println!("set render target {:?}", target);
+                            // println!("set render target {:?}", target);
                             drop(pass);
                             self.ctx.queue().submit(Some(encoder.finish()));
 
-                            // drop(frame);
-                            needs_to_submit = false;
+                            should_submit = false;
                             continue 'frame;
                         }
                     }
                 }
             }
 
-            if needs_to_submit {
+            //
+            if should_submit {
                 self.ctx.queue().submit(Some(encoder.finish()));
             }
 
