@@ -971,7 +971,6 @@ impl Renderer for WGPU {
                             pass.set_scissor_rect(*x as _, *y as _, *width as _, *height as _);
 
                             pass.draw(0..4, 0..4);
-                            // clear_rect_uniform_offset += pass.set_vertex_value(clear_rect_uniform_offset, &clear_rect);
 
                             let size = self.view_size;
                             pass.set_scissor_rect(0, 0, size.w as _, size.h as _);
@@ -981,7 +980,7 @@ impl Renderer for WGPU {
                         }
                         CommandType::SetRenderTarget(target) => {
                             render_target = *target;
-                            // println!("set render target {:?}", target);
+                            println!("set render target {:?}", target);
                             drop(pass);
 
                             self.ctx.queue().submit(Some(encoder.finish()));
