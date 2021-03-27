@@ -57,25 +57,30 @@ impl ClearRect {
 }
 
 impl ClearRect {
-    fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
-        use std::mem;
-        wgpu::VertexBufferLayout {
-            array_stride: mem::size_of::<Self>() as wgpu::BufferAddress,
-            step_mode: wgpu::InputStepMode::Vertex,
-            attributes: &[
-                wgpu::VertexAttribute {
-                    offset: 0,
-                    shader_location: 0,
-                    format: wgpu::VertexFormat::Float32x4,
-                },
-                wgpu::VertexAttribute {
-                    offset: std::mem::size_of::<[f32; 4]>() as _,
-                    shader_location: 1,
-                    format: wgpu::VertexFormat::Float32x4,
-                },
-            ],
-        }
-    }
+    // fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
+    //     use std::mem;
+    //     wgpu::VertexBufferLayout {
+    //         array_stride: mem::size_of::<Self>() as wgpu::BufferAddress,
+    //         step_mode: wgpu::InputStepMode::Vertex,
+    //         attributes: &[
+    //             wgpu::VertexAttribute {
+    //                 offset: 0,
+    //                 shader_location: 0,
+    //                 format: wgpu::VertexFormat::Float32x4,
+    //             },
+    //             // wgpu::VertexAttribute {
+    //             //     offset: std::mem::size_of::<[f32; 4]>() as _,
+    //             //     shader_location: 1,
+    //             //     format: wgpu::VertexFormat::Float32x4,
+    //             // },
+    //             // wgpu::VertexAttribute {
+    //             //     offset: 2 * std::mem::size_of::<[f32; 4]>() as _,
+    //             //     shader_location: 1,
+    //             //     format: wgpu::VertexFormat::Float32x4,
+    //             // },
+    //         ],
+    //     }
+    // }
 }
 
 impl From<WGPUBlend> for wgpu::BlendState {
@@ -194,7 +199,9 @@ fn create_clear_rect_pipeline(
         vertex: wgpu::VertexState {
             module: shader,
             entry_point: "vertex_clear_rect",
-            buffers: &[ClearRect::desc()],
+            buffers: &[
+                // ClearRect::desc()
+            ],
         },
         fragment: Some(wgpu::FragmentState {
             module: shader,

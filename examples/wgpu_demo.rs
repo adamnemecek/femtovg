@@ -108,27 +108,27 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
     let size = window.inner_size();
     let instance = wgpu::Instance::new(wgpu::BackendBit::all());
     let surface = unsafe { instance.create_surface(&window) };
-    let adapter = instance
-        .request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference: wgpu::PowerPreference::default(),
-            // Request an adapter which can render to our surface
-            compatible_surface: Some(&surface),
-        })
-        .await
-        .expect("Failed to find an appropriate adapter");
+    // let adapter = instance
+    //     .request_adapter(&wgpu::RequestAdapterOptions {
+    //         power_preference: wgpu::PowerPreference::default(),
+    //         // Request an adapter which can render to our surface
+    //         compatible_surface: Some(&surface),
+    //     })
+    //     .await
+    //     .expect("Failed to find an appropriate adapter");
 
     // Create the logical device and command queue
-    let (device, queue) = adapter
-        .request_device(
-            &wgpu::DeviceDescriptor {
-                label: None,
-                features: wgpu::Features::empty(),
-                limits: wgpu::Limits::default(),
-            },
-            None,
-        )
-        .await
-        .expect("Failed to create device");
+    // let (device, queue) = adapter
+    //     .request_device(
+    //         &wgpu::DeviceDescriptor {
+    //             label: None,
+    //             features: wgpu::Features::empty(),
+    //             limits: wgpu::Limits::default(),
+    //         },
+    //         None,
+    //     )
+    //     .await
+    //     .expect("Failed to create device");
 
     let instance = WGPUInstance::from_window(&window).await.unwrap();
     let ctx = WGPUContext::new(instance).await.unwrap();
