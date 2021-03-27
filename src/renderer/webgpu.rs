@@ -987,15 +987,9 @@ impl Renderer for WGPU {
                         }
                         CommandType::SetRenderTarget(target) => {
                             render_target = *target;
-                            // drop(pass);
-                            // drop(frame);
-                            // drop(encoder);
-                            // self.ctx.queue().submit(Some(encoder.finish()));
-                            // continue 'frame;
-                            println!("set render target {:?}", target);
-                            // render_target = *target;
+                            // println!("set render target {:?}", target);
                             drop(pass);
-                            //drop(encoder);
+
                             self.ctx.queue().submit(Some(encoder.finish()));
                             drop(frame);
                             needs_to_submit = false;
@@ -1040,4 +1034,3 @@ impl From<Color> for wgpu::Color {
         }
     }
 }
-

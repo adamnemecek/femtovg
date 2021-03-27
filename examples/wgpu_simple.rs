@@ -238,14 +238,14 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 WindowEvent::MouseWheel {
                     device_id: _, delta, ..
                 } => { //match delta {
-                    // winit::event::MouseScrollDelta::LineDelta(_, y) => {
-                    //     let pt = canvas.transform().inversed().transform_point(mousex, mousey);
-                    //     canvas.translate(pt.0, pt.1);
-                    //     canvas.scale(1.0 + (y / 10.0), 1.0 + (y / 10.0));
-                    //     canvas.translate(-pt.0, -pt.1);
-                    // }
-                    // _ => (),
-                },
+                     // winit::event::MouseScrollDelta::LineDelta(_, y) => {
+                     //     let pt = canvas.transform().inversed().transform_point(mousex, mousey);
+                     //     canvas.translate(pt.0, pt.1);
+                     //     canvas.scale(1.0 + (y / 10.0), 1.0 + (y / 10.0));
+                     //     canvas.translate(-pt.0, -pt.1);
+                     // }
+                     // _ => (),
+                }
                 WindowEvent::MouseInput {
                     button: MouseButton::Left,
                     state,
