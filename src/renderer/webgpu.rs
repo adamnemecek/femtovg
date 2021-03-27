@@ -128,7 +128,7 @@ fn begin_render_pass<'a>(
             attachment: stencil_texture.view(),
             depth_ops: Some(wgpu::Operations {
                 load: wgpu::LoadOp::Clear(0.0),
-                store: false,
+                store: true,
             }),
             // todo: what is this?
             stencil_ops: None,
@@ -493,14 +493,14 @@ impl Renderer for WGPU {
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         // todo!("clear rect {:?}", std::mem::size_of::<ClearRect>());
 
-        println!("render start");
+        // println!("render start");
         // self.vertex_buffer.clear();
         // self.vertex_buffer.extend_from_slice(verts);
 
         // let texture_format = &self.swap_chain.format();
         // let format = texture_format.clone();
         let texture_format = self.swap_chain.format();
-        println!("texture format {:?}", texture_format);
+        // println!("texture format {:?}", texture_format);
 
         let mut render_target = self.render_target;
 
@@ -661,6 +661,7 @@ impl Renderer for WGPU {
                 .queue()
                 .sync_buffer(self.clear_rect_buffer.as_ref(), &self.temp_clear_rect_buffer);
         }
+
         let mut i = 0;
 
         let mut index_range_offset = 0;
@@ -1052,21 +1053,3 @@ impl From<Color> for wgpu::Color {
     }
 }
 
-// pub struct RenderPass<'a> {
-//     inner: wgpu::RenderPass<'a>,
-// }
-
-// impl<'a> RenderPass<'a> {
-//     pub fn new() -> Self {
-//         todo!()
-//     }
-
-//     pub fn set_viewport(&self) {
-//         // self.inner.set_viewport(x, y, w, h, min_depth, max_depth)
-//     }
-
-//     pub fn set_fragment(&self) {
-//         todo!()
-//         // self.inner.set_push_constants(stages, offset, data)
-//     }
-// }

@@ -107,7 +107,7 @@ fn main() {
 async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
     let size = window.inner_size();
     let instance = wgpu::Instance::new(wgpu::BackendBit::all());
-    let surface = unsafe { instance.create_surface(&window) };
+    // let surface = unsafe { instance.create_surface(&window) };
     // let adapter = instance
     //     .request_adapter(&wgpu::RequestAdapterOptions {
     //         power_preference: wgpu::PowerPreference::default(),
@@ -314,7 +314,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
 }
 
 fn clear_rect(canvas: &mut Canvas<impl Renderer>) {
-    canvas.clear_rect(10, 10, 200, 200, Color::red());
+    canvas.clear_rect(0, 0, 800, 300, Color::red());
 }
 
 fn stroke_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
