@@ -493,7 +493,7 @@ impl Renderer for WGPU {
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         // todo!("clear rect {:?}", std::mem::size_of::<ClearRect>());
 
-        // println!("render start");
+        println!("render start");
         // self.vertex_buffer.clear();
         // self.vertex_buffer.extend_from_slice(verts);
 
@@ -968,19 +968,8 @@ impl Renderer for WGPU {
                             ..
                         } => {
                             pass.cfg_push_debug_group("clear rect");
-                            // let ndc_rect = Rect {
-                            //     x: -1.0,
-                            //     y: -1.0,
-                            //     w: 2.0,
-                            //     h: 2.0,
-                            // };
 
-                            // let clear_rect = ClearRect::new(ndc_rect, *color);
-
-                            // let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             let bg = &self.clear_rect_bind_group;
-
-                            // pass.set_bind_group(sef, bind_group, offsets)
 
                             pass.set_pipeline(states.clear_rect());
                             pass.set_bind_group(0, bg, &[clear_rect_uniform_offset]);
@@ -992,7 +981,6 @@ impl Renderer for WGPU {
 
                             let size = self.view_size;
                             pass.set_scissor_rect(0, 0, size.w as _, size.h as _);
-                            // pass.draw()
 
                             pass.cfg_pop_debug_group();
                             clear_rect_uniform_offset += std::mem::size_of::<ClearRect>() as u32;
