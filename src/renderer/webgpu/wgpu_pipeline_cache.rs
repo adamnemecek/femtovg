@@ -43,6 +43,17 @@ impl crate::Vertex {
 pub struct ClearRect {
     pub rect: Rect,
     pub color: Color,
+    pub padding: [f32; 56],
+}
+
+impl ClearRect {
+    pub fn new(rect: Rect, color: Color) -> Self {
+        Self {
+            rect,
+            color,
+            padding: [0.0; 56],
+        }
+    }
 }
 
 impl ClearRect {

@@ -1,6 +1,9 @@
-use wgpu::util::{
-    BufferInitDescriptor,
-    DeviceExt,
+use wgpu::{
+    util::{
+        BufferInitDescriptor,
+        DeviceExt,
+    },
+    BufferUsage,
 };
 
 pub struct WGPUVar<T> {
@@ -26,6 +29,18 @@ impl<T> WGPUVar<T> {
             label,
             contents: as_u8_slice(value),
             usage,
+        });
+        Self {
+            inner,
+            ph: Default::default(),
+        }
+    }
+
+    pub fn new_uniform(device: &wgpu::Device, label: Option<&str>, value: &T) -> Self {
+        let inner = device.create_buffer_init(&BufferInitDescriptor {
+            label,
+            contents: as_u8_slice(value),
+            usage: wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::UNIFORM,
         });
         Self {
             inner,

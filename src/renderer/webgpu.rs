@@ -491,6 +491,8 @@ impl Renderer for WGPU {
     }
 
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+        // todo!("clear rect {:?}", std::mem::size_of::<ClearRect>());
+
         println!("render start");
         // self.vertex_buffer.clear();
         // self.vertex_buffer.extend_from_slice(verts);
@@ -521,6 +523,7 @@ impl Renderer for WGPU {
 
         // let bind_groups = vec![];
         let mut uniforms_offset: u32 = 0;
+        let mut clear_rect_offset = 0;
 
         // let mut current_frame = None;
 
@@ -590,14 +593,14 @@ impl Renderer for WGPU {
                     width,
                     height,
                     color,
-                } => self.temp_clear_rect_buffer.push(ClearRect {
-                    rect: Rect {
+                } => self.temp_clear_rect_buffer.push({
+                    let rect = Rect {
                         x: x as _,
                         y: y as _,
                         w: width as _,
                         h: height as _,
-                    },
-                    color,
+                    };
+                    ClearRect::new(rect, color)
                 }),
                 CommandType::SetRenderTarget(_) => {}
             }
@@ -610,17 +613,21 @@ impl Renderer for WGPU {
         println!("index len {:?}", self.temp_index_buffer.len());
 
         println!("verts len {:?}", verts.len());
-        self.vertex_buffer.resize(verts.len());
-        self.ctx.queue().sync_buffer(self.vertex_buffer.as_ref(), verts);
+        {
+            self.vertex_buffer.resize(verts.len());
+            self.ctx.queue().sync_buffer(self.vertex_buffer.as_ref(), verts);
+        }
 
         // self.index_buffer.clear();
         // assert!()
         // self.temp_index_buffer.resize(verts.len() * 3, 0);
-        self.index_buffer.resize(self.temp_index_buffer.len());
-        self.ctx
-            .queue()
-            .sync_buffer(self.index_buffer.as_ref(), &self.temp_index_buffer);
-
+        {
+            self.index_buffer.resize(self.temp_index_buffer.len());
+            self.ctx
+                .queue()
+                .sync_buffer(self.index_buffer.as_ref(), &self.temp_index_buffer);
+        }
+        // sync uniforms
         {
             self.uniform_buffer.resize(self.temp_uniform_buffer.len());
             self.ctx
@@ -629,17 +636,23 @@ impl Renderer for WGPU {
             // println!("index before");
         }
 
-        if self
-            .clear_rect_buffer
-            .resize(self.temp_clear_rect_buffer.len())
-            .resized()
+        // sync
         {
-            self::create_clear_rect_bind_group(&self.ctx, &self.clear_rect_bind_group_layout, &self.clear_rect_buffer);
+            if self
+                .clear_rect_buffer
+                .resize(self.temp_clear_rect_buffer.len())
+                .resized()
+            {
+                self::create_clear_rect_bind_group(
+                    &self.ctx,
+                    &self.clear_rect_bind_group_layout,
+                    &self.clear_rect_buffer,
+                );
+            }
+            self.ctx
+                .queue()
+                .sync_buffer(self.clear_rect_buffer.as_ref(), &self.temp_clear_rect_buffer);
         }
-        self.ctx
-            .queue()
-            .sync_buffer(self.clear_rect_buffer.as_ref(), &self.temp_clear_rect_buffer);
-
         let mut i = 0;
 
         let mut index_range_offset = 0;
@@ -951,12 +964,11 @@ impl Renderer for WGPU {
                                 h: 2.0,
                             };
 
-                            let clear_rect = ClearRect {
-                                rect: ndc_rect,
-                                color: *color,
-                            };
+                            let clear_rect = ClearRect::new(ndc_rect, *color);
 
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
+
+                            // pass.set_bind_group(sef, bind_group, offsets)
 
                             pass.set_pipeline(states.clear_rect());
 

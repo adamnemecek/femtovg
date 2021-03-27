@@ -228,7 +228,8 @@ fn rect_vert_cw(
 [[block]]
 struct ClearRectIn {
     rect: vec4<f32>;
-    [[location(0)]] color: vec4<f32>;
+    color: vec4<f32>;
+    padding: [[stride(4)]] array<f32, 56>;
 };
 
 // [[block]]
