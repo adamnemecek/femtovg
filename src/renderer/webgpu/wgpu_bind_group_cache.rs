@@ -98,6 +98,7 @@ fn create_bind_group(
     // pass.set_tex
 }
 
+#[must_use]
 pub fn create_clear_rect_bind_group(
     ctx: &WGPUContext,
     layout: &wgpu::BindGroupLayout,
@@ -164,7 +165,7 @@ impl WGPUBindGroupCache {
         layout: &wgpu::BindGroupLayout,
         uniforms: &WGPUVec<Params>,
         // view_size: WGPUVar<Size>,
-        // uniforms: WGPUVar<Params>,
+        // uniforms: WGPUVar<Params>,::
         image_tex: Option<ImageId>,
         alpha_tex: Option<ImageId>,
         pseudo_tex: &WGPUTexture,

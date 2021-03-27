@@ -74,7 +74,7 @@ fn create_buffer<T: Copy>(
 pub struct WGPUVec<T: Copy> {
     ctx: WGPUContext,
     inner: wgpu::Buffer,
-    len: usize,
+    // len: usize,
     mem_align: MemAlign<T>,
     usage: wgpu::BufferUsage,
 }
@@ -102,7 +102,7 @@ impl<T: Copy> WGPUVec<T> {
             usage,
             ctx: ctx.clone(),
             inner,
-            len: 0,
+            // len: 0,
             mem_align,
         }
     }
@@ -117,7 +117,7 @@ impl<T: Copy> WGPUVec<T> {
             usage,
             ctx: ctx.clone(),
             inner,
-            len: 0,
+            // len: 0,
             mem_align,
         }
     }
@@ -176,14 +176,14 @@ impl<T: Copy> WGPUVec<T> {
             usage,
             ctx: ctx.clone(),
             inner,
-            len: 0,
+            // len: 0,
             mem_align,
         }
     }
 
-    pub fn len(&self) -> usize {
-        self.len
-    }
+    // pub fn len(&self) -> usize {
+    //     self.len
+    // }
 
     // pub fn extend_from_slice(&mut self, other: &[T]) {
     //     let new_len = self.len() + other.len();

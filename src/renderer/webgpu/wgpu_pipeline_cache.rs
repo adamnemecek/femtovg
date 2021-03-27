@@ -210,7 +210,7 @@ fn create_clear_rect_pipeline(
             targets: &[format.into()],
         }),
         primitive: wgpu::PrimitiveState {
-            topology: wgpu::PrimitiveTopology::TriangleList,
+            topology: wgpu::PrimitiveTopology::TriangleStrip,
             // front_face: wgpu::FrontFace::Ccw,
             ..Default::default()
         },

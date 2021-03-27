@@ -343,7 +343,12 @@ impl WGPU {
         let clear_rect_pipeline_layout = ctx.device().create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("clear rect pipeline layout"),
             bind_group_layouts: &[&clear_rect_bind_group_layout],
-            push_constant_ranges: &[],
+            push_constant_ranges: &[
+                // wgpu::PushConstantRange {
+                //     stages: wgpu::ShaderStage::VERTEX,
+                //     range: 0..view_size_size,
+                // },
+            ],
         });
 
         let clear_rect_buffer = WGPUVec::new_uniform(ctx, 16);
@@ -518,7 +523,7 @@ impl Renderer for WGPU {
 
         // let bind_groups = vec![];
         let mut uniforms_offset: u32 = 0;
-        let mut clear_rect_offset: u32 = 0;
+        let mut clear_rect_uniform_offset: u32 = 0;
 
         // let mut current_frame = None;
 
@@ -639,7 +644,7 @@ impl Renderer for WGPU {
                 .resize(self.temp_clear_rect_buffer.len())
                 .resized()
             {
-                self::create_clear_rect_bind_group(
+                self.clear_rect_bind_group = self::create_clear_rect_bind_group(
                     &self.ctx,
                     &self.clear_rect_bind_group_layout,
                     &self.clear_rect_buffer,
@@ -654,7 +659,10 @@ impl Renderer for WGPU {
 
         let mut index_range_offset = 0;
 
+        let mut needs_to_submit = true;
+
         'frame: while i < commands.len() {
+            needs_to_submit = true;
             let frame = self.swap_chain.get_current_frame().unwrap();
             let mut encoder = self.ctx.create_command_encoder(None);
             {
@@ -878,8 +886,8 @@ impl Renderer for WGPU {
                             }
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
-                            pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
-                            uniforms_offset += std::mem::size_of::<Params>() as u32;
+                            pass.set_bind_group(0, bg.as_ref(), &[]);
+                            // uniforms_offset += std::mem::size_of::<Params>() as u32;
 
                             // pass.set_pipeline()
                             // pass.set_bind_group(0, bg.as_ref(), &[]);
@@ -952,14 +960,14 @@ impl Renderer for WGPU {
                             color,
                         } => {
                             pass.cfg_push_debug_group("clear rect");
-                            let ndc_rect = Rect {
-                                x: -1.0,
-                                y: -1.0,
-                                w: 2.0,
-                                h: 2.0,
-                            };
+                            // let ndc_rect = Rect {
+                            //     x: -1.0,
+                            //     y: -1.0,
+                            //     w: 2.0,
+                            //     h: 2.0,
+                            // };
 
-                            let clear_rect = ClearRect::new(ndc_rect, *color);
+                            // let clear_rect = ClearRect::new(ndc_rect, *color);
 
                             // let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             let bg = &self.clear_rect_bind_group;
@@ -967,18 +975,17 @@ impl Renderer for WGPU {
                             // pass.set_bind_group(sef, bind_group, offsets)
 
                             pass.set_pipeline(states.clear_rect());
+                            pass.set_bind_group(0, bg, &[clear_rect_uniform_offset]);
 
                             pass.set_scissor_rect(*x as _, *y as _, *width as _, *height as _);
-                            uniforms_offset += pass.set_vertex_value(uniforms_offset, &clear_rect);
-
-                            pass.set_bind_group(0, bg, &[clear_rect_offset]);
+                            // clear_rect_uniform_offset += pass.set_vertex_value(clear_rect_uniform_offset, &clear_rect);
 
                             let size = self.view_size;
                             pass.set_scissor_rect(0, 0, size.w as _, size.h as _);
                             // pass.draw()
 
                             pass.cfg_pop_debug_group();
-                            clear_rect_offset += std::mem::size_of::<ClearRect>() as u32;
+                            clear_rect_uniform_offset += std::mem::size_of::<ClearRect>() as u32;
                         }
                         CommandType::SetRenderTarget(target) => {
                             render_target = *target;
@@ -993,13 +1000,17 @@ impl Renderer for WGPU {
                             //drop(encoder);
                             self.ctx.queue().submit(Some(encoder.finish()));
                             drop(frame);
+                            needs_to_submit = false;
                             continue 'frame;
                         }
                     }
                 }
             }
 
-            self.ctx.queue().submit(Some(encoder.finish()));
+            if needs_to_submit {
+                self.ctx.queue().submit(Some(encoder.finish()));
+            }
+
             println!("render end");
         }
     }
