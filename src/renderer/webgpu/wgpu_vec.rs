@@ -79,6 +79,18 @@ pub struct WGPUVec<T: Copy> {
     usage: wgpu::BufferUsage,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum ResizeResult {
+    None,
+    Resized,
+}
+
+impl ResizeResult {
+    pub fn resized(&self) -> bool {
+        self == &Self::Resized
+    }
+}
+
 impl<T: Copy> WGPUVec<T> {
     pub fn new_vertex(ctx: &WGPUContext, capacity: usize) -> Self {
         let mem_align = MemAlign::new(capacity);
@@ -186,9 +198,9 @@ impl<T: Copy> WGPUVec<T> {
     //     self.len = new_len;
     // }
 
-    pub fn resize(&mut self, capacity: usize) {
+    pub fn resize(&mut self, capacity: usize) -> ResizeResult {
         if capacity <= self.capacity() {
-            return;
+            return ResizeResult::None;
         }
 
         let mem_align = MemAlign::<T>::new(capacity);
@@ -222,6 +234,8 @@ impl<T: Copy> WGPUVec<T> {
         self.mem_align = mem_align;
         self.inner.destroy();
         self.inner = inner;
+
+        return ResizeResult::Resized;
     }
 
     // pub fn iter(&self) -> WGPUVecIterator<'_, T> {

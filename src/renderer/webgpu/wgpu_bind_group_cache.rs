@@ -1,6 +1,7 @@
 // use crate
 
 use super::{
+    ClearRect,
     WGPUContext,
     WGPUTexture,
     WGPUVar,
@@ -95,6 +96,25 @@ fn create_bind_group(
         ],
     })
     // pass.set_tex
+}
+
+pub fn create_clear_rect_bind_group(
+    ctx: &WGPUContext,
+    layout: &wgpu::BindGroupLayout,
+    uniforms: &WGPUVec<super::ClearRect>,
+) -> wgpu::BindGroup {
+    ctx.device().create_bind_group(&wgpu::BindGroupDescriptor {
+        label: None,
+        layout,
+        entries: &[wgpu::BindGroupEntry {
+            binding: 0,
+            resource: wgpu::BindingResource::Buffer {
+                buffer: uniforms.as_ref(),
+                offset: 0,
+                size: wgpu::BufferSize::new(std::mem::size_of::<ClearRect>() as _),
+            },
+        }],
+    })
 }
 
 use std::collections::HashMap;

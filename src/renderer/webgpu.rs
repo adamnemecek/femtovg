@@ -189,8 +189,8 @@ pub struct WGPU {
 
     temp_clear_rect_buffer: Vec<ClearRect>,
     clear_rect_buffer: WGPUVec<ClearRect>,
-    // clear_rect_bind_group_layout: wgpu::BindGroupLayout,
-    // clear_rect_pipeline_layout: wgpu::PipelineLayout,
+    clear_rect_bind_group: wgpu::BindGroup,
+    clear_rect_bind_group_layout: wgpu::BindGroupLayout,
 }
 
 #[derive(Clone, Copy)]
@@ -328,34 +328,21 @@ impl WGPU {
 
         let clear_rect_bind_group_layout = ctx.device().create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: None,
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStage::VERTEX,
-                    ty: wgpu::BindingType::Texture {
-                        sample_type: wgpu::TextureSampleType::Float { filterable: false },
-                        view_dimension: wgpu::TextureViewDimension::D2,
-                        multisampled: false,
-                    },
-                    count: None,
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStage::VERTEX,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: true,
+                    min_binding_size: wgpu::BufferSize::new(std::mem::size_of::<ClearRect>() as _),
                 },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 1,
-                    visibility: wgpu::ShaderStage::VERTEX,
-                    ty: wgpu::BindingType::Texture {
-                        sample_type: wgpu::TextureSampleType::Float { filterable: false },
-                        view_dimension: wgpu::TextureViewDimension::D2,
-                        multisampled: false,
-                    },
-                    count: None,
-                },
-            ],
+                count: None,
+            }],
         });
 
         let clear_rect_pipeline_layout = ctx.device().create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: None,
-            // bind_group_layouts: &[&clear_rect_bind_group_layout],
-            bind_group_layouts: &[],
+            bind_group_layouts: &[&clear_rect_bind_group_layout],
             push_constant_ranges: &[],
         });
 
@@ -406,6 +393,14 @@ impl WGPU {
 
         let clear_rect_buffer = WGPUVec::new_vertex(ctx, 16);
 
+        let clear_rect_bind_group_layout = ctx.device().create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: None,
+            entries: &[],
+        });
+
+        let clear_rect_bind_group =
+            self::create_clear_rect_bind_group(ctx, &clear_rect_bind_group_layout, &clear_rect_buffer);
+
         Self {
             clear_color,
             antialias: true,
@@ -431,7 +426,8 @@ impl WGPU {
 
             clear_rect_buffer,
             temp_clear_rect_buffer: vec![],
-            // clear_rect_pipeline_layout,
+            clear_rect_bind_group_layout,
+            clear_rect_bind_group,
         }
     }
 }
@@ -621,21 +617,25 @@ impl Renderer for WGPU {
         // assert!()
         // self.temp_index_buffer.resize(verts.len() * 3, 0);
         self.index_buffer.resize(self.temp_index_buffer.len());
-        // self.temp_index_buffer.resize(self.)
-        // self.index_buffer.resize()
-
-        // println!("index before");
         self.ctx
             .queue()
             .sync_buffer(self.index_buffer.as_ref(), &self.temp_index_buffer);
 
-        self.uniform_buffer.resize(self.temp_uniform_buffer.len());
-        self.ctx
-            .queue()
-            .sync_buffer(self.uniform_buffer.as_ref(), &self.temp_uniform_buffer);
-        // println!("index before");
+        {
+            self.uniform_buffer.resize(self.temp_uniform_buffer.len());
+            self.ctx
+                .queue()
+                .sync_buffer(self.uniform_buffer.as_ref(), &self.temp_uniform_buffer);
+            // println!("index before");
+        }
 
-        self.clear_rect_buffer.resize(self.temp_clear_rect_buffer.len());
+        if self
+            .clear_rect_buffer
+            .resize(self.temp_clear_rect_buffer.len())
+            .resized()
+        {
+            self::create_clear_rect_bind_group(&self.ctx, &self.clear_rect_bind_group_layout, &self.clear_rect_buffer);
+        }
         self.ctx
             .queue()
             .sync_buffer(self.clear_rect_buffer.as_ref(), &self.temp_clear_rect_buffer);
