@@ -660,6 +660,7 @@ impl Renderer for WGPU {
 
         let mut index_range_offset = 0;
 
+        #[allow(unused_assignments)]
         let mut should_submit = true;
 
         let frame = self.swap_chain.get_current_frame().unwrap();
@@ -672,11 +673,6 @@ impl Renderer for WGPU {
             {
                 let target_view = match render_target {
                     RenderTarget::Screen => {
-                        // if let Ok(frame) =
-                        // TargetTexture::Frame(frame)
-                        // } else {
-                        // todo!()
-                        // }
                         view
                     }
                     RenderTarget::Image(id) => images.get(id).unwrap().view(),
@@ -996,7 +992,7 @@ impl Renderer for WGPU {
                 }
             }
 
-            //
+            // if there's a pending submit
             if should_submit {
                 self.ctx.queue().submit(Some(encoder.finish()));
             }
