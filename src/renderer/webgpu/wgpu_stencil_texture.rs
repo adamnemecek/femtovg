@@ -8,12 +8,20 @@ pub struct WGPUStencilTexture {
     size: Size,
     tex: wgpu::Texture,
     view: wgpu::TextureView,
+    gen: u32,
+}
+
+fn label(gen: u32) -> String {
+    format!("stencil texture {}", gen)
 }
 
 impl WGPUStencilTexture {
     pub fn new(ctx: &WGPUContext, size: Size) -> Self {
-        let desc = new_stencil_descriptor(size);
+        let gen = 0;
+        let label = label(gen);
+        let desc = new_stencil_descriptor(size, &label);
 
+        println!("reallocating texture");
         let tex = ctx.device().create_texture(&desc);
         let view = tex.create_view(&Default::default());
         Self {
@@ -21,6 +29,7 @@ impl WGPUStencilTexture {
             tex,
             size,
             view,
+            gen,
         }
     }
 
@@ -29,11 +38,18 @@ impl WGPUStencilTexture {
     }
 
     pub fn resize(&mut self, size: Size) {
+        if size == self.size {
+            return;
+        }
+        println!("reallocating texture");
         // if self.size().contains(&size) {
         //     return;
         // }
         // let size = size.max(&self.size());
-        let desc = new_stencil_descriptor(size);
+
+        self.gen += 1;
+        let label = label(self.gen);
+        let desc = new_stencil_descriptor(size, &label);
         self.tex.destroy();
 
         self.tex = self.ctx.device().create_texture(&desc);
@@ -51,9 +67,9 @@ impl Drop for WGPUStencilTexture {
     }
 }
 
-fn new_stencil_descriptor<'a>(size: Size) -> wgpu::TextureDescriptor<'a> {
+fn new_stencil_descriptor<'a>(size: Size, label: &'a str) -> wgpu::TextureDescriptor<'a> {
     wgpu::TextureDescriptor {
-        label: Some("stencil texture"),
+        label: Some(label),
         size: size.into(),
         mip_level_count: 1,
         sample_count: 1,

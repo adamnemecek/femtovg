@@ -19,7 +19,7 @@ use rgb::ComponentBytes;
 impl From<PixelFormat> for wgpu::TextureFormat {
     fn from(a: PixelFormat) -> Self {
         match a {
-            PixelFormat::Rgba8 => Self::Bgra8Unorm,
+            PixelFormat::Rgba8 => Self::Bgra8UnormSrgb,
             PixelFormat::Rgb8 => unimplemented!("wgpu doesn't support the RGB8 pixel format"),
             PixelFormat::Gray8 => Self::R8Unorm,
         }
@@ -52,11 +52,7 @@ impl WGPUTexture {
 
         let format = info.format().into();
 
-        let size = wgpu::Extent3d {
-            width: info.width() as _,
-            height: info.height() as _,
-            depth_or_array_layers: 1,
-        };
+        let size: wgpu::Extent3d = info.size().into();
 
         let mip_level_count = if generate_mipmaps {
             size.mip_mipmap_level_count()

@@ -575,8 +575,8 @@ impl Renderer for WGPU {
                                 end: index_range_end as _,
                             });
 
-                            self.temp_uniform_buffer.push(fill_params);
                             self.temp_uniform_buffer.push(stencil_params);
+                            self.temp_uniform_buffer.push(fill_params);
                         }
                     }
                 }
@@ -591,11 +591,12 @@ impl Renderer for WGPU {
                     self.temp_uniform_buffer.push(params);
                 }
                 CommandType::ClearRect {
-                    x,
-                    y,
-                    width,
-                    height,
+                    // x,
+                    // y,
+                    // width,
+                    // height,
                     color,
+                    ..
                 } => self.temp_clear_rect_buffer.push({
                     let rect = Rect {
                         x: -1.0,
@@ -607,6 +608,10 @@ impl Renderer for WGPU {
                 }),
                 CommandType::SetRenderTarget(_) => {}
             }
+        }
+
+        for cmd in commands.iter() {
+            println!("cmd {:?}", cmd.cmd_type);
         }
         let end = std::time::Instant::now();
         println!("uniforms vec {:?}", end - start);
@@ -759,6 +764,7 @@ impl Renderer for WGPU {
                             pass.cfg_push_debug_group("convex fill");
                             // set_uniforms
                             let s = states.convex_fill();
+                            pass.set_pipeline(s.fill_buffer());
 
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
 
@@ -997,12 +1003,12 @@ impl Renderer for WGPU {
                             pass.set_bind_group(0, bg, &[clear_rect_uniform_offset]);
 
                             // pass.set_scissor_rect(*x as _, *y as _, *width as _, *height as _);
-                            pass.set_viewport(*x as _ ,*y as _, *width as _, *height as _, 0.0, 1.0);
+                            pass.set_viewport(*x as _, *y as _, *width as _, *height as _, 0.0, 1.0);
 
                             pass.draw(0..4, 0..4);
 
                             // pass.set_scissor_rect(0, 0, view_size.w as _, view_size.h as _);
-                            pass.set_viewport(0.0 ,0.0, view_size.w as _, view_size.h as _, 0.0, 1.0);
+                            pass.set_viewport(0.0, 0.0, view_size.w as _, view_size.h as _, 0.0, 1.0);
 
                             pass.cfg_pop_debug_group();
                             clear_rect_uniform_offset += std::mem::size_of::<ClearRect>() as u32;

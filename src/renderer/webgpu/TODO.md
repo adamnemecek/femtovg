@@ -1,7 +1,7 @@
 # TODO
 
 * does webgpu need a pseudotexture?
-*
+* revisit pixel conversion
 
 # states
 * convex_fill

@@ -297,8 +297,8 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // let mousey = pt.1;
 
                 // stroke_rect(&mut canvas, 20.0, 20.0, 100.0, 100.0);
-                clear_rect(&mut canvas);
-                // stroke_rect(&mut canvas, 0.0, 0.0, 100.0, 100.0);
+                // clear_rect(&mut canvas);
+                stroke_rect(&mut canvas, 0.0, 0.0, 100.0, 100.0);
 
                 canvas.flush();
                 // #[cfg(not(target_arch = "wasm32"))]

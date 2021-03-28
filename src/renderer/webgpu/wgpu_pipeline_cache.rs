@@ -573,6 +573,7 @@ impl WGPUPipelineStates {
         //     None,
         // );
         let convex_fill = ConvexFill {
+            // revisit
             fill_buffer: create_pipeline(
                 ctx,
                 "convex_fill/fill_buffer",
@@ -580,9 +581,9 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 blend_func,
-                wgpu::PrimitiveTopology::TriangleList,
+                wgpu::PrimitiveTopology::TriangleStrip,
                 // None,
-                None,
+                wgpu::IndexFormat::Uint32,
                 wgpu::Face::Back,
                 default_stencil_state(stencil_format),
             ),
