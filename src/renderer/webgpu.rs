@@ -186,6 +186,7 @@ pub struct WGPU {
     view_size: Size,
     swap_chain: WGPUSwapChain,
     bind_group_layout: wgpu::BindGroupLayout,
+    dpi: f32,
 
     temp_clear_rect_buffer: Vec<ClearRect>,
     clear_rect_buffer: WGPUVec<ClearRect>,
@@ -303,7 +304,7 @@ impl WGPU {
             ],
         });
 
-        let view_size_size: u32 = std::mem::size_of::<Size>() as _;
+        // let view_size_size: u32 = std::mem::size_of::<Size>() as _;
         // let param_size: u32 = std::mem::size_of::<Params>() as _;
         // println!("param_size {:?}", param_size);
 
@@ -313,7 +314,7 @@ impl WGPU {
             push_constant_ranges: &[
                 wgpu::PushConstantRange {
                     stages: wgpu::ShaderStage::VERTEX,
-                    range: 0..view_size_size,
+                    range: 0..(std::mem::size_of::<Size>() as _),
                 },
                 // wgpu::PushConstantRange {
                 //     stages: wgpu::ShaderStage::FRAGMENT,
@@ -327,7 +328,7 @@ impl WGPU {
         });
 
         let clear_rect_bind_group_layout = ctx.device().create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("clear rect bind group layout 1"),
+            label: Some("clear rect bind group layout"),
             entries: &[wgpu::BindGroupLayoutEntry {
                 binding: 0,
                 visibility: wgpu::ShaderStage::VERTEX,
@@ -402,6 +403,7 @@ impl WGPU {
         let pseudo_texture = WGPUTexture::new_pseudo_texture(ctx).unwrap();
 
         Self {
+            dpi: 1.0,
             clear_color,
             antialias: true,
             stencil_texture,
@@ -430,10 +432,6 @@ impl WGPU {
             clear_rect_bind_group,
         }
     }
-}
-
-pub struct TextureBindings {
-    // tex_tex:
 }
 
 impl WGPU {
@@ -484,10 +482,16 @@ fn vert_range(start: usize, count: usize) -> std::ops::Range<u32> {
 impl Renderer for WGPU {
     type Image = WGPUTexture;
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
+
         let size = Size::new(width as f32, height as f32);
+        println!("set size {:?}", size);
         self.view_size = size;
+        self.dpi = dpi;
 
         self.bind_group_cache.clear();
+        self.swap_chain.resize(size);
+        // self.pipeline_cache.clear();
+
     }
 
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {

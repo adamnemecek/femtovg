@@ -16,6 +16,7 @@ pub struct WGPUSwapChain {
     size: Size,
     inner: wgpu::SwapChain,
     format: wgpu::TextureFormat,
+    ctx: WGPUContext,
 }
 
 impl WGPUSwapChain {
@@ -24,7 +25,7 @@ impl WGPUSwapChain {
 
         let desc = sc_desc(format, size);
         let inner = ctx.device().create_swap_chain(ctx.surface(), &desc);
-        Self { size, inner, format }
+        Self { ctx: ctx.clone(), size, inner, format }
     }
 
     pub fn format(&self) -> wgpu::TextureFormat {
@@ -35,8 +36,9 @@ impl WGPUSwapChain {
         self.inner.get_current_frame()
     }
 
-    pub fn resize(&self, size: Size) {
-        let desc = sc_desc(self.format, self.size);
-        todo!()
+    pub fn resize(&mut self, size: Size) {
+        let desc = sc_desc(self.format, size);
+        self.size = size;
+        self.inner = self.ctx.device().create_swap_chain(self.ctx.surface(), &desc);
     }
 }

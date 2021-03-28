@@ -838,4 +838,8 @@ impl WGPUPipelineCache {
         // self.inner.borrow().get(&key).as_ref().unwrap()
         // todo!()
     }
+
+    pub fn clear(&mut self) {
+        self.inner().clear()
+    }
 }
