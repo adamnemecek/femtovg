@@ -502,7 +502,7 @@ impl Renderer for WGPU {
 
         // let texture_format = &self.swap_chain.format();
         // let format = texture_format.clone();
-        let texture_format = self.swap_chain.format();
+        let swap_chain_format = self.swap_chain.format();
         // println!("texture format {:?}", texture_format);
 
         let mut render_target = self.render_target;
@@ -698,11 +698,11 @@ impl Renderer for WGPU {
 
             let mut encoder = self.ctx.create_command_encoder(None);
             {
-                let (target_view, view_size) = match render_target {
-                    RenderTarget::Screen => (view, self.view_size),
+                let (target_view, view_size, texture_format) = match render_target {
+                    RenderTarget::Screen => (view, self.view_size, swap_chain_format),
                     RenderTarget::Image(id) => {
                         let tex = images.get(id).unwrap();
-                        (tex.view(), tex.size())
+                        (tex.view(), tex.size(), tex.format())
                     }
                 };
 
