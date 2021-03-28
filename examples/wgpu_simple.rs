@@ -297,9 +297,9 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // let mousey = pt.1;
 
                 // stroke_rect(&mut canvas, 20.0, 20.0, 100.0, 100.0);
-                // clear_rect(&mut canvas, 0, 0, 100, 100);
-                // clear_rect(&mut canvas, 200, 200, 100, 100);
-                stroke_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
+                clear_rect(&mut canvas, 0, 0, 100, 100);
+                clear_rect(&mut canvas, 200, 200, 100, 100);
+                // stroke_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
 
                 // stroke_rect(&mut canvas, 200.0, 200.0, 100.0, 100.0);
 

@@ -1005,7 +1005,7 @@ impl Renderer for WGPU {
                             // pass.set_scissor_rect(*x as _, *y as _, *width as _, *height as _);
                             pass.set_viewport(*x as _, *y as _, *width as _, *height as _, 0.0, 1.0);
 
-                            pass.draw(0..4, 0..4);
+                            pass.draw(0..4, 0..1);
 
                             // pass.set_scissor_rect(0, 0, view_size.w as _, view_size.h as _);
                             pass.set_viewport(0.0, 0.0, view_size.w as _, view_size.h as _, 0.0, 1.0);
