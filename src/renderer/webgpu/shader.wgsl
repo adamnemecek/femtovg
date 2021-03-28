@@ -74,8 +74,8 @@ var<push_constant> viewSize: ViewSize;
 fn vertex_shader(
     [[location(0)]] vert: vec4<f32>,
 ) -> RasterizerData {
-    const tcoord = vert.xy;
-    const pos = vert.wz;
+    const pos = vert.xy;
+    const tcoord = vert.wz;
 
     var ret: RasterizerData;
     ret.ftcoord = tcoord;
