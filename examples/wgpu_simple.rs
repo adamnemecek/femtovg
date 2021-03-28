@@ -293,7 +293,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // let t = start.elapsed().as_secs_f32();
 
                 canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
-                canvas.clear_rect(0, 0, size.width as u32, size.height as u32, Color::rgbf(0.0, 0.3, 1.0));
+                canvas.clear_rect(0, 0, size.width as u32, size.height as u32,  Color::rgbf(0.3, 0.3, 0.32));
 
                 // let height = size.height as f32;
                 // let width = size.width as f32;
@@ -306,7 +306,8 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // clear_rect(&mut canvas, 0, 0, 100, 100);
                 // clear_rect(&mut canvas, 200, 200, 100, 100);
                 // fill_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
-                draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
+                // draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "t", 50.0, 200.0, 100.0, 100.0);
 
                 // stroke_rect(&mut canvas, 200.0, 200.0, 100.0, 100.0);
 

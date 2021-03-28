@@ -623,6 +623,7 @@ impl Renderer for WGPU {
         // println!("verts len {:?}", verts.len());
         {
             self.vertex_buffer.resize(verts.len());
+            println!("resized to {:?}", self.vertex_buffer.capacity());
             self.ctx.queue().sync_buffer(self.vertex_buffer.as_ref(), verts);
         }
 
@@ -844,12 +845,13 @@ impl Renderer for WGPU {
                             }
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                             // need for none, none
-                            let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
+                            let bg = bind_group!(self, images, None, None);
                             // pass.set_bind_group(0, bg.as_ref(), &[]);
                             // uniforms_offset += pass.set_fragment_value(uniforms_offset, stencil_params);
                             pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
                             uniforms_offset += std::mem::size_of::<Params>() as u32;
 
+                            // fill verts
                             for drawable in &cmd.drawables {
                                 if let Some((_start, _count)) = drawable.fill_verts {
                                     // let offset = self.index_buffer.len();
@@ -864,7 +866,8 @@ impl Renderer for WGPU {
                             // pass.set_pipeline(states.concave_fill1());
                             // set_uniforms
 
-                            let bg = bind_group!(self, images, None, None);
+                            // anti-aliased fragments
+                            let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
                             uniforms_offset += std::mem::size_of::<Params>() as u32;
                             // pass.set_bind_group(0, bg.as_ref(), &[]);
@@ -888,13 +891,14 @@ impl Renderer for WGPU {
                                 }
                             }
 
+                            // draw fills
                             // todo: can be moved into the if statement below?
                             match cmd.fill_rule {
                                 FillRule::NonZero => {
-                                    pass.set_pipeline(s.triangle_verts_nonzero());
+                                    pass.set_pipeline(s.fills_nonzero());
                                 }
                                 FillRule::EvenOdd => {
-                                    pass.set_pipeline(s.triangle_verts_evenodd());
+                                    pass.set_pipeline(s.fills_evenodd());
                                 }
                             }
 
@@ -991,6 +995,7 @@ impl Renderer for WGPU {
                             counter.triangles += 1;
 
                             pass.cfg_push_debug_group("triangles");
+
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_pipeline(states.triangles());
                             if should_set_vertex_uniforms {

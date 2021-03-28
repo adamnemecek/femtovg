@@ -448,8 +448,8 @@ pub struct ConcaveFill {
     fill_verts: wgpu::RenderPipeline,
     fringes_nonzero: wgpu::RenderPipeline,
     fringes_evenodd: wgpu::RenderPipeline,
-    triangle_verts_nonzero: wgpu::RenderPipeline,
-    triangle_verts_evenodd: wgpu::RenderPipeline,
+    fills_nonzero: wgpu::RenderPipeline,
+    fills_evenodd: wgpu::RenderPipeline,
 }
 
 impl ConcaveFill {
@@ -465,12 +465,12 @@ impl ConcaveFill {
         &self.fringes_evenodd
     }
 
-    pub fn triangle_verts_nonzero(&self) -> &wgpu::RenderPipeline {
-        &self.triangle_verts_nonzero
+    pub fn fills_nonzero(&self) -> &wgpu::RenderPipeline {
+        &self.fills_nonzero
     }
 
-    pub fn triangle_verts_evenodd(&self) -> &wgpu::RenderPipeline {
-        &self.triangle_verts_evenodd
+    pub fn fills_evenodd(&self) -> &wgpu::RenderPipeline {
+        &self.fills_evenodd
     }
 }
 
@@ -641,9 +641,9 @@ impl WGPUPipelineStates {
                 wgpu::Face::Back,
                 fill_anti_alias_stencil_state_evenodd(stencil_format),
             ),
-            triangle_verts_nonzero: create_pipeline(
+            fills_nonzero: create_pipeline(
                 ctx,
-                "concave_fill/triangle_verts_nonzero",
+                "concave_fill/fills_nonzero",
                 layout,
                 shader,
                 format,
@@ -653,9 +653,9 @@ impl WGPUPipelineStates {
                 wgpu::Face::Back,
                 fill_stencil_state_nonzero(stencil_format),
             ),
-            triangle_verts_evenodd: create_pipeline(
+            fills_evenodd: create_pipeline(
                 ctx,
-                "concave_fill/triangle_verts_evenodd",
+                "concave_fill/fills_evenodd",
                 layout,
                 shader,
                 format,
