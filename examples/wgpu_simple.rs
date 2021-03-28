@@ -78,7 +78,13 @@ fn main() {
     //     (renderer, windowed_context)
     // // };
 
-    let window = winit::window::Window::new(&event_loop).unwrap();
+    // let window = winit::window::Window::new(&event_loop).unwrap();
+    let size = winit::dpi::LogicalSize::new(800, 600);
+    let window = winit::window::WindowBuilder::new()
+        .with_inner_size(size)
+        .with_title("demo")
+        .build(&event_loop)
+        .unwrap();
 
     pollster::block_on(run(event_loop, window));
     // #[cfg(target_arch = "wasm32")]
