@@ -581,6 +581,7 @@ impl WGPUPipelineStates {
                 format,
                 blend_func,
                 wgpu::PrimitiveTopology::TriangleList,
+                // None,
                 None,
                 wgpu::Face::Back,
                 default_stencil_state(stencil_format),

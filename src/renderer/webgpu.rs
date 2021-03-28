@@ -102,6 +102,7 @@ fn begin_render_pass<'a>(
     // ctx: WGPUContext,
     encoder: &'a mut wgpu::CommandEncoder,
     target: &'a wgpu::TextureView,
+    view_size: Size,
     // images: &'a ImageStore<WGPUTexture>,
     // command_buffer: &'a wgpu::CommandBuffer,
     clear_color: Color,
@@ -109,7 +110,7 @@ fn begin_render_pass<'a>(
     vertex_buffer: &'a WGPUVec<Vertex>,
     index_buffer: &'a WGPUVec<u32>,
     // uniform_buffer: &'a WGPUVec<Params>,
-    view_size: Size,
+
     // ) -> wgpu::CommandEncoder {
 ) -> wgpu::RenderPass<'a> {
     stencil_texture.resize(view_size);
@@ -535,7 +536,7 @@ impl Renderer for WGPU {
 
         self.index_ranges.clear();
 
-        // let start = std::time::Instant::now();
+        let start = std::time::Instant::now();
         for cmd in commands.iter() {
             match cmd.cmd_type {
                 CommandType::ConvexFill { params } => {
@@ -607,12 +608,12 @@ impl Renderer for WGPU {
                 CommandType::SetRenderTarget(_) => {}
             }
         }
-        // let end = std::time::Instant::now();
-        // println!("uniforms vec {:?}", end - start);
+        let end = std::time::Instant::now();
+        println!("uniforms vec {:?}", end - start);
 
-        println!("command count {:?}", commands.len());
-        println!("temp_uniforms len {:?}", self.temp_uniform_buffer.len());
-        println!("index len {:?}", self.temp_index_buffer.len());
+        // println!("command count {:?}", commands.len());
+        // println!("temp_uniforms len {:?}", self.temp_uniform_buffer.len());
+        // println!("index len {:?}", self.temp_index_buffer.len());
 
         // println!("verts len {:?}", verts.len());
         {
@@ -673,9 +674,12 @@ impl Renderer for WGPU {
 
             let mut encoder = self.ctx.create_command_encoder(None);
             {
-                let target_view = match render_target {
-                    RenderTarget::Screen => view,
-                    RenderTarget::Image(id) => images.get(id).unwrap().view(),
+                let (target_view, view_size) = match render_target {
+                    RenderTarget::Screen => (view, self.view_size),
+                    RenderTarget::Image(id) => {
+                        let tex = images.get(id).unwrap();
+                        (tex.view(), tex.size())
+                    }
                 };
 
                 let mut should_set_vertex_uniforms = true;
@@ -685,12 +689,12 @@ impl Renderer for WGPU {
                     // target_texture_view.view(),
                     // &frame.output.view,
                     target_view,
+                    view_size,
                     self.clear_color,
                     &mut self.stencil_texture,
                     &self.vertex_buffer,
                     &self.index_buffer,
                     // &self.uniform_buffer,
-                    self.view_size,
                 );
                 // uniforms_offset += offset;
                 // let mut index_buffer_view = self.index_buffer.view_mut();
@@ -758,19 +762,19 @@ impl Renderer for WGPU {
 
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
 
-                            pass.set_pipeline(s.fill_buffer());
-
-                            if should_set_vertex_uniforms {
-                                let _ = pass.set_vertex_value(0, &self.view_size);
-                                should_set_vertex_uniforms = false;
-                            }
-
                             // set uniforms
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
                             uniforms_offset += std::mem::size_of::<Params>() as u32;
 
                             for drawable in &cmd.drawables {
+                                pass.set_pipeline(s.fill_buffer());
+
+                                if should_set_vertex_uniforms {
+                                    let _ = pass.set_vertex_value(0, &view_size);
+                                    should_set_vertex_uniforms = false;
+                                }
+
                                 if let Some((_start, _count)) = drawable.fill_verts {
                                     // let offset = self.index_buffer.len();
 
@@ -812,7 +816,7 @@ impl Renderer for WGPU {
                             if should_set_vertex_uniforms {
                                 // assert!(uniforms_offset == 0);
 
-                                let _ = pass.set_vertex_value(0, &self.view_size);
+                                let _ = pass.set_vertex_value(0, &view_size);
                                 should_set_vertex_uniforms = false;
                             }
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
@@ -888,7 +892,7 @@ impl Renderer for WGPU {
                             }
                             if should_set_vertex_uniforms {
                                 // assert!(uniforms_offset == 0);
-                                let _ = pass.set_vertex_value(0, &self.view_size);
+                                let _ = pass.set_vertex_value(0, &view_size);
                                 should_set_vertex_uniforms = false;
                             }
 
@@ -915,7 +919,7 @@ impl Renderer for WGPU {
 
                             if should_set_vertex_uniforms {
                                 // assert!(uniforms_offset == 0);
-                                let _ = pass.set_vertex_value(0, &self.view_size);
+                                let _ = pass.set_vertex_value(0, &view_size);
                                 should_set_vertex_uniforms = false;
                             }
                             // uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
@@ -962,7 +966,7 @@ impl Renderer for WGPU {
                             pass.set_pipeline(states.triangles());
                             if should_set_vertex_uniforms {
                                 // assert!(uniforms_offset == 0);
-                                let _ = pass.set_vertex_value(0, &self.view_size);
+                                let _ = pass.set_vertex_value(0, &view_size);
                                 should_set_vertex_uniforms = false;
                             }
                             // uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
@@ -992,12 +996,13 @@ impl Renderer for WGPU {
                             pass.set_pipeline(states.clear_rect());
                             pass.set_bind_group(0, bg, &[clear_rect_uniform_offset]);
 
-                            pass.set_scissor_rect(*x as _, *y as _, *width as _, *height as _);
+                            // pass.set_scissor_rect(*x as _, *y as _, *width as _, *height as _);
+                            pass.set_viewport(*x as _ ,*y as _, *width as _, *height as _, 0.0, 1.0);
 
                             pass.draw(0..4, 0..4);
 
-                            let size = self.view_size;
-                            pass.set_scissor_rect(0, 0, size.w as _, size.h as _);
+                            // pass.set_scissor_rect(0, 0, view_size.w as _, view_size.h as _);
+                            pass.set_viewport(0.0 ,0.0, view_size.w as _, view_size.h as _, 0.0, 1.0);
 
                             pass.cfg_pop_debug_group();
                             clear_rect_uniform_offset += std::mem::size_of::<ClearRect>() as u32;

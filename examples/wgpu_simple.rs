@@ -298,6 +298,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
 
                 // stroke_rect(&mut canvas, 20.0, 20.0, 100.0, 100.0);
                 clear_rect(&mut canvas);
+                // stroke_rect(&mut canvas, 0.0, 0.0, 100.0, 100.0);
 
                 canvas.flush();
                 // #[cfg(not(target_arch = "wasm32"))]
@@ -328,16 +329,17 @@ fn stroke_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f
     let bx = 10.0;
     let by = 20.0;
 
-    let paint = Paint::linear_gradient(
-        ax,
-        ay,
-        bx,
-        by,
-        Color::hsla(0.6 / (PI * 2.0), 1.0, 0.55, 1.0),
-        Color::hsla(0.6 / (PI * 2.0), 1.0, 0.55, 1.0),
-    );
+    // let paint = Paint::linear_gradient(
+    //     ax,
+    //     ay,
+    //     bx,
+    //     by,
+    //     Color::hsla(0.6 / (PI * 2.0), 1.0, 0.55, 1.0),
+    //     Color::hsla(0.6 / (PI * 2.0), 1.0, 0.55, 1.0),
+    // );
+    let paint = Paint::color(Color::red());
 
-    canvas.stroke_path(&mut path, paint);
+    canvas.fill_path(&mut path, paint);
 }
 
 // fn draw_paragraph<T: Renderer>(

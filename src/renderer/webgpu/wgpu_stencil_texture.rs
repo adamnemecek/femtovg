@@ -29,10 +29,10 @@ impl WGPUStencilTexture {
     }
 
     pub fn resize(&mut self, size: Size) {
-        if self.size().contains(&size) {
-            return;
-        }
-        let size = size.max(&self.size());
+        // if self.size().contains(&size) {
+        //     return;
+        // }
+        // let size = size.max(&self.size());
         let desc = new_stencil_descriptor(size);
         self.tex.destroy();
 
