@@ -112,8 +112,6 @@ fn main() {
 }
 
 async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
-
-        
     let size = window.inner_size();
     // let instance = wgpu::Instance::new(wgpu::BackendBit::all());
     // let surface = unsafe { instance.create_surface(&window) };

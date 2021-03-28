@@ -540,6 +540,8 @@ impl Renderer for WGPU {
         for cmd in commands.iter() {
             match cmd.cmd_type {
                 CommandType::ConvexFill { params } => {
+                    self.temp_uniform_buffer.push(params);
+
                     for drawable in &cmd.drawables {
                         if let Some((start, count)) = drawable.fill_verts {
                             let index_range_start = self.temp_index_buffer.len();
@@ -553,7 +555,6 @@ impl Renderer for WGPU {
                                 start: index_range_start as _,
                                 end: index_range_end as _,
                             });
-                            self.temp_uniform_buffer.push(params);
                         }
                     }
                 }
@@ -561,6 +562,9 @@ impl Renderer for WGPU {
                     fill_params,
                     stencil_params,
                 } => {
+                    self.temp_uniform_buffer.push(stencil_params);
+                    self.temp_uniform_buffer.push(fill_params);
+
                     for drawable in &cmd.drawables {
                         if let Some((start, count)) = drawable.fill_verts {
                             let index_range_start = self.temp_index_buffer.len();
@@ -574,9 +578,6 @@ impl Renderer for WGPU {
                                 start: index_range_start as _,
                                 end: index_range_end as _,
                             });
-
-                            self.temp_uniform_buffer.push(stencil_params);
-                            self.temp_uniform_buffer.push(fill_params);
                         }
                     }
                 }
@@ -617,7 +618,11 @@ impl Renderer for WGPU {
         // println!("uniforms vec {:?}", end - start);
 
         // println!("command count {:?}", commands.len());
-        // println!("temp_uniforms len {:?}", self.temp_uniform_buffer.len());
+        // println!(
+        //     "temp_uniforms len {:?} bytes {:?}",
+        //     self.temp_uniform_buffer.len(),
+        //     self.temp_uniform_buffer.len() * 256
+        // );
         // println!("index len {:?}", self.temp_index_buffer.len());
 
         // println!("verts len {:?}", verts.len());
@@ -765,9 +770,9 @@ impl Renderer for WGPU {
                         } else {
                             self.pipeline_cache.get(blend, texture_format)
                         };
-                        prev_states = Some(states);
                         states
                     };
+                    prev_states = Some(states);
 
                     // pass.set_push_constants(wgpu::ShaderStage::FRAGMENT, 0, &[]);
 
@@ -979,8 +984,8 @@ impl Renderer for WGPU {
                             // clear stencil buffer
                             {
                                 pass.set_pipeline(s.clear_stencil());
-                                pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
-                                uniforms_offset += std::mem::size_of::<Params>() as u32;
+                                // pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
+                                // uniforms_offset += std::mem::size_of::<Params>() as u32;
                             }
 
                             for drawable in &cmd.drawables {
@@ -1031,6 +1036,7 @@ impl Renderer for WGPU {
 
                             pass.set_pipeline(states.clear_rect());
                             pass.set_bind_group(0, bg, &[clear_rect_uniform_offset]);
+                            clear_rect_uniform_offset += std::mem::size_of::<ClearRect>() as u32;
 
                             // pass.set_scissor_rect(*x as _, *y as _, *width as _, *height as _);
                             pass.set_viewport(*x as _, *y as _, *width as _, *height as _, 0.0, 1.0);
@@ -1041,7 +1047,6 @@ impl Renderer for WGPU {
                             pass.set_viewport(0.0, 0.0, view_size.w as _, view_size.h as _, 0.0, 1.0);
 
                             pass.cfg_pop_debug_group();
-                            clear_rect_uniform_offset += std::mem::size_of::<ClearRect>() as u32;
                         }
                         CommandType::SetRenderTarget(target) => {
                             counter.set_render_target += 1;
