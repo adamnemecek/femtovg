@@ -79,7 +79,7 @@ fn main() {
     // // };
 
     // let window = winit::window::Window::new(&event_loop).unwrap();
-    let size = winit::dpi::LogicalSize::new(800, 600);
+    let size = winit::dpi::LogicalSize::new(512, 512);
     let window = winit::window::WindowBuilder::new()
         .with_inner_size(size)
         .with_title("demo")
@@ -142,17 +142,17 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
 
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
-    // let fonts = Fonts {
-    //     regular: canvas
-    //         .add_font_mem(&resource!("examples/assets/Roboto-Regular.ttf"))
-    //         .expect("Cannot add font"),
-    //     bold: canvas
-    //         .add_font_mem(&resource!("examples/assets/Roboto-Light.ttf"))
-    //         .expect("Cannot add font"),
-    //     icons: canvas
-    //         .add_font_mem(&resource!("examples/assets/entypo.ttf"))
-    //         .expect("Cannot add font"),
-    // };
+    let fonts = Fonts {
+        regular: canvas
+            .add_font_mem(&resource!("examples/assets/Roboto-Regular.ttf"))
+            .expect("Cannot add font"),
+        bold: canvas
+            .add_font_mem(&resource!("examples/assets/Roboto-Light.ttf"))
+            .expect("Cannot add font"),
+        icons: canvas
+            .add_font_mem(&resource!("examples/assets/entypo.ttf"))
+            .expect("Cannot add font"),
+    };
 
     //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
 
@@ -306,6 +306,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // clear_rect(&mut canvas, 0, 0, 100, 100);
                 // clear_rect(&mut canvas, 200, 200, 100, 100);
                 fill_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
 
                 // stroke_rect(&mut canvas, 200.0, 200.0, 100.0, 100.0);
 
@@ -325,6 +326,17 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
 
 fn clear_rect(canvas: &mut Canvas<impl Renderer>, x: u32, y: u32, w: u32, h: u32) {
     canvas.clear_rect(x, y, w, h, Color::red());
+}
+
+fn draw_text<T: Renderer>(canvas: &mut Canvas<T>, fonts: &Fonts, title: &str, x: f32, y: f32, w: f32, h: f32) {
+    canvas.save();
+    let mut text_paint = Paint::color(Color::rgba(100, 200, 100, 255));
+    text_paint.set_font_size(80.0);
+    text_paint.set_font(&[fonts.regular]);
+    text_paint.set_text_align(Align::Left);
+    text_paint.set_text_baseline(Baseline::Middle);
+    let _ = canvas.fill_text(x + h, y + h * 0.5, title, text_paint);
+    canvas.restore();
 }
 
 fn fill_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {

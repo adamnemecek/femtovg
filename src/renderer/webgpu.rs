@@ -496,7 +496,7 @@ impl Renderer for WGPU {
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         // todo!("clear rect {:?}", std::mem::size_of::<ClearRect>());
 
-        println!("render start");
+        // println!("render start");
         // self.vertex_buffer.clear();
         // self.vertex_buffer.extend_from_slice(verts);
 
@@ -610,11 +610,11 @@ impl Renderer for WGPU {
             }
         }
 
-        for cmd in commands.iter() {
-            println!("cmd {:?}", cmd.cmd_type);
-        }
+        // for cmd in commands.iter() {
+        //     println!("cmd {:?}", cmd.cmd_type);
+        // }
         let end = std::time::Instant::now();
-        println!("uniforms vec {:?}", end - start);
+        // println!("uniforms vec {:?}", end - start);
 
         // println!("command count {:?}", commands.len());
         // println!("temp_uniforms len {:?}", self.temp_uniform_buffer.len());
@@ -1031,7 +1031,7 @@ impl Renderer for WGPU {
                 self.ctx.queue().submit(Some(encoder.finish()));
             }
 
-            println!("render end");
+            // println!("render end");
         }
     }
 

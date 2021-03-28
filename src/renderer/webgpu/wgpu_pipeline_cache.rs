@@ -573,7 +573,8 @@ impl WGPUPipelineStates {
         //     None,
         // );
         let convex_fill = ConvexFill {
-            // revisit
+            // todo: i'm not sure if this should be a trianglelist or a triangle strip
+            // in metal, we are using indexed rendering
             fill_buffer: create_pipeline(
                 ctx,
                 "convex_fill/fill_buffer",

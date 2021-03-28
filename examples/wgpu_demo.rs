@@ -78,7 +78,14 @@ fn main() {
     //     (renderer, windowed_context)
     // // };
 
-    let window = winit::window::Window::new(&event_loop).unwrap();
+    // let window = winit::window::Window::new(&event_loop).unwrap();
+
+    let size = winit::dpi::LogicalSize::new(512, 512);
+    let window = winit::window::WindowBuilder::new()
+        .with_inner_size(size)
+        .with_title("demo")
+        .build(&event_loop)
+        .unwrap();
 
     pollster::block_on(run(event_loop, window));
     // #[cfg(target_arch = "wasm32")]
@@ -105,9 +112,11 @@ fn main() {
 }
 
 async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
+
+        
     let size = window.inner_size();
-    let instance = wgpu::Instance::new(wgpu::BackendBit::all());
-    let surface = unsafe { instance.create_surface(&window) };
+    // let instance = wgpu::Instance::new(wgpu::BackendBit::all());
+    // let surface = unsafe { instance.create_surface(&window) };
     // let adapter = instance
     //     .request_adapter(&wgpu::RequestAdapterOptions {
     //         power_preference: wgpu::PowerPreference::default(),
