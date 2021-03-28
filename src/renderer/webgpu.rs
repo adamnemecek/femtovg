@@ -482,7 +482,6 @@ fn vert_range(start: usize, count: usize) -> std::ops::Range<u32> {
 impl Renderer for WGPU {
     type Image = WGPUTexture;
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
-
         let size = Size::new(width as f32, height as f32);
         println!("set size {:?}", size);
         self.view_size = size;
@@ -491,7 +490,6 @@ impl Renderer for WGPU {
         self.bind_group_cache.clear();
         self.swap_chain.resize(size);
         // self.pipeline_cache.clear();
-
     }
 
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
@@ -585,8 +583,8 @@ impl Renderer for WGPU {
                     self.temp_uniform_buffer.push(params);
                 }
                 CommandType::StencilStroke { params1, params2 } => {
-                    self.temp_uniform_buffer.push(params1);
                     self.temp_uniform_buffer.push(params2);
+                    self.temp_uniform_buffer.push(params1);
                 }
                 CommandType::Triangles { params } => {
                     self.temp_uniform_buffer.push(params);
@@ -910,17 +908,21 @@ impl Renderer for WGPU {
                         CommandType::StencilStroke { params1, params2 } => {
                             pass.cfg_push_debug_group("stencil stroke");
                             let s = states.stencil_stroke();
-
+                            let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             // pipeline state + stroke_shape_stencil_state
-                            pass.set_pipeline(s.stroke_base());
+
+                            // stroke base
+                            {
+                                pass.set_pipeline(s.stroke_base());
+                                pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
+                                uniforms_offset += std::mem::size_of::<Params>() as u32;
+                            }
+
                             if should_set_vertex_uniforms {
                                 // assert!(uniforms_offset == 0);
                                 let _ = pass.set_vertex_value(0, &self.view_size);
                                 should_set_vertex_uniforms = false;
                             }
-                            let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
-                            pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
-                            uniforms_offset += std::mem::size_of::<Params>() as u32;
                             // uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
 
                             for drawable in &cmd.drawables {
@@ -930,12 +932,36 @@ impl Renderer for WGPU {
                                 }
                             }
                             // todo:
+                            // draw antialiased pixels
+                            // let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
+                            {
+                                pass.set_pipeline(s.aa_pixels());
+                                pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
+                                uniforms_offset += std::mem::size_of::<Params>() as u32;
+                            }
 
-                            // let bg = bind_group!(self, cmd);
-                            // uniforms_offset += pass.set_fragment_value(uniforms_offset, params1);
+                            for drawable in &cmd.drawables {
+                                if let Some((start, count)) = drawable.stroke_verts {
+                                    pass.draw(vert_range(start, count), 0..1);
+                                }
+                            }
+
+                            // clear stencil buffer
+                            {
+                                pass.set_pipeline(s.clear_stencil());
+                                pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
+                                uniforms_offset += std::mem::size_of::<Params>() as u32;
+                            }
+
+                            for drawable in &cmd.drawables {
+                                if let Some((start, count)) = drawable.stroke_verts {
+                                    pass.draw(vert_range(start, count), 0..1);
+                                }
+                            }
+
                             pass.cfg_pop_debug_group();
                         }
-                        CommandType::Triangles { params } => {
+                        CommandType::Triangles { .. } => {
                             pass.cfg_push_debug_group("triangles");
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_pipeline(states.triangles());

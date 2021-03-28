@@ -25,7 +25,12 @@ impl WGPUSwapChain {
 
         let desc = sc_desc(format, size);
         let inner = ctx.device().create_swap_chain(ctx.surface(), &desc);
-        Self { ctx: ctx.clone(), size, inner, format }
+        Self {
+            ctx: ctx.clone(),
+            size,
+            inner,
+            format,
+        }
     }
 
     pub fn format(&self) -> wgpu::TextureFormat {
