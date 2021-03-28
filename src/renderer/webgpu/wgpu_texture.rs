@@ -38,10 +38,10 @@ pub struct WGPUTexture {
 impl WGPUTexture {
     pub fn new_pseudo_texture(ctx: &WGPUContext) -> Result<Self, ErrorKind> {
         let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
-        Self::new(ctx, info)
+        Self::new(ctx, info, "pseudo texture")
     }
 
-    pub fn new(ctx: &WGPUContext, info: ImageInfo) -> Result<Self, ErrorKind> {
+    pub fn new(ctx: &WGPUContext, info: ImageInfo, label: &str) -> Result<Self, ErrorKind> {
         assert!(info.format() != PixelFormat::Rgb8);
         let ctx = ctx.clone();
 
@@ -63,7 +63,7 @@ impl WGPUTexture {
         // let sample_count = if generate_mipmaps { } else { 1 };
         // todo: what's the difference between texture and texture_view
         let tex = ctx.device().create_texture(&wgpu::TextureDescriptor {
-            label: Some("Low Resolution Target"),
+            label: Some(label),
             size,
             mip_level_count,
             sample_count: 1,

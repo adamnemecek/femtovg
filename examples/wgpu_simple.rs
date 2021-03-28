@@ -297,9 +297,9 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // let mousey = pt.1;
 
                 // stroke_rect(&mut canvas, 20.0, 20.0, 100.0, 100.0);
-                clear_rect(&mut canvas, 0, 0, 100, 100);
-                clear_rect(&mut canvas, 200, 200, 100, 100);
-                // stroke_rect(&mut canvas, 0.0, 0.0, 100.0, 100.0);
+                // clear_rect(&mut canvas, 0, 0, 100, 100);
+                // clear_rect(&mut canvas, 200, 200, 100, 100);
+                stroke_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
 
                 // stroke_rect(&mut canvas, 200.0, 200.0, 100.0, 100.0);
 
@@ -327,10 +327,10 @@ fn stroke_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f
     //     x,y,w,h,5.0
     // );
     path.rect(x, y, w, h);
-    let ax = 10.0;
-    let ay = 20.0;
-    let bx = 10.0;
-    let by = 20.0;
+    // let ax = 10.0;
+    // let ay = 20.0;
+    // let bx = 10.0;
+    // let by = 20.0;
 
     // let paint = Paint::linear_gradient(
     //     ax,

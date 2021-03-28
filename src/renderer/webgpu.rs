@@ -1036,7 +1036,8 @@ impl Renderer for WGPU {
     }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
-        WGPUTexture::new(&self.ctx, info)
+        let label = format!("{:?}", info);
+        WGPUTexture::new(&self.ctx, info, &label)
     }
 
     fn update_image(&mut self, image: &mut Self::Image, src: ImageSource, x: usize, y: usize) -> Result<(), ErrorKind> {
