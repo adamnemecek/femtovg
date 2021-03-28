@@ -674,6 +674,19 @@ impl Renderer for WGPU {
         let frame = self.swap_chain.get_current_frame().unwrap();
         let view = &frame.output.view;
 
+        #[derive(Default, Debug)]
+        struct Counter {
+            convex_fill: usize,
+            concave_fill: usize,
+            stroke: usize,
+            stencil_stroke: usize,
+            triangles: usize,
+            clear_rect: usize,
+            set_render_target: usize,
+        }
+
+        let mut counter = Counter::default();
+
         'frame: while i < commands.len() {
             should_submit = true;
 
@@ -761,6 +774,8 @@ impl Renderer for WGPU {
 
                     match &cmd.cmd_type {
                         CommandType::ConvexFill { params } => {
+                            counter.convex_fill += 1;
+
                             pass.cfg_push_debug_group("convex fill");
                             // set_uniforms
                             let s = states.convex_fill();
@@ -815,6 +830,8 @@ impl Renderer for WGPU {
                             stencil_params,
                             fill_params,
                         } => {
+                            counter.concave_fill += 1;
+
                             pass.cfg_push_debug_group("concave fill");
                             let s = states.concave_fill();
                             pass.set_pipeline(s.fill_verts());
@@ -888,6 +905,8 @@ impl Renderer for WGPU {
                             pass.cfg_pop_debug_group();
                         }
                         CommandType::Stroke { params } => {
+                            counter.stroke += 1;
+
                             pass.cfg_push_debug_group("stroke");
 
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
@@ -911,6 +930,8 @@ impl Renderer for WGPU {
                             pass.cfg_pop_debug_group();
                         }
                         CommandType::StencilStroke { params1, params2 } => {
+                            counter.stencil_stroke += 1;
+
                             pass.cfg_push_debug_group("stencil stroke");
                             let s = states.stencil_stroke();
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
@@ -967,6 +988,8 @@ impl Renderer for WGPU {
                             pass.cfg_pop_debug_group();
                         }
                         CommandType::Triangles { .. } => {
+                            counter.triangles += 1;
+
                             pass.cfg_push_debug_group("triangles");
                             let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             pass.set_pipeline(states.triangles());
@@ -995,6 +1018,8 @@ impl Renderer for WGPU {
                             // color,
                             ..
                         } => {
+                            counter.clear_rect += 1;
+
                             pass.cfg_push_debug_group("clear rect");
 
                             let bg = &self.clear_rect_bind_group;
@@ -1014,6 +1039,8 @@ impl Renderer for WGPU {
                             clear_rect_uniform_offset += std::mem::size_of::<ClearRect>() as u32;
                         }
                         CommandType::SetRenderTarget(target) => {
+                            counter.set_render_target += 1;
+
                             render_target = *target;
                             // println!("set render target {:?}", target);
                             drop(pass);
@@ -1032,6 +1059,7 @@ impl Renderer for WGPU {
             }
 
             // println!("render end");
+            println!("counter {:?}", counter);
         }
     }
 
