@@ -297,8 +297,11 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // let mousey = pt.1;
 
                 // stroke_rect(&mut canvas, 20.0, 20.0, 100.0, 100.0);
-                // clear_rect(&mut canvas);
-                stroke_rect(&mut canvas, 0.0, 0.0, 100.0, 100.0);
+                clear_rect(&mut canvas, 0, 0, 100, 100);
+                clear_rect(&mut canvas, 200, 200, 100, 100);
+                // stroke_rect(&mut canvas, 0.0, 0.0, 100.0, 100.0);
+
+                // stroke_rect(&mut canvas, 200.0, 200.0, 100.0, 100.0);
 
                 canvas.flush();
                 // #[cfg(not(target_arch = "wasm32"))]
@@ -314,8 +317,8 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
     });
 }
 
-fn clear_rect(canvas: &mut Canvas<impl Renderer>) {
-    canvas.clear_rect(0, 0, 800, 300, Color::red());
+fn clear_rect(canvas: &mut Canvas<impl Renderer>, x: u32, y: u32, w: u32, h: u32) {
+    canvas.clear_rect(x, y, w, h, Color::red());
 }
 
 fn stroke_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
