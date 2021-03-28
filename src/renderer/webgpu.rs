@@ -880,29 +880,24 @@ impl Renderer for WGPU {
                         CommandType::Stroke { params } => {
                             pass.cfg_push_debug_group("stroke");
 
-                            pass.set_pipeline(states.stroke());
+                            let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
+                            {
+                                pass.set_pipeline(states.stroke());
+                                pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
+                                uniforms_offset += std::mem::size_of::<Params>() as u32;
+                            }
                             if should_set_vertex_uniforms {
                                 // assert!(uniforms_offset == 0);
                                 let _ = pass.set_vertex_value(0, &self.view_size);
                                 should_set_vertex_uniforms = false;
                             }
-                            // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
-                            let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
-                            pass.set_bind_group(0, bg.as_ref(), &[]);
-                            // uniforms_offset += std::mem::size_of::<Params>() as u32;
 
-                            // pass.set_pipeline()
-                            // pass.set_bind_group(0, bg.as_ref(), &[]);
-                            // let _ = pass.set_vertex_value(0, params);
-                            // pass.set_bind_group(0, bg.as_ref(), &[]);
-                            // uniforms_offset += pass.set_fragment_value(uniforms_offset, params);
+                            for drawable in &cmd.drawables {
+                                if let Some((start, count)) = drawable.stroke_verts {
+                                    pass.draw(vert_range(start, count), 0..1);
+                                }
+                            }
 
-                            // self.set_uniforms(pass, images, paint, cmd.image, cmd.alpha_mask);
-                            //     for drawable in &cmd.drawables {
-                            //         if let Some((start, count)) = drawable.stroke_verts {
-                            //             // pass.draw()
-                            //         }
-                            //     }
                             pass.cfg_pop_debug_group();
                         }
                         CommandType::StencilStroke { params1, params2 } => {
