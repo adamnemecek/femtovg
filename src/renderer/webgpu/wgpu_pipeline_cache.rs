@@ -278,9 +278,11 @@ fn fill_anti_alias_stencil_state_nonzero(format: wgpu::TextureFormat) -> wgpu::D
         stencil: wgpu::StencilState {
             front: wgpu::StencilFaceState {
                 compare: wgpu::CompareFunction::Equal,
-                fail_op: wgpu::StencilOperation::Keep,
-                depth_fail_op: wgpu::StencilOperation::Keep,
-                pass_op: wgpu::StencilOperation::Keep,
+                
+                // fail_op: wgpu::StencilOperation::Keep,
+                // depth_fail_op: wgpu::StencilOperation::Keep,
+                // pass_op: wgpu::StencilOperation::Keep,
+                ..Default::default()
             },
             back: wgpu::StencilFaceState::default(),
             read_mask: 0xff,
@@ -299,9 +301,10 @@ fn fill_anti_alias_stencil_state_evenodd(format: wgpu::TextureFormat) -> wgpu::D
         stencil: wgpu::StencilState {
             front: wgpu::StencilFaceState {
                 compare: wgpu::CompareFunction::Equal,
-                fail_op: wgpu::StencilOperation::Keep,
-                depth_fail_op: wgpu::StencilOperation::Keep,
-                pass_op: wgpu::StencilOperation::Keep,
+                ..Default::default()
+                // fail_op: wgpu::StencilOperation::Keep,
+                // depth_fail_op: wgpu::StencilOperation::Keep,
+                // pass_op: wgpu::StencilOperation::Keep,
             },
             back: wgpu::StencilFaceState::default(),
             read_mask: 0x1,
@@ -385,7 +388,7 @@ fn stroke_anti_alias_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthSt
                 // compare: wgpu::CompareFunction::NotEqual,
                 // fail_op: wgpu::StencilOperation::Zero,
                 // depth_fail_op: wgpu::StencilOperation::Zero,
-                pass_op: wgpu::StencilOperation::Keep,
+                // pass_op: wgpu::StencilOperation::Keep,
                 ..Default::default()
             },
             back: wgpu::StencilFaceState::default(),
@@ -660,8 +663,8 @@ impl WGPUPipelineStates {
                 shader,
                 format,
                 blend_func,
-                wgpu::PrimitiveTopology::TriangleList,
-                None,
+                wgpu::PrimitiveTopology::TriangleStrip,
+                wgpu::IndexFormat::Uint32,
                 wgpu::Face::Back,
                 fill_stencil_state_evenodd(stencil_format),
             ),
