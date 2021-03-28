@@ -299,7 +299,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // stroke_rect(&mut canvas, 20.0, 20.0, 100.0, 100.0);
                 // clear_rect(&mut canvas, 0, 0, 100, 100);
                 // clear_rect(&mut canvas, 200, 200, 100, 100);
-                stroke_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
+                fill_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
 
                 // stroke_rect(&mut canvas, 200.0, 200.0, 100.0, 100.0);
 
@@ -321,7 +321,7 @@ fn clear_rect(canvas: &mut Canvas<impl Renderer>, x: u32, y: u32, w: u32, h: u32
     canvas.clear_rect(x, y, w, h, Color::red());
 }
 
-fn stroke_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
+fn fill_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
     let mut path = Path::new();
     // path.rounded_rect(
     //     x,y,w,h,5.0

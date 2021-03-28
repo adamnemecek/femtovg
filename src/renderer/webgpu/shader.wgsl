@@ -75,7 +75,7 @@ fn vertex_shader(
     [[location(0)]] vert: vec4<f32>,
 ) -> RasterizerData {
     const pos = vert.xy;
-    const tcoord = vert.wz;
+    const tcoord = vert.zw;
 
     var ret: RasterizerData;
     ret.ftcoord = tcoord;
