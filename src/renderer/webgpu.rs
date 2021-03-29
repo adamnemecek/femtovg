@@ -105,7 +105,7 @@ fn begin_render_pass<'a>(
     view_size: Size,
     // images: &'a ImageStore<WGPUTexture>,
     // command_buffer: &'a wgpu::CommandBuffer,
-    clear_color: Color,
+    clear_color: wgpu::Color,
     stencil_texture: &'a mut WGPUStencilTexture,
     vertex_buffer: &'a WGPUVec<Vertex>,
     index_buffer: &'a WGPUVec<u32>,
@@ -121,7 +121,7 @@ fn begin_render_pass<'a>(
             attachment: target,
             resolve_target: None, // todo! what's this?
             ops: wgpu::Operations {
-                load: wgpu::LoadOp::Clear(clear_color.into()),
+                load: wgpu::LoadOp::Clear(clear_color),
                 store: true,
             },
         }],
@@ -435,6 +435,18 @@ impl WGPU {
     }
 }
 
+// fn start_capture() {
+//     let device = metal::Device::system_default().unwrap();
+//     let z = metal::CaptureManager::shared();
+//     z.start_capture_with_device(&device);
+// }
+
+// fn stop_capture() {
+//     let device = metal::Device::system_default().unwrap();
+//     let z = metal::CaptureManager::shared();
+//     z.stop_capture();
+// }
+
 impl WGPU {
     // pub fn bind_group_for(
     //     &self,
@@ -714,7 +726,7 @@ impl Renderer for WGPU {
                     // &frame.output.view,
                     target_view,
                     view_size,
-                    self.clear_color,
+                    self.clear_color.into(),
                     &mut self.stencil_texture,
                     &self.vertex_buffer,
                     &self.index_buffer,
