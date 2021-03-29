@@ -79,7 +79,8 @@ fn main() {
     // // };
 
     // let window = winit::window::Window::new(&event_loop).unwrap();
-    let size = winit::dpi::LogicalSize::new(512, 512);
+    // let size = winit::dpi::LogicalSize::new(512, 512);
+    let size = winit::dpi::LogicalSize::new(800, 600);
     let window = winit::window::WindowBuilder::new()
         .with_inner_size(size)
         .with_title("demo")
@@ -211,6 +212,8 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
 
     // let mut perf = PerfGraph::new();
 
+    let mut frame = 0;
+
     event_loop.run(move |event, _, control_flow| {
         // #[cfg(not(target_arch = "wasm32"))]
         // let window = windowed_context.window();
@@ -281,6 +284,8 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 _ => (),
             },
             Event::RedrawRequested(_) => {
+                frame += 1;
+
                 let now = Instant::now();
                 let dt = (now - prevt).as_secs_f32();
                 prevt = now;
@@ -295,6 +300,8 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
                 canvas.clear_rect(0, 0, size.width as u32, size.height as u32, Color::rgbf(0.3, 0.3, 0.32));
 
+                // draw_eyes(&mut canvas, (size.width as f32) - 250.0, 50.0, 150.0, 100.0, mousex, mousey, 0.0);
+
                 // let height = size.height as f32;
                 // let width = size.width as f32;
 
@@ -306,8 +313,8 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // clear_rect(&mut canvas, 0, 0, 100, 100);
                 // clear_rect(&mut canvas, 200, 200, 100, 100);
                 // fill_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
-                // draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
-                draw_text(&mut canvas, &fonts, "tea", 50.0, 200.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "ta", 0.0, 0.0, 100.0, 100.0);
+                // draw_text(&mut canvas, &fonts, "at", 50.0, 200.0, 100.0, 100.0);
 
                 // stroke_rect(&mut canvas, 200.0, 200.0, 100.0, 100.0);
 
@@ -315,6 +322,10 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // #[cfg(not(target_arch = "wasm32"))]
                 // windowed_context.swap_buffers().unwrap();
                 // todo!("swap buffers");
+
+                // if frame == 3 {
+                //     *control_flow = ControlFlow::Exit
+                // }
             }
             Event::MainEventsCleared => {
                 //scroll = 1.0;
@@ -469,94 +480,94 @@ fn fill_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32
 //     canvas.restore();
 // }
 
-// fn draw_eyes<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, mx: f32, my: f32, t: f32) {
-//     let ex = w * 0.23;
-//     let ey = h * 0.5;
-//     let lx = x + ex;
-//     let ly = y + ey;
-//     let rx = x + w - ex;
-//     let ry = y + ey;
-//     let br = if ex < ey { ex } else { ey } * 0.5;
-//     let blink = 1.0 - (t * 0.5).sin().powf(200.0) * 0.8;
+fn draw_eyes<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, mx: f32, my: f32, t: f32) {
+    let ex = w * 0.23;
+    let ey = h * 0.5;
+    let lx = x + ex;
+    let ly = y + ey;
+    let rx = x + w - ex;
+    let ry = y + ey;
+    let br = if ex < ey { ex } else { ey } * 0.5;
+    let blink = 1.0 - (t * 0.5).sin().powf(200.0) * 0.8;
 
-//     let bg = Paint::linear_gradient(
-//         x,
-//         y + h * 0.5,
-//         x + w * 0.1,
-//         y + h,
-//         Color::rgba(0, 0, 0, 32),
-//         Color::rgba(0, 0, 0, 16),
-//     );
-//     let mut path = Path::new();
-//     path.ellipse(lx + 3.0, ly + 16.0, ex, ey);
-//     path.ellipse(rx + 3.0, ry + 16.0, ex, ey);
-//     canvas.fill_path(&mut path, bg);
+    let bg = Paint::linear_gradient(
+        x,
+        y + h * 0.5,
+        x + w * 0.1,
+        y + h,
+        Color::rgba(0, 0, 0, 32),
+        Color::rgba(0, 0, 0, 16),
+    );
+    let mut path = Path::new();
+    path.ellipse(lx + 3.0, ly + 16.0, ex, ey);
+    path.ellipse(rx + 3.0, ry + 16.0, ex, ey);
+    canvas.fill_path(&mut path, bg);
 
-//     let bg = Paint::linear_gradient(
-//         x,
-//         y + h * 0.25,
-//         x + w * 0.1,
-//         y + h,
-//         Color::rgba(220, 220, 220, 255),
-//         Color::rgba(128, 128, 128, 255),
-//     );
-//     let mut path = Path::new();
-//     path.ellipse(lx, ly, ex, ey);
-//     path.ellipse(rx, ry, ex, ey);
-//     canvas.fill_path(&mut path, bg);
+    let bg = Paint::linear_gradient(
+        x,
+        y + h * 0.25,
+        x + w * 0.1,
+        y + h,
+        Color::rgba(220, 220, 220, 255),
+        Color::rgba(128, 128, 128, 255),
+    );
+    let mut path = Path::new();
+    path.ellipse(lx, ly, ex, ey);
+    path.ellipse(rx, ry, ex, ey);
+    canvas.fill_path(&mut path, bg);
 
-//     let mut dx = (mx - rx) / (ex * 10.0);
-//     let mut dy = (my - ry) / (ey * 10.0);
-//     let d = (dx * dx + dy * dy).sqrt();
-//     if d > 1.0 {
-//         dx /= d;
-//         dy /= d;
-//     }
+    let mut dx = (mx - rx) / (ex * 10.0);
+    let mut dy = (my - ry) / (ey * 10.0);
+    let d = (dx * dx + dy * dy).sqrt();
+    if d > 1.0 {
+        dx /= d;
+        dy /= d;
+    }
 
-//     dx *= ex * 0.4;
-//     dy *= ey * 0.5;
-//     let mut path = Path::new();
-//     path.ellipse(lx + dx, ly + dy + ey * 0.25 * (1.0 - blink), br, br * blink);
-//     canvas.fill_path(&mut path, Paint::color(Color::rgba(32, 32, 32, 255)));
+    dx *= ex * 0.4;
+    dy *= ey * 0.5;
+    let mut path = Path::new();
+    path.ellipse(lx + dx, ly + dy + ey * 0.25 * (1.0 - blink), br, br * blink);
+    canvas.fill_path(&mut path, Paint::color(Color::rgba(32, 32, 32, 255)));
 
-//     let mut dx = (mx - rx) / (ex * 10.0);
-//     let mut dy = (my - ry) / (ey * 10.0);
-//     let d = (dx * dx + dy * dy).sqrt();
-//     if d > 1.0 {
-//         dx /= d;
-//         dy /= d;
-//     }
+    let mut dx = (mx - rx) / (ex * 10.0);
+    let mut dy = (my - ry) / (ey * 10.0);
+    let d = (dx * dx + dy * dy).sqrt();
+    if d > 1.0 {
+        dx /= d;
+        dy /= d;
+    }
 
-//     dx *= ex * 0.4;
-//     dy *= ey * 0.5;
-//     let mut path = Path::new();
-//     path.ellipse(rx + dx, ry + dy + ey * 0.25 * (1.0 - blink), br, br * blink);
-//     canvas.fill_path(&mut path, Paint::color(Color::rgba(32, 32, 32, 255)));
+    dx *= ex * 0.4;
+    dy *= ey * 0.5;
+    let mut path = Path::new();
+    path.ellipse(rx + dx, ry + dy + ey * 0.25 * (1.0 - blink), br, br * blink);
+    canvas.fill_path(&mut path, Paint::color(Color::rgba(32, 32, 32, 255)));
 
-//     let gloss = Paint::radial_gradient(
-//         lx - ex * 0.25,
-//         ly - ey * 0.5,
-//         ex * 0.1,
-//         ex * 0.75,
-//         Color::rgba(255, 255, 255, 128),
-//         Color::rgba(255, 255, 255, 0),
-//     );
-//     let mut path = Path::new();
-//     path.ellipse(lx, ly, ex, ey);
-//     canvas.fill_path(&mut path, gloss);
+    let gloss = Paint::radial_gradient(
+        lx - ex * 0.25,
+        ly - ey * 0.5,
+        ex * 0.1,
+        ex * 0.75,
+        Color::rgba(255, 255, 255, 128),
+        Color::rgba(255, 255, 255, 0),
+    );
+    let mut path = Path::new();
+    path.ellipse(lx, ly, ex, ey);
+    canvas.fill_path(&mut path, gloss);
 
-//     let gloss = Paint::radial_gradient(
-//         rx - ex * 0.25,
-//         ry - ey * 0.5,
-//         ex * 0.1,
-//         ex * 0.75,
-//         Color::rgba(255, 255, 255, 128),
-//         Color::rgba(255, 255, 255, 0),
-//     );
-//     let mut path = Path::new();
-//     path.ellipse(rx, ry, ex, ey);
-//     canvas.fill_path(&mut path, gloss);
-// }
+    let gloss = Paint::radial_gradient(
+        rx - ex * 0.25,
+        ry - ey * 0.5,
+        ex * 0.1,
+        ex * 0.75,
+        Color::rgba(255, 255, 255, 128),
+        Color::rgba(255, 255, 255, 0),
+    );
+    let mut path = Path::new();
+    path.ellipse(rx, ry, ex, ey);
+    canvas.fill_path(&mut path, gloss);
+}
 
 // fn draw_graph<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, t: f32) {
 //     let dx = w / 5.0;

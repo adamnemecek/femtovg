@@ -67,7 +67,7 @@ impl Drop for WGPUStencilTexture {
     }
 }
 
-fn new_stencil_descriptor<'a>(size: Size, label: &'a str) -> wgpu::TextureDescriptor<'a> {
+pub(crate) fn new_stencil_descriptor<'a>(size: Size, label: &'a str) -> wgpu::TextureDescriptor<'a> {
     wgpu::TextureDescriptor {
         label: Some(label),
         size: size.into(),

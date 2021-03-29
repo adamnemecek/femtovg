@@ -33,6 +33,11 @@ pub struct WGPUTexture {
     tex: wgpu::Texture,
     view: wgpu::TextureView,
     sampler: wgpu::Sampler,
+
+    // stencil: Option<wgpu::Texture>,
+    // stencil_view: Option<wgpu::TextureView>,
+    stencil: wgpu::Texture,
+    stencil_view: wgpu::TextureView,
 }
 
 impl WGPUTexture {
@@ -108,13 +113,30 @@ impl WGPUTexture {
 
         let sampler = ctx.device().create_sampler(&sampler_desc);
 
+        let stencil_desc = super::new_stencil_descriptor(info.size(), "stencil");
+
+        // let (stencil, stencil_view) = if wants_stencil {
+        let stencil = ctx.device().create_texture(&stencil_desc);
+        let stencil_view = stencil.create_view(&Default::default());
+        // (Some(stencil), Some(stencil_view))
+        // }
+        // else {
+        // (None, None)
+        // };
+
         Ok(Self {
             view,
             sampler,
             ctx,
             info,
             tex,
+            stencil,
+            stencil_view,
         })
+    }
+
+    pub fn stencil_view(&self) -> &wgpu::TextureView {
+        &self.stencil_view
     }
 
     pub fn write_texture(&self, extent: wgpu::Extent3d, data: &[u8]) {
@@ -207,10 +229,17 @@ impl WGPUTexture {
     }
 
     pub fn delete(&self) {
-        self.tex.destroy()
+        self.tex.destroy();
+        self.stencil.destroy();
     }
 
     pub fn format(&self) -> wgpu::TextureFormat {
         self.info.format().into()
+    }
+}
+
+impl Drop for WGPUTexture {
+    fn drop(&mut self) {
+        self.delete();
     }
 }

@@ -106,14 +106,15 @@ fn begin_render_pass<'a>(
     // images: &'a ImageStore<WGPUTexture>,
     // command_buffer: &'a wgpu::CommandBuffer,
     clear_color: wgpu::Color,
-    stencil_texture: &'a mut WGPUStencilTexture,
+    // stencil_texture: &'a mut WGPUStencilTexture,
+    stencil_view: &'a wgpu::TextureView,
     vertex_buffer: &'a WGPUVec<Vertex>,
     index_buffer: &'a WGPUVec<u32>,
     // uniform_buffer: &'a WGPUVec<Params>,
 
     // ) -> wgpu::CommandEncoder {
 ) -> wgpu::RenderPass<'a> {
-    stencil_texture.resize(view_size);
+    // stencil_texture.resize(view_size);
 
     let pass_desc = wgpu::RenderPassDescriptor {
         label: Some("render pass"),
@@ -126,7 +127,8 @@ fn begin_render_pass<'a>(
             },
         }],
         depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachmentDescriptor {
-            attachment: stencil_texture.view(),
+            // attachment: stencil_texture.view(),
+            attachment: stencil_view,
             depth_ops: Some(wgpu::Operations {
                 load: wgpu::LoadOp::Clear(0.0),
                 store: true,
@@ -500,8 +502,10 @@ impl Renderer for WGPU {
         self.view_size = size;
         self.dpi = dpi;
 
+        // we need to flush all the bind groups since they are bound to particular
         self.bind_group_cache.clear();
         self.swap_chain.resize(size);
+        self.stencil_texture.resize(size);
         // self.pipeline_cache.clear();
     }
 
@@ -710,15 +714,17 @@ impl Renderer for WGPU {
 
             let mut encoder = self.ctx.create_command_encoder(None);
             {
-                let (target_view, view_size, texture_format) = match render_target {
-                    RenderTarget::Screen => (view, self.view_size, swap_chain_format),
+                let (target_view, stencil_view, view_size, texture_format) = match render_target {
+                    RenderTarget::Screen => (view, self.stencil_texture.view(), self.view_size, swap_chain_format),
                     RenderTarget::Image(id) => {
                         let tex = images.get(id).unwrap();
-                        (tex.view(), tex.size(), tex.format())
+                        (tex.view(), tex.stencil_view(), tex.size(), tex.format())
                     }
                 };
 
                 let mut should_set_vertex_uniforms = true;
+                println!("view_size {:?}", view_size);
+                println!("render target {:?}", render_target);
 
                 let mut pass = begin_render_pass(
                     &mut encoder,
@@ -727,7 +733,8 @@ impl Renderer for WGPU {
                     target_view,
                     view_size,
                     self.clear_color.into(),
-                    &mut self.stencil_texture,
+                    // &mut self.stencil_texture,
+                    stencil_view,
                     &self.vertex_buffer,
                     &self.index_buffer,
                     // &self.uniform_buffer,
