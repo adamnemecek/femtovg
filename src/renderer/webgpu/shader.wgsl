@@ -61,8 +61,8 @@ fn sdroundrect(u: Uniforms, pt: vec2<f32>) -> f32 {
 
 [[block]]
 struct ViewSize {
-    x: f32;
-    y: f32;
+    x: u32;
+    y: u32;
 };
 
 var<push_constant> viewSize: ViewSize;

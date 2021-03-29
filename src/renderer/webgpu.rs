@@ -497,7 +497,7 @@ fn vert_range(start: usize, count: usize) -> std::ops::Range<u32> {
 impl Renderer for WGPU {
     type Image = WGPUTexture;
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
-        let size = Size::new(width as f32, height as f32);
+        let size = Size::new(width, height);
         println!("set size {:?}", size);
         self.view_size = size;
         self.dpi = dpi;
