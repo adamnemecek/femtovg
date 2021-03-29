@@ -115,15 +115,15 @@ impl<'a> TryFrom<&'a DynamicImage> for ImageSource<'a> {
                 let src: Img<&[GRAY8]> =
                     Img::new(img.as_ref().as_pixels(), img.width() as usize, img.height() as usize);
 
-                Ok(ImageSource::from(src))
+                Ok(Self::from(src))
             }
             ::image::DynamicImage::ImageRgb8(img) => {
                 let src = Img::new(img.as_ref().as_rgb(), img.width() as usize, img.height() as usize);
-                Ok(ImageSource::from(src))
+                Ok(Self::from(src))
             }
             ::image::DynamicImage::ImageRgba8(img) => {
                 let src = Img::new(img.as_ref().as_rgba(), img.width() as usize, img.height() as usize);
-                Ok(ImageSource::from(src))
+                Ok(Self::from(src))
             }
             // TODO: if format is not supported maybe we should convert it here,
             // Buut that is an expensive operation on the render thread that will remain hidden from the user
