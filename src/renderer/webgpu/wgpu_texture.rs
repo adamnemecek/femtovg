@@ -238,8 +238,8 @@ impl WGPUTexture {
     }
 }
 
-impl Drop for WGPUTexture {
-    fn drop(&mut self) {
-        self.delete();
-    }
-}
+// impl Drop for WGPUTexture {
+//     fn drop(&mut self) {
+//         self.delete();
+//     }
+// }

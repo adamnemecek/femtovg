@@ -201,6 +201,8 @@ pub struct WGPU {
 struct IndexRange {
     start: u32,
     end: u32,
+    e_start: usize,
+    e_count: usize,
 }
 
 impl From<IndexRange> for std::ops::Range<u32> {
@@ -570,6 +572,8 @@ impl Renderer for WGPU {
                             self.index_ranges.push(IndexRange {
                                 start: index_range_start as _,
                                 end: index_range_end as _,
+                                e_start: start,
+                                e_count: count,
                             });
                         }
                     }
@@ -593,6 +597,8 @@ impl Renderer for WGPU {
                             self.index_ranges.push(IndexRange {
                                 start: index_range_start as _,
                                 end: index_range_end as _,
+                                e_start: start,
+                                e_count: count,
                             });
                         }
                     }
@@ -821,7 +827,7 @@ impl Renderer for WGPU {
                                     should_set_vertex_uniforms = false;
                                 }
 
-                                if let Some((_start, _count)) = drawable.fill_verts {
+                                if let Some((start, count)) = drawable.fill_verts {
                                     // let offset = self.index_buffer.len();
 
                                     // let byte_index_buffer_offset = offset * std::mem::size_of::<u32>();
@@ -835,6 +841,8 @@ impl Renderer for WGPU {
 
                                     // pass.draw_indexed((offset as _)..(offset + triangle_fan_index_count) as _, 0, 0..1);
                                     let index_range = self.index_ranges[index_range_offset];
+                                    assert!(index_range.e_start == start);
+                                    assert!(index_range.e_count == count);
                                     // let start = (start - 2) * 3;
                                     // let count = (count - 2) * 3;
                                     pass.draw_indexed(index_range.into(), 0, 0..1);
@@ -877,11 +885,13 @@ impl Renderer for WGPU {
 
                             // fill verts
                             for drawable in &cmd.drawables {
-                                if let Some((_start, _count)) = drawable.fill_verts {
+                                if let Some((start, count)) = drawable.fill_verts {
                                     // let offset = self.index_buffer.len();
                                     // self.index_buffer
                                     let index_range = self.index_ranges[index_range_offset];
                                     // .extend_with_triange_fan_indices_cw(start as _, count as _);
+                                    assert!(index_range.e_start == start);
+                                    assert!(index_range.e_count == count);
                                     pass.draw_indexed(index_range.into(), 0, 0..1);
                                     index_range_offset += 1;
                                     // pass.set_push_constants(stages, offset, data)

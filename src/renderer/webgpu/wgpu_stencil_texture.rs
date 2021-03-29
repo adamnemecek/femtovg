@@ -61,11 +61,11 @@ impl WGPUStencilTexture {
     }
 }
 
-impl Drop for WGPUStencilTexture {
-    fn drop(&mut self) {
-        self.tex.destroy()
-    }
-}
+// impl Drop for WGPUStencilTexture {
+//     fn drop(&mut self) {
+//         self.tex.destroy()
+//     }
+// }
 
 pub(crate) fn new_stencil_descriptor<'a>(size: Size, label: &'a str) -> wgpu::TextureDescriptor<'a> {
     wgpu::TextureDescriptor {

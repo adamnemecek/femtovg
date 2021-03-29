@@ -81,7 +81,7 @@ fn main() {
     // let window = winit::window::Window::new(&event_loop).unwrap();
 
     // let size = winit::dpi::LogicalSize::new(512, 512);
-    let size = winit::dpi::LogicalSize::new(800, 600);
+    let size = winit::dpi::LogicalSize::new(1024, 800);
     let window = winit::window::WindowBuilder::new()
         .with_inner_size(size)
         .with_title("demo")

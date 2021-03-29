@@ -4,14 +4,14 @@ use super::{
     MemAlign,
     WGPUContext,
     WGPUInstance,
-    WGPUVar,
+    // WGPUVar,
 };
 
-pub struct WGPUVecViewMut<'a, T: Copy> {
-    // len:
-    inner: wgpu::BufferViewMut<'a>,
-    ph: std::marker::PhantomData<T>,
-}
+// pub struct WGPUVecViewMut<'a, T: Copy> {
+//     // len:
+//     inner: wgpu::BufferViewMut<'a>,
+//     ph: std::marker::PhantomData<T>,
+// }
 
 // impl<'a, T: Copy> WGPUVecViewMut<'a, T> {
 //     pub fn new(v: WGUPVec<T>) -> Self {
@@ -232,7 +232,7 @@ impl<T: Copy> WGPUVec<T> {
         // }
         // self.ctx.queue.write_buffer(self, offset, data)
         self.mem_align = mem_align;
-        self.inner.destroy();
+        // self.inner.destroy();
         self.inner = inner;
 
         return ResizeResult::Resized;
@@ -307,11 +307,11 @@ impl<T: Copy> WGPUVec<T> {
 //     }
 // }
 
-impl<T: Copy> Drop for WGPUVec<T> {
-    fn drop(&mut self) {
-        self.inner.destroy()
-    }
-}
+// impl<T: Copy> Drop for WGPUVec<T> {
+//     fn drop(&mut self) {
+//         self.inner.destroy()
+//     }
+// }
 
 pub trait VecExt {
     fn extend_with_triange_fan_indices_cw(&mut self, start: u32, count: u32) -> usize;
