@@ -1112,7 +1112,7 @@ impl Renderer for WGPU {
     }
 
     fn delete_image(&mut self, image: Self::Image) {
-        image.delete();
+        // we don't have to do anything since the textures will be freed by wgpu automatically
     }
 
     fn screenshot(&mut self) -> Result<ImgVec<RGBA8>, ErrorKind> {

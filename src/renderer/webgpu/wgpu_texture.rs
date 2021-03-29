@@ -228,10 +228,10 @@ impl WGPUTexture {
         self.info.size()
     }
 
-    pub fn delete(&self) {
-        self.tex.destroy();
-        self.stencil.destroy();
-    }
+    // pub fn delete(&self) {
+    //     // self.tex.destroy();
+    //     // self.stencil.destroy();
+    // }
 
     pub fn format(&self) -> wgpu::TextureFormat {
         self.info.format().into()
