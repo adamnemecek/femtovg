@@ -112,8 +112,11 @@ fn create_pipeline<'a>(
     cull_mode: impl Into<Option<wgpu::Face>>,
     depth_stencil: impl Into<Option<wgpu::DepthStencilState>>,
 ) -> wgpu::RenderPipeline {
+    let label = label.into();
+    let label = format!("{:?} {:?}", label, blend_func);
+
     ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-        label: label.into(),
+        label: Some(&label),
         layout: Some(layout),
         vertex: wgpu::VertexState {
             module: shader,
@@ -193,6 +196,7 @@ fn create_clear_rect_pipeline(
     stencil_format: wgpu::TextureFormat,
     layout: &wgpu::PipelineLayout,
 ) -> wgpu::RenderPipeline {
+
     ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label: Some("clear_rect"),
         layout: Some(layout),
