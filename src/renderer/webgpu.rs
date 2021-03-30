@@ -715,6 +715,14 @@ impl Renderer for WGPU {
 
         let mut counter = Counter::default();
 
+        // ///
+        // let z = commands.first().unwrap();
+        // let z = match z.cmd_type {
+        //     CommandType::SetRenderTarget { .. } => true,
+        //     _ => false,
+        // };
+        // println!("first command is set render target {:?}", z);
+
         'frame: while i < commands.len() {
             should_submit = true;
 
@@ -778,7 +786,7 @@ impl Renderer for WGPU {
                     };
                 }
 
-                while i < commands.len() {
+                'continued: while i < commands.len() {
                     let cmd = &commands[i];
                     i += 1;
 
@@ -865,12 +873,8 @@ impl Renderer for WGPU {
                             let s = states.concave_fill();
                             pass.set_pipeline(s.fill_verts());
 
-                            // if should_set_vertex_uniforms {
-                            // assert!(uniforms_offset == 0);
-
                             let _ = pass.set_vertex_value(0, &view_size);
-                            // should_set_vertex_uniforms = false;
-                            // }
+
                             // let bg = self.bind_group_for(images, cmd.image, cmd.alpha_mask);
                             // need for none, none
                             let bg = bind_group!(self, images, None, None);
@@ -1065,14 +1069,17 @@ impl Renderer for WGPU {
                         }
                         CommandType::SetRenderTarget(target) => {
                             counter.set_render_target += 1;
+                            if render_target != *target {
+                                render_target = *target;
+                                // println!("set render target {:?}", target);
+                                drop(pass);
+                                self.ctx.queue().submit(Some(encoder.finish()));
 
-                            render_target = *target;
-                            // println!("set render target {:?}", target);
-                            drop(pass);
-                            self.ctx.queue().submit(Some(encoder.finish()));
-
-                            should_submit = false;
-                            continue 'frame;
+                                should_submit = false;
+                                continue 'frame;
+                            } else {
+                                continue 'continued;
+                            }
                         }
                     }
                 }

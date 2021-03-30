@@ -313,7 +313,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // clear_rect(&mut canvas, 0, 0, 100, 100);
                 // clear_rect(&mut canvas, 200, 200, 100, 100);
                 // fill_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
-                draw_text(&mut canvas, &fonts, "ta", 0.0, 0.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "tea", 0.0, 0.0, 100.0, 100.0);
                 // draw_text(&mut canvas, &fonts, "at", 50.0, 200.0, 100.0, 100.0);
 
                 // stroke_rect(&mut canvas, 200.0, 200.0, 100.0, 100.0);
