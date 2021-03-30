@@ -1,9 +1,5 @@
-use wgpu::{
-    PrimitiveTopology,
-    ShaderModule,
-};
+use std::collections::HashMap;
 
-// use fnv::FnvHashMap;
 use super::{
     Color,
     Rect,
@@ -11,11 +7,6 @@ use super::{
     WGPUBlend,
     WGPUContext,
 };
-// use std::{
-// cell::UnsafeCell,
-// rc::Rc,
-// };
-use std::collections::HashMap;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 struct PipelineCacheKey {
@@ -23,7 +14,7 @@ struct PipelineCacheKey {
     pub texture_format: wgpu::TextureFormat,
 }
 
-impl crate::Vertex {
+impl Vertex {
     fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
         use std::mem;
         wgpu::VertexBufferLayout {
@@ -191,7 +182,7 @@ fn create_stencil_only_pipeline<'a>(
 }
 fn create_clear_rect_pipeline(
     ctx: &WGPUContext,
-    shader: &ShaderModule,
+    shader: &wgpu::ShaderModule,
     format: wgpu::TextureFormat,
     stencil_format: wgpu::TextureFormat,
     layout: &wgpu::PipelineLayout,
