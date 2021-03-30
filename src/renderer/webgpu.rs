@@ -651,10 +651,6 @@ impl Renderer for WGPU {
             }
         }
 
-        for (i, e) in self.temp_uniform_buffer.iter().enumerate() {
-            println!("{:?} inner {:?}", i, e.inner_col);
-        }
-
         // for cmd in commands.iter() {
         //     println!("cmd {:?}", cmd.cmd_type);
         // }
