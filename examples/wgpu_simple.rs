@@ -317,7 +317,8 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 let height= 600.0;
                 let width = 800.0;
                 let t = 0.0;
-                draw_graph(&mut canvas, 0.0, height / 2.0, width, height / 2.0, t);
+                draw_simple_graph(&mut canvas, 0.0, height / 2.0, width, height / 2.0, t);
+                // draw_rects(&mut canvas);
                 // draw_text(&mut canvas, &fonts, "at", 50.0, 200.0, 100.0, 100.0);
 
                 // stroke_rect(&mut canvas, 200.0, 200.0, 100.0, 100.0);
@@ -340,8 +341,99 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
     });
 }
 
+// fn draw_rects(canvas: &mut Canvas<impl Renderer>) {
+//     for i in 0..100 {
+//         for j in 0..100 {
+//             fill_rect(canvas, (2 *  i) as _ , (2 * j) as _, 1.0, 1.0);
+//         }
+//     }
+// }
+
 fn clear_rect(canvas: &mut Canvas<impl Renderer>, x: u32, y: u32, w: u32, h: u32) {
     canvas.clear_rect(x, y, w, h, Color::red());
+}
+
+fn draw_simple_graph<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, t: f32) {
+    let dx = w / 5.0;
+    let mut sx = [0.0; 6];
+    let mut sy = [0.0; 6];
+
+    let samples = [
+        (1.0 + (t * 1.2345 + (t * 0.33457).cos() * 0.44).sin()) * 0.5,
+        (1.0 + (t * 0.68363 + (t * 1.3).cos() * 1.55).sin()) * 0.5,
+        (1.0 + (t * 1.1642 + (t * 0.33457).cos() * 1.24).sin()) * 0.5,
+        (1.0 + (t * 0.56345 + (t * 1.63).cos() * 0.14).sin()) * 0.5,
+        (1.0 + (t * 1.6245 + (t * 0.254).cos() * 0.3).sin()) * 0.5,
+        (1.0 + (t * 0.345 + (t * 0.03).cos() * 0.6).sin()) * 0.5,
+    ];
+
+    let count = 3;
+
+    for i in 0..count {
+        sx[i] = x + i as f32 * dx;
+        sy[i] = y + h * samples[i] * 0.8;
+    }
+
+    // Graph background
+    let bg = Paint::linear_gradient(
+        x,
+        y,
+        x,
+        y + h,
+        Color::rgba(0, 160, 192, 0),
+        Color::rgba(0, 160, 192, 64),
+    );
+
+
+    let mut path = Path::new();
+    path.move_to(sx[0], sy[0]);
+
+    for i in 1..count {
+        path.bezier_to(sx[i - 1] + dx * 0.5, sy[i - 1], sx[i] - dx * 0.5, sy[i], sx[i], sy[i]);
+    }
+
+    path.line_to(x + w, y + h);
+    path.line_to(x, y + h);
+    canvas.fill_path(&mut path, bg);
+
+    // Graph line
+    // let mut path = Path::new();
+    // path.move_to(sx[0], sy[0] + 2.0);
+
+    // for i in 1..count {
+    //     path.bezier_to(sx[i - 1] + dx * 0.5, sy[i - 1], sx[i] - dx * 0.5, sy[i], sx[i], sy[i]);
+    // }
+
+    // let mut line = Paint::color(Color::rgba(0, 160, 192, 255));
+    // line.set_line_width(3.0);
+    // canvas.stroke_path(&mut path, line);
+
+    // Graph sample pos
+    // for i in 0..count {
+    //     let bg = Paint::radial_gradient(
+    //         sx[i],
+    //         sy[i] + 2.0,
+    //         3.0,
+    //         8.0,
+    //         Color::rgba(0, 0, 0, 32),
+    //         Color::rgba(0, 0, 0, 0),
+    //     );
+    //     let mut path = Path::new();
+    //     path.rect(sx[i] - 10.0, sy[i] - 10.0 + 2.0, 20.0, 20.0);
+    //     canvas.fill_path(&mut path, bg);
+    // }
+
+    // let mut path = Path::new();
+    // for i in 0..count {
+    //     path.circle(sx[i], sy[i], 4.0);
+    // }
+    // canvas.fill_path(&mut path, Paint::color(Color::rgba(0, 160, 192, 255)));
+
+    // let mut path = Path::new();
+    // for i in 0..count {
+    //     path.circle(sx[i], sy[i], 2.0);
+    // }
+    // canvas.fill_path(&mut path, Paint::color(Color::rgba(220, 220, 220, 255)));
 }
 
 fn draw_text<T: Renderer>(canvas: &mut Canvas<T>, fonts: &Fonts, title: &str, x: f32, y: f32, w: f32, h: f32) {
