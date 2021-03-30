@@ -147,7 +147,7 @@ fn fragment_shader_aa(
     if (u.has_mask == 1.0) {
     //     // revisit ftcoord
         const ftcoord = vec2<f32>(in.ftcoord.x, 1.0 - in.ftcoord.y);
-        const r = textureSample(alpha_tex, samplr, ftcoord).r;
+        const r = textureSample(alpha_tex, alpha_samplr, ftcoord).x;
         var mask: vec4<f32>;
         mask = vec4<f32>(r, r, r, r);
         // const mask = vec4<f32>(alpha_tex.sample(samplr, ftcoord).r);
