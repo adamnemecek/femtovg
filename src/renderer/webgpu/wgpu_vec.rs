@@ -77,6 +77,7 @@ pub struct WGPUVec<T: Copy> {
     // len: usize,
     mem_align: MemAlign<T>,
     usage: wgpu::BufferUsage,
+    gen: usize,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -96,9 +97,10 @@ impl<T: Copy> WGPUVec<T> {
         let mem_align = MemAlign::new(capacity);
 
         let usage = wgpu::BufferUsage::VERTEX | wgpu::BufferUsage::COPY_DST;
-        let inner = create_buffer(ctx, "vertex buffer", mem_align, usage);
+        let inner = create_buffer(ctx, "vertex buffer gen 0", mem_align, usage);
 
         Self {
+            gen: 0,
             usage,
             ctx: ctx.clone(),
             inner,
@@ -111,9 +113,10 @@ impl<T: Copy> WGPUVec<T> {
         let mem_align = MemAlign::new(capacity);
 
         let usage = wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST;
-        let inner = create_buffer(ctx, "uniform buffer", mem_align, usage);
+        let inner = create_buffer(ctx, "uniform buffer gen 0", mem_align, usage);
 
         Self {
+            gen: 0,
             usage,
             ctx: ctx.clone(),
             inner,
@@ -167,12 +170,13 @@ impl<T: Copy> WGPUVec<T> {
         let usage = wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::INDEX;
         let inner = create_buffer(
             ctx,
-            "index buffer",
+            "index buffer gen 0",
             mem_align,
             //  wgpu::BufferUsage::INDEX,
             usage,
         );
         Self {
+            gen: 0,
             usage,
             ctx: ctx.clone(),
             inner,
@@ -216,7 +220,18 @@ impl<T: Copy> WGPUVec<T> {
 
         //     mapped_at_creation: true,
         // });
-        let inner = create_buffer(&self.ctx, "vertex buffer", mem_align, self.usage);
+        self.gen += 1;
+        let label = if self.usage.contains(wgpu::BufferUsage::VERTEX) {
+            format!("vertex buffer gen {:?}", self.gen)
+        } else if self.usage.contains(wgpu::BufferUsage::UNIFORM) {
+            format!("uniform buffer gen {:?}", self.gen)
+        } else if self.usage.contains(wgpu::BufferUsage::INDEX) {
+            format!("index buffer gen {:?}", self.gen)
+        } else {
+            todo!("unrecognized buffer type");
+        };
+
+        let inner = create_buffer(&self.ctx, &label, mem_align, self.usage);
 
         // let inner = self.device.new_mem(
         //     mem_align,

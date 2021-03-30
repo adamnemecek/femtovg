@@ -196,7 +196,6 @@ fn create_clear_rect_pipeline(
     stencil_format: wgpu::TextureFormat,
     layout: &wgpu::PipelineLayout,
 ) -> wgpu::RenderPipeline {
-
     ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label: Some("clear_rect"),
         layout: Some(layout),
