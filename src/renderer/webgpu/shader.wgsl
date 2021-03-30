@@ -56,7 +56,8 @@ fn sdroundrect(u: Uniforms, pt: vec2<f32>) -> f32 {
     // return 0.0;
     const ext2 = u.extent - vec2<f32>(u.radius, u.radius);
     const d = abs(pt) - ext2;
-    return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - u.radius;
+    // return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - u.radius;
+    return min(max(d.x, d.y), 0.0) + length(vec2<f32>(max(d.x, 0.0), max(d.y, 0.0))) - u.radius;
 }
 
 [[block]]
@@ -81,8 +82,8 @@ fn vertex_shader(
     ret.ftcoord = tcoord;
     ret.fpos = pos;
     ret.pos = vec4<f32>(
-                    2.0 * pos.x / viewSize.x - 1.0,
-                    1.0 - 2.0 * pos.y / viewSize.y,
+                    2.0 * pos.x / f32(viewSize.x) - 1.0,
+                    1.0 - 2.0 * pos.y / f32(viewSize.y),
                     0.0,
                     1.0
             );
@@ -119,7 +120,13 @@ fn fragment_shader_aa(
         const d = clamp((sdroundrect(u, pt) + u.feather*0.5) / u.feather, 0.0, 1.0);
         // // float d = saturate((u.feather * 0.5 + sdroundrect(uniforms, pt))
         // //                    / u.feather);
-        const color = mix(u.inner_col, u.outer_col, d);
+        // const color = mix(u.inner_col, u.outer_col, d);
+         const color = vec4<f32>(
+           mix(u.inner_col.r, u.outer_col.r, d),
+           mix(u.inner_col.g, u.outer_col.g, d),
+           mix(u.inner_col.b, u.outer_col.b, d),
+           mix(u.inner_col.a, u.outer_col.a, d)
+         );
         // // color *= scissor;
         // // color *= strokeAlpha;
         result = color;
