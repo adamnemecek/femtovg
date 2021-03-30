@@ -548,13 +548,16 @@ impl Renderer for WGPU {
 
         // let mut current_frame = None;
 
-        // process indices
+
         self.temp_index_buffer.clear();
         self.temp_uniform_buffer.clear();
+        self.temp_clear_rect_buffer.clear();
 
         self.index_ranges.clear();
 
         let start = std::time::Instant::now();
+
+        // process indices
         for cmd in commands.iter() {
             match cmd.cmd_type {
                 CommandType::ConvexFill { params } => {
@@ -640,7 +643,7 @@ impl Renderer for WGPU {
         // println!("uniforms vec {:?}", end - start);
 
         // println!("command count {:?}", commands.len());
-        // println!(
+        // todo!(
         //     "temp_uniforms len {:?} bytes {:?}",
         //     self.temp_uniform_buffer.len(),
         //     self.temp_uniform_buffer.len() * 256

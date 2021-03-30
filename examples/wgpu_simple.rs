@@ -298,7 +298,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // let t = start.elapsed().as_secs_f32();
 
                 canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
-                canvas.clear_rect(0, 0, size.width as u32, size.height as u32, Color::rgbf(0.3, 0.3, 0.32));
+                canvas.clear_rect(0, 0, size.width as u32, size.height as u32, Color::rgbf(0.3, 0.3, 0.3));
 
                 // draw_eyes(&mut canvas, (size.width as f32) - 250.0, 50.0, 150.0, 100.0, mousex, mousey, 0.0);
 
@@ -313,7 +313,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // clear_rect(&mut canvas, 0, 0, 100, 100);
                 // clear_rect(&mut canvas, 200, 200, 100, 100);
                 // fill_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
-                draw_text(&mut canvas, &fonts, "tea", 0.0, 0.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
                 // draw_text(&mut canvas, &fonts, "at", 50.0, 200.0, 100.0, 100.0);
 
                 // stroke_rect(&mut canvas, 200.0, 200.0, 100.0, 100.0);
@@ -370,7 +370,7 @@ fn fill_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32
     //     Color::hsla(0.6 / (PI * 2.0), 1.0, 0.55, 1.0),
     //     Color::hsla(0.6 / (PI * 2.0), 1.0, 0.55, 1.0),
     // );
-    let paint = Paint::color(Color::red());
+    let paint = Paint::color(Color::white());
 
     canvas.fill_path(&mut path, paint);
 }

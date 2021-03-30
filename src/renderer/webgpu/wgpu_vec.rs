@@ -111,9 +111,10 @@ impl<T: Copy> WGPUVec<T> {
 
     pub fn new_uniform(ctx: &WGPUContext, capacity: usize) -> Self {
         let mem_align = MemAlign::new(capacity);
-
+        let type_name = std::any::type_name::<T>();
         let usage = wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST;
-        let inner = create_buffer(ctx, "uniform buffer gen 0", mem_align, usage);
+        let label = format!("uniform buffer gen 0 {:?}", type_name);
+        let inner = create_buffer(ctx, &label, mem_align, usage);
 
         Self {
             gen: 0,
@@ -224,7 +225,8 @@ impl<T: Copy> WGPUVec<T> {
         let label = if self.usage.contains(wgpu::BufferUsage::VERTEX) {
             format!("vertex buffer gen {:?}", self.gen)
         } else if self.usage.contains(wgpu::BufferUsage::UNIFORM) {
-            format!("uniform buffer gen {:?}", self.gen)
+            let type_name = std::any::type_name::<T>();
+            format!("uniform buffer gen {:?} {:?}", self.gen, type_name)
         } else if self.usage.contains(wgpu::BufferUsage::INDEX) {
             format!("index buffer gen {:?}", self.gen)
         } else {
