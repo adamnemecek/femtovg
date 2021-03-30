@@ -723,7 +723,7 @@ impl Renderer for WGPU {
         // };
         // println!("first command is set render target {:?}", z);
 
-        'frame: while i < commands.len() {
+        'new_pass: while i < commands.len() {
             should_submit = true;
 
             let mut encoder = self.ctx.create_command_encoder(None);
@@ -1069,14 +1069,14 @@ impl Renderer for WGPU {
                         }
                         CommandType::SetRenderTarget(target) => {
                             counter.set_render_target += 1;
+
                             if render_target != *target {
                                 render_target = *target;
-                                // println!("set render target {:?}", target);
                                 drop(pass);
                                 self.ctx.queue().submit(Some(encoder.finish()));
 
                                 should_submit = false;
-                                continue 'frame;
+                                continue 'new_pass;
                             } else {
                                 continue 'continued;
                             }
