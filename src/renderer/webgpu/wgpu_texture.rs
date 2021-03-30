@@ -113,7 +113,8 @@ impl WGPUTexture {
 
         let sampler = ctx.device().create_sampler(&sampler_desc);
 
-        let stencil_desc = super::new_stencil_descriptor(info.size(), "stencil");
+        let stencil_label = format!("{:?} stencil", label);
+        let stencil_desc = super::new_stencil_descriptor(info.size(), &stencil_label);
 
         // let (stencil, stencil_view) = if wants_stencil {
         let stencil = ctx.device().create_texture(&stencil_desc);
