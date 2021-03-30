@@ -342,7 +342,7 @@ fn clear_rect(canvas: &mut Canvas<impl Renderer>, x: u32, y: u32, w: u32, h: u32
 
 fn draw_text<T: Renderer>(canvas: &mut Canvas<T>, fonts: &Fonts, title: &str, x: f32, y: f32, w: f32, h: f32) {
     canvas.save();
-    let mut text_paint = Paint::color(Color::rgba(100, 200, 100, 255));
+    let mut text_paint = Paint::color(Color::rgba(255, 0, 0, 255));
     text_paint.set_font_size(80.0);
     text_paint.set_font(&[fonts.regular]);
     text_paint.set_text_align(Align::Left);

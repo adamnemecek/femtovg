@@ -548,10 +548,11 @@ impl Renderer for WGPU {
 
         // let mut current_frame = None;
 
-
         self.temp_index_buffer.clear();
         self.temp_uniform_buffer.clear();
         self.temp_clear_rect_buffer.clear();
+
+        println!("len {:?}", self.temp_uniform_buffer.len());
 
         self.index_ranges.clear();
 
@@ -561,7 +562,10 @@ impl Renderer for WGPU {
         for cmd in commands.iter() {
             match cmd.cmd_type {
                 CommandType::ConvexFill { params } => {
+                    // println!("set uniforms convex fill buffer");
+
                     self.temp_uniform_buffer.push(params);
+                    // println!("len {:?}", self.temp_uniform_buffer.len());
 
                     for drawable in &cmd.drawables {
                         if let Some((start, count)) = drawable.fill_verts {
@@ -585,8 +589,10 @@ impl Renderer for WGPU {
                     fill_params,
                     stencil_params,
                 } => {
+                    // println!("set uniforms concave fill buffer");
                     self.temp_uniform_buffer.push(stencil_params);
                     self.temp_uniform_buffer.push(fill_params);
+                    // println!("len {:?}", self.temp_uniform_buffer.len());
 
                     for drawable in &cmd.drawables {
                         if let Some((start, count)) = drawable.fill_verts {
@@ -607,14 +613,20 @@ impl Renderer for WGPU {
                     }
                 }
                 CommandType::Stroke { params } => {
+                    // println!("set uniforms stroke");
                     self.temp_uniform_buffer.push(params);
+                    println!("len {:?}", self.temp_uniform_buffer.len());
                 }
                 CommandType::StencilStroke { params1, params2 } => {
+                    // println!("set uniforms stencil stroke");
                     self.temp_uniform_buffer.push(params2);
                     self.temp_uniform_buffer.push(params1);
+                    // println!("len {:?}", self.temp_uniform_buffer.len());
                 }
                 CommandType::Triangles { params } => {
+                    // println!("set uniforms triangles");
                     self.temp_uniform_buffer.push(params);
+                    // println!("len {:?}", self.temp_uniform_buffer.len());
                 }
                 CommandType::ClearRect {
                     // x,
@@ -623,17 +635,24 @@ impl Renderer for WGPU {
                     // height,
                     color,
                     ..
-                } => self.temp_clear_rect_buffer.push({
-                    let rect = Rect {
-                        x: -1.0,
-                        y: -1.0,
-                        w: 2.0,
-                        h: 2.0,
-                    };
-                    ClearRect::new(rect, color)
-                }),
+                } => {
+                    // println!("set uniforms clear rect");
+                    self.temp_clear_rect_buffer.push({
+                        let rect = Rect {
+                            x: -1.0,
+                            y: -1.0,
+                            w: 2.0,
+                            h: 2.0,
+                        };
+                        ClearRect::new(rect, color)
+                    })
+                }
                 CommandType::SetRenderTarget(_) => {}
             }
+        }
+
+        for (i, e) in self.temp_uniform_buffer.iter().enumerate() {
+            println!("{:?} inner {:?}", i, e.inner_col);
         }
 
         // for cmd in commands.iter() {
@@ -1087,6 +1106,8 @@ impl Renderer for WGPU {
                     }
                 }
             }
+
+            // todo!("uniforms_offset {:?}", uniforms_offset);
 
             // if there's a pending submit
             if should_submit {

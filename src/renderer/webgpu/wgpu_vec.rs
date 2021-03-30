@@ -226,6 +226,7 @@ impl<T: Copy> WGPUVec<T> {
             format!("vertex buffer gen {:?}", self.gen)
         } else if self.usage.contains(wgpu::BufferUsage::UNIFORM) {
             let type_name = std::any::type_name::<T>();
+            // let label = format!("uniform buffer gen 0 {:?}", type_name);
             format!("uniform buffer gen {:?} {:?}", self.gen, type_name)
         } else if self.usage.contains(wgpu::BufferUsage::INDEX) {
             format!("index buffer gen {:?}", self.gen)
