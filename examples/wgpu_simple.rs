@@ -314,7 +314,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // clear_rect(&mut canvas, 0, 0, 100, 100);
                 // clear_rect(&mut canvas, 200, 200, 100, 100);
                 // fill_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
-                draw_text(&mut canvas, &fonts, "tea", 0.0, 0.0, 100.0, 100.0);
+                // draw_text(&mut canvas, &fonts, "tea", 0.0, 0.0, 100.0, 100.0);
 
                 let height = 600.0;
                 let width = 800.0;
@@ -494,7 +494,8 @@ fn draw_paragraph<T: Renderer>(
     mx: f32,
     my: f32,
 ) {
-    let text = "eeee is longer eee of txxt.";
+    let text = "abcdefghijklmnqrtcxzs";
+    // let text = "abcdefghijkls";
 
     canvas.save();
 
@@ -510,40 +511,41 @@ fn draw_paragraph<T: Renderer>(
     // let mut px;
     // let mut caret_x;
 
-    let lines = canvas.break_text_vec(width, text, paint).expect("Cannot break text");
+    // let lines = canvas.break_text_vec(width, text, paint).expect("Cannot break text");
 
-    for (line_num, line_range) in lines.into_iter().enumerate() {
-        if let Ok(res) = canvas.fill_text(x, y, &text[line_range], paint) {
-            let hit = mx > x && mx < (x + width) && my >= y && my < (y + res.height());
+    canvas.fill_text(100.0, 100.0, text, paint);
+    // for (line_num, line_range) in lines.into_iter().enumerate() {
+    //     if let Ok(res) = canvas.fill_text(x, y, &text[line_range], paint) {
+    //         let hit = mx > x && mx < (x + width) && my >= y && my < (y + res.height());
 
-            // if hit {
-            //     caret_x = if mx < x + res.width() / 2.0 { x } else { x + res.width() };
-            //     px = x;
+    //         // if hit {
+    //         //     caret_x = if mx < x + res.width() / 2.0 { x } else { x + res.width() };
+    //         //     px = x;
 
-            //     for glyph in &res.glyphs {
-            //         let x0 = glyph.x;
-            //         let x1 = x0 + glyph.width;
-            //         let gx = x0 * 0.3 + x1 * 0.7;
+    //         //     for glyph in &res.glyphs {
+    //         //         let x0 = glyph.x;
+    //         //         let x1 = x0 + glyph.width;
+    //         //         let gx = x0 * 0.3 + x1 * 0.7;
 
-            //         if mx >= px && mx < gx {
-            //             caret_x = glyph.x;
-            //         }
+    //         //         if mx >= px && mx < gx {
+    //         //             caret_x = glyph.x;
+    //         //         }
 
-            //         px = gx;
-            //     }
+    //         //         px = gx;
+    //         //     }
 
-            //     let mut path = Path::new();
-            //     path.rect(caret_x, y, 1.0, res.height());
-            //     canvas.fill_path(&mut path, Paint::color(Color::rgba(255, 192, 0, 255)));
+    //         //     let mut path = Path::new();
+    //         //     path.rect(caret_x, y, 1.0, res.height());
+    //         //     canvas.fill_path(&mut path, Paint::color(Color::rgba(255, 192, 0, 255)));
 
-            //     gutter = line_num + 1;
+    //         //     gutter = line_num + 1;
 
-            //     gutter_y = y + 14.0 / 2.0;
-            // }
+    //         //     gutter_y = y + 14.0 / 2.0;
+    //         // }
 
-            y += res.height();
-        }
-    }
+    //         y += res.height();
+    //     }
+    // }
 
     // if gutter > 0 {
     //     let mut paint = Paint::color(Color::rgba(255, 192, 0, 255));
