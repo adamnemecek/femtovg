@@ -752,23 +752,6 @@ impl Renderer for WGPU {
                     &self.index_buffer,
                     // &self.uniform_buffer,
                 );
-                // uniforms_offset += offset;
-                // let mut index_buffer_view = self.index_buffer.view_mut();
-
-                // pass.set_vertex_buffer(0, self.vertex_buffer.slice());
-                // pass.set_index_buffer(self.index_buffer.slice(), wgpu::IndexFormat::Uint32);
-                // };
-
-                // let pass_desc = new_pass_descriptor();
-                // let mut pass = encoder.begin_render_pass(&pass_desc);
-
-                // pass.set_bind_group(index, bind_group, offsets)
-
-                // encoder.begin_render_pass(des c)
-
-                // pass.set_viewport(x, y, w, h, min_depth, max_depth)
-
-                // let mut state = None;
 
                 let mut offset = 0;
 
@@ -805,10 +788,6 @@ impl Renderer for WGPU {
                         states
                     };
                     prev_states = Some(states);
-
-                    // pass.set_push_constants(wgpu::ShaderStage::FRAGMENT, 0, &[]);
-
-                    // uniforms_offset += std::mem::size_of::<Params>();
 
                     match &cmd.cmd_type {
                         CommandType::ConvexFill { params } => {

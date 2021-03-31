@@ -314,11 +314,11 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // clear_rect(&mut canvas, 0, 0, 100, 100);
                 // clear_rect(&mut canvas, 200, 200, 100, 100);
                 // fill_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
-                // draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
                 let height = 600.0;
                 let width = 800.0;
                 let t = 0.0;
-                draw_simple_graph(&mut canvas, 0.0, height / 2.0, width, height / 2.0, t);
+                // draw_simple_graph(&mut canvas, 0.0, height / 2.0, width, height / 2.0, t);
                 // draw_rects(&mut canvas);
                 // draw_text(&mut canvas, &fonts, "at", 50.0, 200.0, 100.0, 100.0);
 
