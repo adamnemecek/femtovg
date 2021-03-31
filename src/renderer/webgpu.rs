@@ -102,12 +102,9 @@ fn begin_render_pass<'a>(
     // ctx: WGPUContext,
     encoder: &'a mut wgpu::CommandEncoder,
     target: &'a wgpu::TextureView,
-    view_size: Size,
-    // images: &'a ImageStore<WGPUTexture>,
-    // command_buffer: &'a wgpu::CommandBuffer,
-    clear_color: wgpu::Color,
-    // stencil_texture: &'a mut WGPUStencilTexture,
     stencil_view: &'a wgpu::TextureView,
+    view_size: Size,
+    clear_color: wgpu::Color,
     vertex_buffer: &'a WGPUVec<Vertex>,
     index_buffer: &'a WGPUVec<u32>,
     // uniform_buffer: &'a WGPUVec<Params>,
@@ -134,11 +131,11 @@ fn begin_render_pass<'a>(
                 store: true,
             }),
             // todo: what is this?
-            stencil_ops: None,
-            // stencil_ops: Some(wgpu::Operations {
-            //     load: wgpu::LoadOp::Clear(0),
-            //     store: true,
-            // }), //Option<Operations<u32>>,
+            // stencil_ops: None,
+            stencil_ops: Some(wgpu::Operations {
+                load: wgpu::LoadOp::Clear(0),
+                store: true,
+            }), //Option<Operations<u32>>,
         }),
     };
 
@@ -764,10 +761,10 @@ impl Renderer for WGPU {
                     // target_texture_view.view(),
                     // &frame.output.view,
                     target_view,
+                    stencil_view,
                     view_size,
                     self.clear_color.into(),
                     // &mut self.stencil_texture,
-                    stencil_view,
                     &self.vertex_buffer,
                     &self.index_buffer,
                     // &self.uniform_buffer,
