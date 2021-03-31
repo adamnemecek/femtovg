@@ -107,11 +107,7 @@ fn begin_render_pass<'a>(
     clear_color: wgpu::Color,
     vertex_buffer: &'a WGPUVec<Vertex>,
     index_buffer: &'a WGPUVec<u32>,
-    // uniform_buffer: &'a WGPUVec<Params>,
-
-    // ) -> wgpu::CommandEncoder {
 ) -> wgpu::RenderPass<'a> {
-    // stencil_texture.resize(view_size);
 
     let pass_desc = wgpu::RenderPassDescriptor {
         label: Some("render pass"),
@@ -124,7 +120,6 @@ fn begin_render_pass<'a>(
             },
         }],
         depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachmentDescriptor {
-            // attachment: stencil_texture.view(),
             attachment: stencil_view,
             depth_ops: Some(wgpu::Operations {
                 load: wgpu::LoadOp::Clear(0.0),
@@ -139,12 +134,6 @@ fn begin_render_pass<'a>(
         }),
     };
 
-    // todo set cull mode on the state
-
-    // let mut encoder = ctx
-    //     .device()
-    //     .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
-
     let mut pass = encoder.begin_render_pass(&pass_desc);
     pass.set_viewport(0.0, 0.0, view_size.w as _, view_size.h as _, 0.0, 1.0);
 
@@ -153,13 +142,7 @@ fn begin_render_pass<'a>(
 
     pass.set_index_buffer(index_buffer.as_ref().slice(..), wgpu::IndexFormat::Uint32);
 
-    // pass.set_vertex_buffer(1, buffer_slice);
     pass
-
-    // encoder.set_vertex_buffer(0, vertex_buffer.as_slice());
-    // encoder
-
-    // encoder
 }
 
 /// the things that
