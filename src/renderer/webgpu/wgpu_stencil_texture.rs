@@ -52,8 +52,9 @@ impl WGPUStencilTexture {
         let desc = new_stencil_descriptor(size, &label);
         self.tex.destroy();
 
-        self.tex = self.ctx.device().create_texture(&desc);
-        self.view = self.tex.create_view(&Default::default());
+        let tex = self.ctx.device().create_texture(&desc);
+        self.view = tex.create_view(&Default::default());
+        self.tex = tex;
     }
 
     pub fn view(&self) -> &wgpu::TextureView {

@@ -298,7 +298,8 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // let t = start.elapsed().as_secs_f32();
 
                 canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
-                canvas.clear_rect(0, 0, size.width as u32, size.height as u32, Color::rgbf(0.3, 0.3, 0.3));
+                // Color::rgbf(0.3, 0.3, 0.3)
+                canvas.clear_rect(0, 0, size.width as u32, size.height as u32, Color::white());
 
                 // draw_eyes(&mut canvas, (size.width as f32) - 250.0, 50.0, 150.0, 100.0, mousex, mousey, 0.0);
 
@@ -313,11 +314,11 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // clear_rect(&mut canvas, 0, 0, 100, 100);
                 // clear_rect(&mut canvas, 200, 200, 100, 100);
                 // fill_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
-                // draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
-                let height= 600.0;
+                draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
+                let height = 600.0;
                 let width = 800.0;
                 let t = 0.0;
-                draw_simple_graph(&mut canvas, 0.0, height / 2.0, width, height / 2.0, t);
+                // draw_simple_graph(&mut canvas, 0.0, height / 2.0, width, height / 2.0, t);
                 // draw_rects(&mut canvas);
                 // draw_text(&mut canvas, &fonts, "at", 50.0, 200.0, 100.0, 100.0);
 
@@ -383,7 +384,6 @@ fn draw_simple_graph<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32
         Color::rgba(0, 160, 192, 0),
         Color::rgba(0, 160, 192, 64),
     );
-
 
     let mut path = Path::new();
     path.move_to(sx[0], sy[0]);

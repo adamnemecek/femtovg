@@ -504,10 +504,12 @@ impl Renderer for WGPU {
         self.view_size = size;
         self.dpi = dpi;
 
+        self.stencil_texture.resize(size);
         // we need to flush all the bind groups since they are bound to particular
         self.bind_group_cache.clear();
         self.swap_chain.resize(size);
-        self.stencil_texture.resize(size);
+
+        // self.stencil_texture = WGPUStencilTexture::new(&self.ctx, size);
         // self.pipeline_cache.clear();
     }
 
