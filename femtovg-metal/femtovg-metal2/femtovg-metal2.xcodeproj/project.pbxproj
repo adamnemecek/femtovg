@@ -23,7 +23,7 @@
 			buildPhases = (
 			);
 			buildToolPath = /Users/adamnemecek/.cargo/bin/cargo;
-			buildWorkingDirectory = /Users/adamnemecek/Code/femtovg3;
+			buildWorkingDirectory = "/Users/adamnemecek/Code/wgpu-rs5";
 			dependencies = (
 			);
 			name = "femtovg-metal2";

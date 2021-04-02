@@ -141,7 +141,7 @@ impl WGPUTexture {
     }
 
     pub fn write_texture(&self, extent: wgpu::Extent3d, data: &[u8]) {
-        let layout = wgpu::TextureDataLayout { ..Default::default() };
+        // let layout = wgpu::TextureDataLayout { ..Default::default() };
         // self.context.queue().write_texture(&self.tex, data, layout, extent, )
         todo!()
     }
@@ -171,16 +171,31 @@ impl WGPUTexture {
             y: y as _,
             z: 0,
         };
-        let copy_view = wgpu::TextureCopyView {
+
+        let z = std::num::NonZeroU32::new(10);
+        // let copy_view = wgpu::ImageDataLayout {
+        //     mip_level: 0,
+        //     origin,
+        //     texture: self.tex(),
+        // };
+
+        let copy_view = wgpu::ImageCopyTexture {
             mip_level: 0,
             origin,
             texture: self.tex(),
         };
+        // let copy_view = wgpu::ImageDataLayout {
+        //     offset: 0,
+        //     bytes_per_row: Some(std::num::NonZeroU32::new(0)).unwrap(),
+        //     // texture: self.tex(),
+        //     // rows_per_image: Some(std::num::NonZeroU32::new(0)).unwrap(),
+        //     rows_per_image: None,
+        // };
 
         match src {
             ImageSource::Gray(data) => {
-                let data_layout = wgpu::TextureDataLayout {
-                    bytes_per_row: width as _,
+                let data_layout = wgpu::ImageDataLayout {
+                    bytes_per_row: Some(std::num::NonZeroU32::new(4 * width as u32)).unwrap(),
                     ..Default::default()
                 };
 
@@ -189,8 +204,8 @@ impl WGPUTexture {
                     .write_texture(copy_view, data.buf().as_bytes(), data_layout, size.into())
             }
             ImageSource::Rgba(data) => {
-                let data_layout = wgpu::TextureDataLayout {
-                    bytes_per_row: (4 * width) as _,
+                let data_layout = wgpu::ImageDataLayout {
+                    bytes_per_row: Some(std::num::NonZeroU32::new(4 * width as u32)).unwrap(),
                     ..Default::default()
                 };
 

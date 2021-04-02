@@ -18,12 +18,7 @@ impl Color {
 
     /// Returns a color value from red, green, blue float values. Alpha will be set to 1.0.
     pub fn rgbf(r: f32, g: f32, b: f32) -> Self {
-        Self {
-            r: r,
-            g: g,
-            b: b,
-            a: 1.0,
-        }
+        Self { r, g, b, a: 1.0 }
     }
 
     /// Returns a color value from red, green, blue and alpha char values.

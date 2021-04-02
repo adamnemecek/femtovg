@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use crate::BlendFactor;
+
 use super::{
     Color,
     Rect,
@@ -187,6 +189,18 @@ fn create_clear_rect_pipeline(
     stencil_format: wgpu::TextureFormat,
     layout: &wgpu::PipelineLayout,
 ) -> wgpu::RenderPipeline {
+    let b = wgpu::BlendComponent {
+        src_factor: wgpu::BlendFactor::One,
+        dst_factor: wgpu::BlendFactor::One,
+        operation: wgpu::BlendOperation::Add,
+    };
+
+    let c = wgpu::BlendComponent {
+        src_factor: wgpu::BlendFactor::One,
+        dst_factor: wgpu::BlendFactor::OneMinusBlendColor,
+        operation: wgpu::BlendOperation::Add,
+    };
+
     ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label: Some("clear_rect"),
         layout: Some(layout),
@@ -202,6 +216,19 @@ fn create_clear_rect_pipeline(
             entry_point: "fragment_clear_rect",
             //todo!
             targets: &[format.into()],
+            // targets: &[wgpu::ColorTargetState {
+            //     // format.into()
+            //     format: format.into(),
+            //     // blend: Some(wgpu::BlendState {
+            //     //     color: wgpu::BlendComponent::REPLACE,
+            //     //     alpha: wgpu::BlendComponent::REPLACE,
+            //     // }),
+            //     blend: Some(wgpu::BlendState {
+            //         color: b,
+            //         alpha: c,
+            //     }),
+            //     write_mask: wgpu::ColorWrite::ALL,
+            // }],
         }),
         primitive: wgpu::PrimitiveState {
             topology: wgpu::PrimitiveTopology::TriangleStrip,

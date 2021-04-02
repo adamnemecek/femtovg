@@ -59,7 +59,10 @@ use self::VecExt;
 // use fnv::FnvHashMap;
 use imgref::ImgVec;
 use rgb::RGBA8;
-use std::borrow::Cow;
+use std::{
+    borrow::Cow,
+    process::exit,
+};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct WGPUBlend {
@@ -108,19 +111,18 @@ fn begin_render_pass<'a>(
     vertex_buffer: &'a WGPUVec<Vertex>,
     index_buffer: &'a WGPUVec<u32>,
 ) -> wgpu::RenderPass<'a> {
-
     let pass_desc = wgpu::RenderPassDescriptor {
         label: Some("render pass"),
-        color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
-            attachment: target,
+        color_attachments: &[wgpu::RenderPassColorAttachment {
+            view: target,
             resolve_target: None, // todo! what's this?
             ops: wgpu::Operations {
                 load: wgpu::LoadOp::Clear(clear_color),
                 store: true,
             },
         }],
-        depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachmentDescriptor {
-            attachment: stencil_view,
+        depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+            view: stencil_view,
             depth_ops: Some(wgpu::Operations {
                 load: wgpu::LoadOp::Clear(0.0),
                 store: true,
@@ -175,6 +177,8 @@ pub struct WGPU {
     clear_rect_buffer: WGPUVec<ClearRect>,
     clear_rect_bind_group: wgpu::BindGroup,
     clear_rect_bind_group_layout: wgpu::BindGroupLayout,
+
+    frame: usize,
 }
 
 #[derive(Clone, Copy)]
@@ -381,13 +385,16 @@ impl WGPU {
             flags,
         });
 
+        // let clear_color = Color::rgba(0, 0, 0, 0);
         let clear_color = Color::white();
+        // let clear_color = Color::red();
         let pipeline_cache = WGPUPipelineCache::new(ctx, pipeline_layout, clear_rect_pipeline_layout, shader);
         let bind_group_cache = WGPUBindGroupCache::new();
         let swap_chain = WGPUSwapChain::new(ctx, view_size);
         let pseudo_texture = WGPUTexture::new_pseudo_texture(ctx).unwrap();
 
         Self {
+            frame: 0,
             dpi: 1.0,
             clear_color,
             antialias: true,
@@ -713,6 +720,18 @@ impl Renderer for WGPU {
             set_render_target: usize,
         }
 
+        impl Counter {
+            fn clear(&mut self) {
+                self.convex_fill = 0;
+                self.concave_fill = 0;
+                self.stroke = 0;
+                self.stencil_stroke = 0;
+                self.triangles = 0;
+                self.clear_rect = 0;
+                self.set_render_target = 0;
+            }
+        }
+
         let mut counter = Counter::default();
 
         // ///
@@ -896,6 +915,7 @@ impl Renderer for WGPU {
                                         pass.set_pipeline(s.fringes_evenodd());
                                     }
                                 }
+                                let _ = pass.set_vertex_value(0, &view_size);
 
                                 for drawable in &cmd.drawables {
                                     if let Some((start, count)) = drawable.stroke_verts {
@@ -914,6 +934,8 @@ impl Renderer for WGPU {
                                     pass.set_pipeline(s.fills_evenodd());
                                 }
                             }
+
+                            let _ = pass.set_vertex_value(0, &view_size);
 
                             if let Some((start, count)) = cmd.triangles_verts {
                                 // pass.
@@ -1047,6 +1069,8 @@ impl Renderer for WGPU {
                             pass.cfg_pop_debug_group();
                         }
                         CommandType::SetRenderTarget(target) => {
+                            // println!("render end");
+
                             counter.set_render_target += 1;
 
                             if render_target != *target {
@@ -1071,8 +1095,11 @@ impl Renderer for WGPU {
                 self.ctx.queue().submit(Some(encoder.finish()));
             }
 
-            // println!("render end");
-            println!("counter {:?}", counter);
+            self.frame += 1;
+
+            // if self.frame == 4 {
+            //     exit(0);
+            // }
         }
     }
 
@@ -1102,5 +1129,13 @@ impl From<Color> for wgpu::Color {
             b: c.b as _,
             a: c.a as _,
         }
+
+        // let v = 255.0 / 100.0;
+        // Self {
+        //     r: (c.r as f64) * v,
+        //     g: (c.g as f64) * v,
+        //     b: (c.b as f64) * v,
+        //     a: (c.a as f64),
+        // }
     }
 }

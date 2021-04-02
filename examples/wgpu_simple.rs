@@ -314,21 +314,23 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // clear_rect(&mut canvas, 0, 0, 100, 100);
                 // clear_rect(&mut canvas, 200, 200, 100, 100);
                 // fill_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
-                // draw_text(&mut canvas, &fonts, "tea", 0.0, 0.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "tea", 0.0, 0.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "qwe", 0.0, 0.0, 100.0, 300.0);
+                draw_text(&mut canvas, &fonts, "poi", 0.0, 0.0, 100.0, 500.0);
 
                 let height = 600.0;
                 let width = 800.0;
 
-                draw_paragraph(
-                    &mut canvas,
-                    fonts.regular,
-                    width - 450.0,
-                    50.0,
-                    150.0,
-                    100.0,
-                    mousex,
-                    mousey,
-                );
+                // draw_paragraph(
+                //     &mut canvas,
+                //     fonts.regular,
+                //     width - 450.0,
+                //     50.0,
+                //     150.0,
+                //     100.0,
+                //     mousex,
+                //     mousey,
+                // );
 
                 let t = 0.0;
                 // draw_simple_graph(&mut canvas, 0.0, height / 2.0, width, height / 2.0, t);
@@ -496,6 +498,7 @@ fn draw_paragraph<T: Renderer>(
 ) {
     let text = "abcdefghijklmnqrtcxzs";
     // let text = "abcdefghijkls";
+    let text = "abcdefghijklmno";
 
     canvas.save();
 
