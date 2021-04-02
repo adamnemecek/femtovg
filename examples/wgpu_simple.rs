@@ -210,9 +210,11 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
     let mut mousey = 0.0;
     let mut dragging = false;
 
+    ctx.device().start_capture();
+
     // let mut perf = PerfGraph::new();
 
-    let mut frame = 0;
+    let mut frame_count = 0;
 
     event_loop.run(move |event, _, control_flow| {
         // #[cfg(not(target_arch = "wasm32"))]
@@ -284,7 +286,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 _ => (),
             },
             Event::RedrawRequested(_) => {
-                frame += 1;
+                frame_count += 1;
 
                 let now = Instant::now();
                 let dt = (now - prevt).as_secs_f32();
@@ -340,6 +342,10 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // stroke_rect(&mut canvas, 200.0, 200.0, 100.0, 100.0);
 
                 canvas.flush();
+
+                if frame_count == 2 {
+                    ctx.device().stop_capture();
+                }
                 // #[cfg(not(target_arch = "wasm32"))]
                 // windowed_context.swap_buffers().unwrap();
                 // todo!("swap buffers");
