@@ -189,17 +189,17 @@ fn create_clear_rect_pipeline(
     stencil_format: wgpu::TextureFormat,
     layout: &wgpu::PipelineLayout,
 ) -> wgpu::RenderPipeline {
-    let b = wgpu::BlendComponent {
-        src_factor: wgpu::BlendFactor::One,
-        dst_factor: wgpu::BlendFactor::One,
-        operation: wgpu::BlendOperation::Add,
-    };
+    // let b = wgpu::BlendComponent {
+    //     src_factor: wgpu::BlendFactor::One,
+    //     dst_factor: wgpu::BlendFactor::One,
+    //     operation: wgpu::BlendOperation::Add,
+    // };
 
-    let c = wgpu::BlendComponent {
-        src_factor: wgpu::BlendFactor::One,
-        dst_factor: wgpu::BlendFactor::OneMinusBlendColor,
-        operation: wgpu::BlendOperation::Add,
-    };
+    // let c = wgpu::BlendComponent {
+    //     src_factor: wgpu::BlendFactor::One,
+    //     dst_factor: wgpu::BlendFactor::OneMinusBlendColor,
+    //     operation: wgpu::BlendOperation::Add,
+    // };
 
     ctx.device().create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label: Some("clear_rect"),

@@ -59,10 +59,6 @@ use self::VecExt;
 // use fnv::FnvHashMap;
 use imgref::ImgVec;
 use rgb::RGBA8;
-use std::{
-    borrow::Cow,
-    process::exit,
-};
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct WGPUBlend {
@@ -381,7 +377,7 @@ impl WGPU {
 
         let shader = ctx.device().create_shader_module(&wgpu::ShaderModuleDescriptor {
             label: None,
-            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("webgpu/shader.wgsl"))),
+            source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Borrowed(include_str!("webgpu/shader.wgsl"))),
             flags,
         });
 

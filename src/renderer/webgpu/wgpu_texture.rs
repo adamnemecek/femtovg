@@ -172,7 +172,7 @@ impl WGPUTexture {
             z: 0,
         };
 
-        let z = std::num::NonZeroU32::new(10);
+        // let z = std::num::NonZeroU32::new(10);
         // let copy_view = wgpu::ImageDataLayout {
         //     mip_level: 0,
         //     origin,
@@ -195,7 +195,7 @@ impl WGPUTexture {
         match src {
             ImageSource::Gray(data) => {
                 let data_layout = wgpu::ImageDataLayout {
-                    bytes_per_row: Some(std::num::NonZeroU32::new(4 * width as u32)).unwrap(),
+                    bytes_per_row: Some(std::num::NonZeroU32::new(width as u32)).unwrap(),
                     ..Default::default()
                 };
 
