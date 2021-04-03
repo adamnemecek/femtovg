@@ -113,7 +113,7 @@ fn begin_render_pass<'a>(
             view: target,
             resolve_target: None, // todo! what's this?
             ops: wgpu::Operations {
-                load: wgpu::LoadOp::Clear(clear_color),
+                load: wgpu::LoadOp::Load,
                 store: true,
             },
         }],
@@ -130,6 +130,10 @@ fn begin_render_pass<'a>(
                 load: wgpu::LoadOp::Clear(0),
                 store: true,
             }), //Option<Operations<u32>>,
+            // stencil_ops: Some(wgpu::Operations {
+            //     load: wgpu::LoadOp::Clear(0),
+            //     store: true,
+            // }), //Option<Operations<u32>>,
         }),
     };
 
