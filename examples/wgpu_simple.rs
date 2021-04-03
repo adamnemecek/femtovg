@@ -156,7 +156,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
     };
 
     let image = canvas
-        .load_image_mem(&resource!("examples/assets/images/image1.jpg"), ImageFlags::empty())
+        .load_image_mem(&resource!("examples/assets/images/image4.jpg"), ImageFlags::empty())
         .unwrap();
 
     //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
