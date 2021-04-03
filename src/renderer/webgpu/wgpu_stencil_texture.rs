@@ -21,7 +21,7 @@ impl WGPUStencilTexture {
         let label = label(gen);
         let desc = new_stencil_descriptor(size, &label);
 
-        println!("reallocating texture");
+        // println!("reallocating texture");
         let tex = ctx.device().create_texture(&desc);
         let view = tex.create_view(&Default::default());
         Self {
@@ -41,7 +41,8 @@ impl WGPUStencilTexture {
         if size == self.size {
             return;
         }
-        println!("reallocating texture");
+        println!("reallocating stencil texture {:?}", std::time::Instant::now());
+
         // if self.size().contains(&size) {
         //     return;
         // }
@@ -55,6 +56,7 @@ impl WGPUStencilTexture {
         let tex = self.ctx.device().create_texture(&desc);
         self.view = tex.create_view(&Default::default());
         self.tex = tex;
+        self.size = size;
     }
 
     pub fn view(&self) -> &wgpu::TextureView {
