@@ -613,6 +613,10 @@ where
 
     // Transforms
 
+    pub fn premultiply_transform(&mut self, transform: Transform2D) {
+        self.state_mut().transform.premultiply(&transform);
+    }
+
     /// Resets current transform to a identity matrix.
     pub fn reset_transform(&mut self) {
         self.state_mut().transform = Transform2D::identity();
