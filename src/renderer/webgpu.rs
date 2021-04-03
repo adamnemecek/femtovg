@@ -130,10 +130,10 @@ fn begin_render_pass<'a>(
                 load: wgpu::LoadOp::Clear(0),
                 store: true,
             }), //Option<Operations<u32>>,
-            // stencil_ops: Some(wgpu::Operations {
-            //     load: wgpu::LoadOp::Clear(0),
-            //     store: true,
-            // }), //Option<Operations<u32>>,
+                // stencil_ops: Some(wgpu::Operations {
+                //     load: wgpu::LoadOp::Clear(0),
+                //     store: true,
+                // }), //Option<Operations<u32>>,
         }),
     };
 

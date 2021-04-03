@@ -17,7 +17,6 @@ pub struct WGPUSwapChain {
     size: Size,
     inner: wgpu::SwapChain,
     format: wgpu::TextureFormat,
-
 }
 
 impl WGPUSwapChain {

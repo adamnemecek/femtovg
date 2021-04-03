@@ -155,6 +155,10 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
             .expect("Cannot add font"),
     };
 
+    let image = canvas
+        .load_image_mem(&resource!("examples/assets/images/image1.jpg"), ImageFlags::empty())
+        .unwrap();
+
     //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
 
     //let image_id = canvas.create_image_file("examples/assets/RoomRender.jpg", ImageFlags::FLIP_Y).expect("Cannot create image");
@@ -286,8 +290,6 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 _ => (),
             },
             Event::RedrawRequested(_) => {
-
-
                 let now = Instant::now();
                 let dt = (now - prevt).as_secs_f32();
                 prevt = now;
@@ -318,8 +320,9 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // clear_rect(&mut canvas, 0, 0, 100, 100);
                 // clear_rect(&mut canvas, 200, 200, 100, 100);
                 // fill_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
-                draw_text(&mut canvas, &fonts, "tea", 0.0, 0.0, 100.0, 100.0);
+                // draw_text(&mut canvas, &fonts, "tea", 0.0, 0.0, 100.0, 100.0);
                 draw_text(&mut canvas, &fonts, "qwe", 200.0, 0.0, 100.0, 300.0);
+                draw_image(&mut canvas, 30.0, 30.0, &[image]);
                 // draw_text( mut canvas, &fonts, "poi", 0.0, 0.0, 100.0, 500.0);
 
                 let height = 600.0;
@@ -364,6 +367,15 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
             _ => (),
         }
     });
+}
+
+fn draw_image(canvas: &mut Canvas<impl Renderer>, x: f32, y: f32, images: &[ImageId]) {
+    let (w, h) = canvas.image_size(images[0]).unwrap();
+
+    let paint = Paint::image(images[0], x, y, w as f32, h as f32, 0.0, 1.0);
+    let mut path = Path::new();
+    path.rect(x, y, w as _, h as _);
+    canvas.fill_path(&mut path, paint);
 }
 
 // fn draw_rects(canvas: &mut Canvas<impl Renderer>) {
