@@ -210,7 +210,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
     let mut mousey = 0.0;
     let mut dragging = false;
 
-    ctx.device().start_capture();
+    // ctx.device().start_capture();
 
     // let mut perf = PerfGraph::new();
 
@@ -303,6 +303,8 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 let bg_color = Color::rgbf(0.3, 0.3, 0.3);
                 canvas.clear_rect(0, 0, size.width as u32, size.height as u32, bg_color);
 
+                // canvas.clear_rect(0, 0, 100, 100, bg_color);
+
                 // draw_eyes(&mut canvas, (size.width as f32) - 250.0, 50.0, 150.0, 100.0, mousex, mousey, 0.0);
 
                 // let height = size.height as f32;
@@ -317,8 +319,8 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // clear_rect(&mut canvas, 200, 200, 100, 100);
                 // fill_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
                 draw_text(&mut canvas, &fonts, "tea", 0.0, 0.0, 100.0, 100.0);
-                draw_text(&mut canvas, &fonts, "qwe", 0.0, 0.0, 100.0, 300.0);
-                draw_text(&mut canvas, &fonts, "poi", 0.0, 0.0, 100.0, 500.0);
+                draw_text(&mut canvas, &fonts, "qwe", 200.0, 0.0, 100.0, 300.0);
+                // draw_text( mut canvas, &fonts, "poi", 0.0, 0.0, 100.0, 500.0);
 
                 let height = 600.0;
                 let width = 800.0;
@@ -343,9 +345,9 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
 
                 canvas.flush();
 
-                if frame_count == 2 {
-                    ctx.device().stop_capture();
-                }
+                // if frame_count == 2 {
+                //     ctx.device().stop_capture();
+                // }
                 // #[cfg(not(target_arch = "wasm32"))]
                 // windowed_context.swap_buffers().unwrap();
                 // todo!("swap buffers");

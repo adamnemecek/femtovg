@@ -119,6 +119,7 @@ fn begin_render_pass<'a>(
         }],
         depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
             view: stencil_view,
+            // depth_ops: None,
             depth_ops: Some(wgpu::Operations {
                 load: wgpu::LoadOp::Clear(0.0),
                 store: true,
@@ -382,7 +383,7 @@ impl WGPU {
         });
 
         // let clear_color = Color::rgba(0, 0, 0, 0);
-        let clear_color = Color::white();
+        let clear_color = Color::green();
         // let clear_color = Color::red();
         let pipeline_cache = WGPUPipelineCache::new(ctx, pipeline_layout, clear_rect_pipeline_layout, shader);
         let bind_group_cache = WGPUBindGroupCache::new();

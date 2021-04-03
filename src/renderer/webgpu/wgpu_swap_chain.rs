@@ -13,10 +13,11 @@ fn sc_desc(format: wgpu::TextureFormat, size: Size) -> wgpu::SwapChainDescriptor
 }
 
 pub struct WGPUSwapChain {
+    ctx: WGPUContext,
     size: Size,
     inner: wgpu::SwapChain,
     format: wgpu::TextureFormat,
-    ctx: WGPUContext,
+
 }
 
 impl WGPUSwapChain {

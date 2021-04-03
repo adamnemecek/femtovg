@@ -211,23 +211,34 @@ fn rect_vert_cw(
     const bottom: f32 = y;
     const top: f32 = y + h;
 
-    switch (vid) {
-        case 0: {
-            pos = vec2<f32>(right, top);
-        }
-        case 1: {
-            pos = vec2<f32>(left, top);
-        }
-        case 2: {
-            pos = vec2<f32>(right, bottom);
-        }
-        case 3: {
-            pos = vec2<f32>(left, bottom);
-        }
-        default: {
-            pos = vec2<f32>(0.0, 0.0);
-        }
-    };
+    // switch (vid) {
+    //     case 0: {
+    //         pos = vec2<f32>(right, top);
+    //     }
+    //     case 1: {
+    //         pos = vec2<f32>(left, top);
+    //     }
+    //     case 2: {
+    //         pos = vec2<f32>(right, bottom);
+    //     }
+    //     case 3: {
+    //         pos = vec2<f32>(left, bottom);
+    //     }
+    //     default: {
+    //         pos = vec2<f32>(0.0, 0.0);
+    //     }
+    // };
+    if (vid == 0) {
+        pos = vec2<f32>(right, top);
+    } elseif (vid == 1) {
+        pos = vec2<f32>(left, top);
+    } elseif (vid == 2) {
+        pos = vec2<f32>(right, bottom);
+    } elseif (vid == 3) {
+        pos = vec2<f32>(left, bottom);
+    } else {
+        pos = vec2<f32>(0.0, 0.0);
+    }
     // de
     return pos;
 }

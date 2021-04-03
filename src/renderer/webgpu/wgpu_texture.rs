@@ -14,6 +14,10 @@ use super::{
     WGPUTextureExt,
 };
 
+// use std::sync::Once;
+
+// static INSTANCE: Once<usize> = Once::new();
+
 use rgb::ComponentBytes;
 
 impl From<PixelFormat> for wgpu::TextureFormat {
