@@ -22,7 +22,8 @@ pub struct WGPUSwapChain {
 
 impl WGPUSwapChain {
     pub fn new(ctx: &WGPUContext, size: Size) -> Self {
-        let format = ctx.get_swap_chain_preferred_format();
+        // let format = ctx.get_swap_chain_preferred_format();
+        let format = wgpu::TextureFormat::Bgra8Unorm;
 
         let desc = sc_desc(format, size);
         let inner = ctx.device().create_swap_chain(ctx.surface(), &desc);

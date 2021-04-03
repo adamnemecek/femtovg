@@ -382,8 +382,8 @@ impl WGPU {
             flags,
         });
 
-        // let clear_color = Color::rgba(0, 0, 0, 0);
-        let clear_color = Color::green();
+        let clear_color = Color::rgba(0, 0, 0, 0);
+        // let clear_color = Color::red();
         // let clear_color = Color::red();
         let pipeline_cache = WGPUPipelineCache::new(ctx, pipeline_layout, clear_rect_pipeline_layout, shader);
         let bind_group_cache = WGPUBindGroupCache::new();
