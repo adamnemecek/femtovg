@@ -488,7 +488,7 @@ impl Renderer for WGPU {
     type Image = WGPUTexture;
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
         let size = Size::new(width, height);
-        println!("set size {:?}", size);
+        // println!("set size {:?}", size);
         self.view_size = size;
         self.dpi = dpi;
 
@@ -542,7 +542,7 @@ impl Renderer for WGPU {
         self.temp_uniform_buffer.clear();
         self.temp_clear_rect_buffer.clear();
 
-        println!("len {:?}", self.temp_uniform_buffer.len());
+        // println!("len {:?}", self.temp_uniform_buffer.len());
 
         self.index_ranges.clear();
 
@@ -605,7 +605,7 @@ impl Renderer for WGPU {
                 CommandType::Stroke { params } => {
                     // println!("set uniforms stroke");
                     self.temp_uniform_buffer.push(params);
-                    println!("len {:?}", self.temp_uniform_buffer.len());
+                    // println!("len {:?}", self.temp_uniform_buffer.len());
                 }
                 CommandType::StencilStroke { params1, params2 } => {
                     // println!("set uniforms stencil stroke");
@@ -658,7 +658,7 @@ impl Renderer for WGPU {
         // println!("verts len {:?}", verts.len());
         {
             self.vertex_buffer.resize(verts.len());
-            println!("resized to {:?}", self.vertex_buffer.capacity());
+            // println!("resized to {:?}", self.vertex_buffer.capacity());
             self.ctx.queue().sync_buffer(self.vertex_buffer.as_ref(), verts);
         }
 
@@ -756,8 +756,8 @@ impl Renderer for WGPU {
                     }
                 };
 
-                println!("view_size {:?}", view_size);
-                println!("render target {:?}", render_target);
+                // println!("view_size {:?}", view_size);
+                // println!("render target {:?}", render_target);
 
                 let mut pass = begin_render_pass(
                     &mut encoder,
