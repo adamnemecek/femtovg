@@ -176,25 +176,11 @@ impl WGPUTexture {
             z: 0,
         };
 
-        // let z = std::num::NonZeroU32::new(10);
-        // let copy_view = wgpu::ImageDataLayout {
-        //     mip_level: 0,
-        //     origin,
-        //     texture: self.tex(),
-        // };
-
         let copy_view = wgpu::ImageCopyTexture {
             mip_level: 0,
             origin,
             texture: self.tex(),
         };
-        // let copy_view = wgpu::ImageDataLayout {
-        //     offset: 0,
-        //     bytes_per_row: Some(std::num::NonZeroU32::new(0)).unwrap(),
-        //     // texture: self.tex(),
-        //     // rows_per_image: Some(std::num::NonZeroU32::new(0)).unwrap(),
-        //     rows_per_image: None,
-        // };
 
         match src {
             ImageSource::Gray(data) => {

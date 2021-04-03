@@ -103,7 +103,7 @@ fn begin_render_pass<'a>(
     target: &'a wgpu::TextureView,
     stencil_view: &'a wgpu::TextureView,
     view_size: Size,
-    clear_color: wgpu::Color,
+    _clear_color: wgpu::Color,
     vertex_buffer: &'a WGPUVec<Vertex>,
     index_buffer: &'a WGPUVec<u32>,
 ) -> wgpu::RenderPass<'a> {
