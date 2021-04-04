@@ -22,6 +22,7 @@ use femtovg::{
     renderer::{
         WGPUContext,
         WGPUInstance,
+        WGPUSwapChain,
         WGPU,
     },
     Align,

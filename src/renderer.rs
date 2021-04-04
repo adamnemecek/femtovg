@@ -21,6 +21,7 @@ mod webgpu;
 pub use webgpu::{
     WGPUContext,
     WGPUInstance,
+    WGPUSwapChain,
     WGPU,
 };
 
