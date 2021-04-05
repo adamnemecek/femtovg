@@ -1,4 +1,5 @@
 use std::f32::consts::PI;
+use std::rc::Rc;
 
 use resource::resource;
 
@@ -19,12 +20,7 @@ use winit::window::WindowBuilder;
 //use glutin::{GlRequest, Api};
 
 use femtovg::{
-    renderer::{
-        WGPUContext,
-        WGPUInstance,
-        WGPUSwapChain,
-        WGPU,
-    },
+    renderer::WGPU,
     Align,
     Baseline,
     Canvas,
@@ -52,6 +48,37 @@ struct Fonts {
     icons: FontId,
 }
 
+// Creating some of the wgpu types requires async code
+async fn build_wgpu_device(window: &winit::window::Window) -> Option<(wgpu::Adapter, wgpu::Surface, wgpu::Device, wgpu::Queue)> {
+    // The instance is a handle to our GPU
+    // BackendBit::PRIMARY => Vulkan + Metal + DX12 + Browser WebGPU
+    let instance = wgpu::Instance::new(wgpu::BackendBit::PRIMARY);
+    let surface = unsafe { instance.create_surface(window) };
+    let adapter = instance
+        .request_adapter(&wgpu::RequestAdapterOptions {
+            power_preference: wgpu::PowerPreference::LowPower,
+            compatible_surface: Some(&surface),
+        })
+        .await?;
+    
+    let (device, queue) = adapter
+        .request_device(
+            &wgpu::DeviceDescriptor {
+                features: wgpu::Features::PUSH_CONSTANTS,
+                limits: wgpu::Limits {
+                    max_push_constant_size: 8, // must be at-least 8
+                    ..wgpu::Limits::default()
+                },
+                label: None,
+            },
+            None, // Trace path
+        )
+        .await
+        .ok()?;
+    
+    Some((adapter, surface, device, queue))
+}
+
 fn main() {
     // This provides better error messages in debug mode.
     // It's disabled in release mode so it doesn't bloat up the file size.
@@ -60,88 +87,34 @@ fn main() {
 
     let event_loop = EventLoop::new();
 
-    // #[cfg(not(target_arch = "wasm32"))]
-    // let (renderer, windowed_context) = {
-    //     use glutin::ContextBuilder;
-
-    //     let wb = WindowBuilder::new()
-    //         .with_inner_size(winit::dpi::PhysicalSize::new(1000, 600))
-    //         .with_title("femtovg demo");
-
-    //     //let windowed_context = ContextBuilder::new().with_gl(GlRequest::Specific(Api::OpenGlEs, (2, 0))).with_vsync(false).build_windowed(wb, &el).unwrap();
-    //     //let windowed_context = ContextBuilder::new().with_vsync(false).with_multisampling(8).build_windowed(wb, &el).unwrap();
-    //     let windowed_context = ContextBuilder::new().with_vsync(false).build_windowed(wb, &el).unwrap();
-    //     let windowed_context = unsafe { windowed_context.make_current().unwrap() };
-
-    //     let renderer =
-    //         OpenGl::new(|s| windowed_context.get_proc_address(s) as *const _).expect("Cannot create renderer");
-
-    //     (renderer, windowed_context)
-    // // };
-
-    // let window = winit::window::Window::new(&event_loop).unwrap();
-
-    // let size = winit::dpi::LogicalSize::new(512, 512);
-    let size = winit::dpi::LogicalSize::new(1024, 800);
-    let window = winit::window::WindowBuilder::new()
-        .with_inner_size(size)
+    #[cfg(not(target_arch = "wasm32"))]
+    let window = WindowBuilder::new()
+        .with_inner_size(winit::dpi::LogicalSize::new(1024, 800))
         .with_title("demo")
         .build(&event_loop)
         .unwrap();
 
-    pollster::block_on(run(event_loop, window));
-    // #[cfg(target_arch = "wasm32")]
-    // let (renderer, window) = {
-    //     use wasm_bindgen::JsCast;
+    let (adapter, surface, device, queue) = futures::executor::block_on(build_wgpu_device(&window)).unwrap();
 
-    //     let canvas = web_sys::window()
-    //         .unwrap()
-    //         .document()
-    //         .unwrap()
-    //         .get_element_by_id("canvas")
-    //         .unwrap()
-    //         .dyn_into::<web_sys::HtmlCanvasElement>()
-    //         .unwrap();
+    let mut staging_belt = wgpu::util::StagingBelt::new(10 * 1024);
+    let mut local_pool = futures::executor::LocalPool::new();
 
-    //     use winit::platform::web::WindowBuilderExtWebSys;
+    let sc_desc = wgpu::SwapChainDescriptor {
+        usage: wgpu::TextureUsage::RENDER_ATTACHMENT,
+        format: wgpu::TextureFormat::Bgra8UnormSrgb,
+        width: 1000,
+        height: 600,
+        present_mode: wgpu::PresentMode::Mailbox,
+    };
+    let swap_chain = device.create_swap_chain(&surface, &sc_desc);
 
-    //     let renderer = OpenGl::new_from_html_canvas(&canvas).expect("Cannot create renderer");
-
-    //     let window = WindowBuilder::new().with_canvas(Some(canvas)).build(&el).unwrap();
-
-    //     (renderer, window)
-    // };
-}
-
-async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
     let size = window.inner_size();
-    // let instance = wgpu::Instance::new(wgpu::BackendBit::all());
-    // let surface = unsafe { instance.create_surface(&window) };
-    // let adapter = instance
-    //     .request_adapter(&wgpu::RequestAdapterOptions {
-    //         power_preference: wgpu::PowerPreference::default(),
-    //         // Request an adapter which can render to our surface
-    //         compatible_surface: Some(&surface),
-    //     })
-    //     .await
-    //     .expect("Failed to find an appropriate adapter");
+    let view_size = Size::new(size.width as _, size.height as _);
 
-    // Create the logical device and command queue
-    // let (device, queue) = adapter
-    //     .request_device(
-    //         &wgpu::DeviceDescriptor {
-    //             label: None,
-    //             features: wgpu::Features::empty(),
-    //             limits: wgpu::Limits::default(),
-    //         },
-    //         None,
-    //     )
-    //     .await
-    //     .expect("Failed to create device");
+    let device = Rc::new(device);
+    let queue = Rc::new(queue);
 
-    let instance = WGPUInstance::from_window(&window).await.unwrap();
-    let ctx = WGPUContext::new(instance).await.unwrap();
-    let renderer = WGPU::new(&ctx, Size::new(size.width as _, size.height as _));
+    let renderer = WGPU::new(Rc::clone(&device), Rc::clone(&queue), &adapter,sc_desc.format, view_size);
 
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
@@ -214,6 +187,8 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
 
     let mut perf = PerfGraph::new();
 
+    let mut do_screenshot = false;
+
     event_loop.run(move |event, _, control_flow| {
         // #[cfg(not(target_arch = "wasm32"))]
         // let window = windowed_context.window();
@@ -276,14 +251,14 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                         canvas.delete_image(screenshot_image_id);
                     }
 
-                    if let Ok(image) = canvas.screenshot() {
-                        screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
-                    }
+                    do_screenshot = true;
                 }
                 WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                 _ => (),
             },
             Event::RedrawRequested(_) => {
+                use futures::task::SpawnExt;
+
                 let now = Instant::now();
                 let dt = (now - prevt).as_secs_f32();
                 prevt = now;
@@ -422,10 +397,39 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
 
                 //canvas.restore();
 
-                canvas.flush();
+                let mut frame = match swap_chain.get_current_frame() {
+                    Ok(frame) => frame,
+                    Err(_) => {
+                        // Missed frame. Try again next frame.
+                        return;
+                    }
+                };
+
+                canvas.flush(&mut frame);
+
+                if do_screenshot {
+                    if let Ok(image) = canvas.screenshot(&mut frame) {
+                        screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
+                    }
+
+                    do_screenshot = false;
+                }
+                
+
                 // #[cfg(not(target_arch = "wasm32"))]
                 // windowed_context.swap_buffers().unwrap();
                 // todo!("swap buffers");
+
+                // Submit work
+                staging_belt.finish();
+
+                // Recall staging buffers
+                local_pool
+                    .spawner()
+                    .spawn(staging_belt.recall())
+                    .expect("Failed to recall staging belt");
+
+                local_pool.run_until_stalled();
             }
             Event::MainEventsCleared => {
                 //scroll = 1.0;

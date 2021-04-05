@@ -2,32 +2,18 @@
 
 use super::{
     ClearRect,
-    WGPUContext,
     WGPUTexture,
-    WGPUVar,
     WGPUVec,
 };
 
 use crate::{
-    renderer::{
-        ImageId,
-        Vertex,
-    },
-    BlendFactor,
-    Color,
-    CompositeOperationState,
-    ErrorKind,
-    FillRule,
-    ImageInfo,
-    ImageSource,
+    renderer::ImageId,
     ImageStore,
     Params,
-    Rect,
-    Size,
 };
 
 fn create_bind_group(
-    ctx: &WGPUContext,
+    device: &wgpu::Device,
     // pass: &'a mut wgpu::RenderPass<'b>,
     images: &ImageStore<WGPUTexture>,
     layout: &wgpu::BindGroupLayout,
@@ -51,7 +37,7 @@ fn create_bind_group(
         pseudo_tex
     };
 
-    ctx.device().create_bind_group(&wgpu::BindGroupDescriptor {
+    device.create_bind_group(&wgpu::BindGroupDescriptor {
         label: Some("fvg bind group"),
         layout,
         entries: &[
@@ -100,11 +86,11 @@ fn create_bind_group(
 
 #[must_use]
 pub fn create_clear_rect_bind_group(
-    ctx: &WGPUContext,
+    device: &wgpu::Device,
     layout: &wgpu::BindGroupLayout,
     uniforms: &WGPUVec<super::ClearRect>,
 ) -> wgpu::BindGroup {
-    ctx.device().create_bind_group(&wgpu::BindGroupDescriptor {
+    device.create_bind_group(&wgpu::BindGroupDescriptor {
         label: Some("clear rect bind group"),
         layout,
         entries: &[wgpu::BindGroupEntry {
@@ -159,7 +145,7 @@ impl WGPUBindGroupCache {
 
     pub fn get(
         &self,
-        ctx: &WGPUContext,
+        device: &wgpu::Device,
         // pass: &'a mut wgpu::RenderPass<'b>,
         images: &ImageStore<WGPUTexture>,
         layout: &wgpu::BindGroupLayout,
@@ -182,7 +168,7 @@ impl WGPUBindGroupCache {
         // inner.get(&key).unwrap()
 
         if !r.contains_key(&key) {
-            let inner = create_bind_group(ctx, images, layout, uniforms, image_tex, alpha_tex, pseudo_tex);
+            let inner = create_bind_group(device, images, layout, uniforms, image_tex, alpha_tex, pseudo_tex);
             r.insert(
                 key,
                 WGPUBindGroup {

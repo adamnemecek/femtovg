@@ -1,9 +1,6 @@
-use wgpu::{
-    util::{
-        BufferInitDescriptor,
-        DeviceExt,
-    },
-    BufferUsage,
+use wgpu::util::{
+    BufferInitDescriptor,
+    DeviceExt,
 };
 
 pub struct WGPUVar<T> {
@@ -79,8 +76,6 @@ impl<T: Copy> AsRef<wgpu::Buffer> for WGPUVar<T> {
 }
 
 mod tests {
-    use super::*;
-
     #[derive(Clone, Copy)]
     struct Test {
         a: u32,

@@ -1,10 +1,5 @@
-use wgpu::TextureFormat;
-
-use super::WGPUContext;
 use crate::geometry::Size;
 pub struct WGPUStencilTexture {
-    //
-    ctx: WGPUContext,
     size: Size,
     tex: wgpu::Texture,
     view: wgpu::TextureView,
@@ -16,16 +11,15 @@ fn label(gen: u32) -> String {
 }
 
 impl WGPUStencilTexture {
-    pub fn new(ctx: &WGPUContext, size: Size) -> Self {
+    pub fn new(device: &wgpu::Device, size: Size) -> Self {
         let gen = 0;
         let label = label(gen);
         let desc = new_stencil_descriptor(size, &label);
 
         // println!("reallocating texture");
-        let tex = ctx.device().create_texture(&desc);
+        let tex = device.create_texture(&desc);
         let view = tex.create_view(&Default::default());
         Self {
-            ctx: ctx.clone(),
             tex,
             size,
             view,
@@ -37,7 +31,7 @@ impl WGPUStencilTexture {
         self.size
     }
 
-    pub fn resize(&mut self, size: Size) {
+    pub fn resize(&mut self, device: &wgpu::Device, size: Size) {
         if size == self.size {
             return;
         }
@@ -53,7 +47,7 @@ impl WGPUStencilTexture {
         let desc = new_stencil_descriptor(size, &label);
         self.tex.destroy();
 
-        let tex = self.ctx.device().create_texture(&desc);
+        let tex = device.create_texture(&desc);
         self.view = tex.create_view(&Default::default());
         self.tex = tex;
         self.size = size;

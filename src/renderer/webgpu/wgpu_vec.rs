@@ -1,9 +1,5 @@
-use wgpu::util::DeviceExt;
-
 use super::{
     MemAlign,
-    WGPUContext,
-    WGPUInstance,
     // WGPUVar,
 };
 
@@ -48,12 +44,12 @@ pub fn as_u8_slice<T>(v: &[T]) -> &[u8] {
 }
 
 fn create_buffer<T: Copy>(
-    ctx: &WGPUContext,
+    device: &wgpu::Device,
     label: &str,
     mem_align: MemAlign<T>,
     usage: wgpu::BufferUsage,
 ) -> wgpu::Buffer {
-    ctx.device().create_buffer(&wgpu::BufferDescriptor {
+    device.create_buffer(&wgpu::BufferDescriptor {
         label: Some(label),
          /// Debug label of a buffer. This will show up in graphics debuggers for easy identification.
         // pub label: L,
@@ -72,7 +68,6 @@ fn create_buffer<T: Copy>(
 }
 
 pub struct WGPUVec<T: Copy> {
-    ctx: WGPUContext,
     inner: wgpu::Buffer,
     // len: usize,
     mem_align: MemAlign<T>,
@@ -93,33 +88,31 @@ impl ResizeResult {
 }
 
 impl<T: Copy> WGPUVec<T> {
-    pub fn new_vertex(ctx: &WGPUContext, capacity: usize) -> Self {
+    pub fn new_vertex(device: &wgpu::Device, capacity: usize) -> Self {
         let mem_align = MemAlign::new(capacity);
 
         let usage = wgpu::BufferUsage::VERTEX | wgpu::BufferUsage::COPY_DST;
-        let inner = create_buffer(ctx, "vertex buffer gen 0", mem_align, usage);
+        let inner = create_buffer(device, "vertex buffer gen 0", mem_align, usage);
 
         Self {
             gen: 0,
             usage,
-            ctx: ctx.clone(),
             inner,
             // len: 0,
             mem_align,
         }
     }
 
-    pub fn new_uniform(ctx: &WGPUContext, capacity: usize) -> Self {
+    pub fn new_uniform(device: &wgpu::Device, capacity: usize) -> Self {
         let mem_align = MemAlign::new(capacity);
         let type_name = std::any::type_name::<T>();
         let usage = wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST;
         let label = format!("uniform buffer gen 0 {:?}", type_name);
-        let inner = create_buffer(ctx, &label, mem_align, usage);
+        let inner = create_buffer(device, &label, mem_align, usage);
 
         Self {
             gen: 0,
             usage,
-            ctx: ctx.clone(),
             inner,
             // len: 0,
             mem_align,
@@ -134,7 +127,7 @@ impl<T: Copy> WGPUVec<T> {
     //     // use wgpu::util::BufferInitDescriptor;
     //     let mem_align = MemAlign::new(slice.len());
 
-    //     let inner = ctx.device().create_buffer(&wgpu::BufferDescriptor {
+    //     let inner = device.create_buffer(&wgpu::BufferDescriptor {
     //         label: None,
     //          /// Debug label of a buffer. This will show up in graphics debuggers for easy identification.
     //         // pub label: L,
@@ -165,12 +158,12 @@ impl<T: Copy> WGPUVec<T> {
     //     self_
     // }
 
-    pub fn new_index(ctx: &WGPUContext, capacity: usize) -> Self {
+    pub fn new_index(device: &wgpu::Device, capacity: usize) -> Self {
         let mem_align = MemAlign::new(capacity);
 
         let usage = wgpu::BufferUsage::COPY_DST | wgpu::BufferUsage::INDEX;
         let inner = create_buffer(
-            ctx,
+            device,
             "index buffer gen 0",
             mem_align,
             //  wgpu::BufferUsage::INDEX,
@@ -179,7 +172,6 @@ impl<T: Copy> WGPUVec<T> {
         Self {
             gen: 0,
             usage,
-            ctx: ctx.clone(),
             inner,
             // len: 0,
             mem_align,
@@ -203,7 +195,7 @@ impl<T: Copy> WGPUVec<T> {
     //     self.len = new_len;
     // }
 
-    pub fn resize(&mut self, capacity: usize) -> ResizeResult {
+    pub fn resize(&mut self, device: &wgpu::Device, capacity: usize) -> ResizeResult {
         if capacity <= self.capacity() {
             return ResizeResult::None;
         }
@@ -211,11 +203,11 @@ impl<T: Copy> WGPUVec<T> {
         let mem_align = MemAlign::<T>::new(capacity);
         // println!("resize to {:?}", mem_align.byte_size);
 
-        // let inner = ctx.device().create_buffer(&wgpu::BufferDescriptor {
+        // let inner = device.create_buffer(&wgpu::BufferDescriptor {
 
         // });
 
-        // let inner = self.ctx.device().create_buffer(&wgpu::BufferDescriptor {
+        // let inner = self.device.create_buffer(&wgpu::BufferDescriptor {
         //     label: None,
         //     size: mem_align.byte_size as _,
 
@@ -234,7 +226,7 @@ impl<T: Copy> WGPUVec<T> {
             todo!("unrecognized buffer type");
         };
 
-        let inner = create_buffer(&self.ctx, &label, mem_align, self.usage);
+        let inner = create_buffer(device, &label, mem_align, self.usage);
 
         // let inner = self.device.new_mem(
         //     mem_align,
@@ -366,11 +358,11 @@ impl<T: Copy> AsRef<wgpu::Buffer> for WGPUVec<T> {
 }
 
 mod tests {
+    /*
     use super::{
-        WGPUContext,
-        WGPUInstance,
         WGPUVec,
     };
+    */
 
     // async fn async_vec_test() {
     //     let instance = WGPUInstance::new().await.unwrap();

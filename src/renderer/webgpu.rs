@@ -1,9 +1,7 @@
-mod wgpu_vec;
-use wgpu::util::RenderEncoder;
-pub use wgpu_vec::*;
+use std::rc::Rc;
 
-mod wgpu_context;
-pub use wgpu_context::*;
+mod wgpu_vec;
+pub use wgpu_vec::*;
 
 mod wgpu_texture;
 pub use wgpu_texture::*;
@@ -20,31 +18,13 @@ pub use wgpu_pipeline_cache::*;
 mod mem_align;
 pub use mem_align::*;
 
-mod wgpu_swap_chain;
-pub use wgpu_swap_chain::*;
-
 mod wgpu_bind_group_cache;
 pub use wgpu_bind_group_cache::*;
 
 mod wgpu_var;
 pub use wgpu_var::*;
 
-use crate::{
-    renderer::{
-        ImageId,
-        Vertex,
-    },
-    BlendFactor,
-    Color,
-    CompositeOperationState,
-    ErrorKind,
-    FillRule,
-    ImageInfo,
-    ImageSource,
-    ImageStore,
-    Rect,
-    Size,
-};
+use crate::{BlendFactor, Color, CompositeOperationState, ErrorKind, FillRule, ImageInfo, ImageSource, ImageStore, Rect, Size, renderer::Vertex};
 
 use super::{
     Command,
@@ -98,7 +78,6 @@ impl From<CompositeOperationState> for WGPUBlend {
 }
 
 fn begin_render_pass<'a>(
-    // ctx: WGPUContext,
     encoder: &'a mut wgpu::CommandEncoder,
     target: &'a wgpu::TextureView,
     stencil_view: &'a wgpu::TextureView,
@@ -109,16 +88,16 @@ fn begin_render_pass<'a>(
 ) -> wgpu::RenderPass<'a> {
     let pass_desc = wgpu::RenderPassDescriptor {
         label: Some("render pass"),
-        color_attachments: &[wgpu::RenderPassColorAttachment {
-            view: target,
+        color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
+            attachment: target,
             resolve_target: None, // todo! what's this?
             ops: wgpu::Operations {
                 load: wgpu::LoadOp::Load,
                 store: true,
             },
         }],
-        depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
-            view: stencil_view,
+        depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachmentDescriptor {
+            attachment: stencil_view,
             // depth_ops: None,
             depth_ops: Some(wgpu::Operations {
                 load: wgpu::LoadOp::Clear(0.0),
@@ -148,9 +127,27 @@ fn begin_render_pass<'a>(
     pass
 }
 
+#[derive(Clone, Copy)]
+struct IndexRange {
+    start: u32,
+    end: u32,
+    e_start: usize,
+    e_count: usize,
+}
+
+impl From<IndexRange> for std::ops::Range<u32> {
+    fn from(a: IndexRange) -> Self {
+        a.start..a.end
+    }
+}
+
 /// the things that
 pub struct WGPU {
-    ctx: WGPUContext,
+    device: Rc<wgpu::Device>,
+    queue: Rc<wgpu::Queue>,
+
+    sc_format: wgpu::TextureFormat,
+
     antialias: bool,
     stencil_texture: WGPUStencilTexture,
 
@@ -170,7 +167,6 @@ pub struct WGPU {
     bind_group_cache: WGPUBindGroupCache,
     clear_color: Color,
     view_size: Size,
-    swap_chain: WGPUSwapChain,
     bind_group_layout: wgpu::BindGroupLayout,
     dpi: f32,
 
@@ -182,22 +178,8 @@ pub struct WGPU {
     frame: usize,
 }
 
-#[derive(Clone, Copy)]
-struct IndexRange {
-    start: u32,
-    end: u32,
-    e_start: usize,
-    e_count: usize,
-}
-
-impl From<IndexRange> for std::ops::Range<u32> {
-    fn from(a: IndexRange) -> Self {
-        a.start..a.end
-    }
-}
-
 impl WGPU {
-    pub fn new(ctx: &WGPUContext, view_size: Size) -> Self {
+    pub fn new(device: Rc<wgpu::Device>, queue: Rc<wgpu::Queue>, adapter: &wgpu::Adapter, swapchain_format: wgpu::TextureFormat, view_size: Size) -> Self {
         let default_stencil_state = 0;
 
         // let clear_stencil_state = {
@@ -224,7 +206,7 @@ impl WGPU {
         //     };
         // };
 
-        let bind_group_layout = ctx.device().create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("bind group layout"),
             entries: &[
                 //viewsize
@@ -298,7 +280,7 @@ impl WGPU {
         // let param_size: u32 = std::mem::size_of::<Params>() as _;
         // println!("param_size {:?}", param_size);
 
-        let pipeline_layout = ctx.device().create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: None,
             bind_group_layouts: &[&bind_group_layout],
             push_constant_ranges: &[
@@ -317,7 +299,7 @@ impl WGPU {
             ],
         });
 
-        let clear_rect_bind_group_layout = ctx.device().create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        let clear_rect_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("clear rect bind group layout"),
             entries: &[wgpu::BindGroupLayoutEntry {
                 binding: 0,
@@ -331,7 +313,7 @@ impl WGPU {
             }],
         });
 
-        let clear_rect_pipeline_layout = ctx.device().create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        let clear_rect_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("clear rect pipeline layout"),
             bind_group_layouts: &[&clear_rect_bind_group_layout],
             push_constant_ranges: &[
@@ -342,10 +324,10 @@ impl WGPU {
             ],
         });
 
-        let clear_rect_buffer = WGPUVec::new_uniform(ctx, 16);
+        let clear_rect_buffer = WGPUVec::new_uniform(&device, 16);
 
         let clear_rect_bind_group =
-            self::create_clear_rect_bind_group(ctx, &clear_rect_bind_group_layout, &clear_rect_buffer);
+            self::create_clear_rect_bind_group(&device, &clear_rect_bind_group_layout, &clear_rect_buffer);
 
         // let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
         //     label: None,
@@ -369,18 +351,18 @@ impl WGPU {
         // let encoder = ctx
         //     .device()
         //     .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
-        let stencil_texture = WGPUStencilTexture::new(ctx, view_size);
-        let vertex_buffer = WGPUVec::new_vertex(ctx, 1024);
-        let index_buffer = WGPUVec::new_index(ctx, 1024);
-        let uniform_buffer = WGPUVec::new_uniform(ctx, 32);
+        let stencil_texture = WGPUStencilTexture::new(&device, view_size);
+        let vertex_buffer = WGPUVec::new_vertex(&device, 1024);
+        let index_buffer = WGPUVec::new_index(&device, 1024);
+        let uniform_buffer = WGPUVec::new_uniform(&device, 32);
 
         let mut flags = wgpu::ShaderFlags::VALIDATION;
-        match ctx.adapter().get_info().backend {
+        match adapter.get_info().backend {
             wgpu::Backend::Metal | wgpu::Backend::Vulkan => flags |= wgpu::ShaderFlags::EXPERIMENTAL_TRANSLATION,
             _ => (), //TODO
         }
 
-        let shader = ctx.device().create_shader_module(&wgpu::ShaderModuleDescriptor {
+        let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
             label: None,
             source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Borrowed(include_str!("webgpu/shader.wgsl"))),
             flags,
@@ -389,18 +371,20 @@ impl WGPU {
         let clear_color = Color::rgba(0, 0, 0, 0);
         // let clear_color = Color::red();
         // let clear_color = Color::red();
-        let pipeline_cache = WGPUPipelineCache::new(ctx, pipeline_layout, clear_rect_pipeline_layout, shader);
+        let pipeline_cache = WGPUPipelineCache::new(pipeline_layout, clear_rect_pipeline_layout, shader);
         let bind_group_cache = WGPUBindGroupCache::new();
-        let swap_chain = WGPUSwapChain::new(ctx, view_size);
-        let pseudo_texture = WGPUTexture::new_pseudo_texture(ctx).unwrap();
+        let pseudo_texture = WGPUTexture::new_pseudo_texture(&device).unwrap();
 
         Self {
+            device,
+            queue,
+            sc_format: swapchain_format,
+
             frame: 0,
             dpi: 1.0,
             clear_color,
             antialias: true,
             stencil_texture,
-            ctx: ctx.clone(),
 
             vertex_buffer,
 
@@ -417,7 +401,6 @@ impl WGPU {
             bind_group_cache,
             view_size,
             bind_group_layout,
-            swap_chain,
 
             clear_rect_buffer,
             temp_clear_rect_buffer: vec![],
@@ -430,7 +413,7 @@ impl WGPU {
 // fn start_capture() {
 //     let device = metal::Device::system_default().unwrap();
 //     let z = metal::CaptureManager::shared();
-//     z.start_capture_with_device(&device);
+//     z.start_capture_with_device(&self.device);
 // }
 
 // fn stop_capture() {
@@ -439,7 +422,7 @@ impl WGPU {
 //     z.stop_capture();
 // }
 
-impl WGPU {
+// impl WGPU {
     // pub fn bind_group_for(
     //     &self,
     //     images: &ImageStore<WGPUTexture>,
@@ -455,7 +438,9 @@ impl WGPU {
     //         &self.pseudo_texture,
     //     )
     // }
-}
+
+
+// }
 
 #[inline]
 fn vert_range(start: usize, count: usize) -> std::ops::Range<u32> {
@@ -486,22 +471,23 @@ fn vert_range(start: usize, count: usize) -> std::ops::Range<u32> {
 
 impl Renderer for WGPU {
     type Image = WGPUTexture;
+    type Frame = wgpu::SwapChainFrame;
+
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
         let size = Size::new(width, height);
         // println!("set size {:?}", size);
         self.view_size = size;
         self.dpi = dpi;
 
-        self.stencil_texture.resize(size);
+        self.stencil_texture.resize(&self.device, size);
         // we need to flush all the bind groups since they are bound to particular
         self.bind_group_cache.clear();
-        self.swap_chain.resize(size);
 
         // self.stencil_texture = WGPUStencilTexture::new(&self.ctx, size);
         // self.pipeline_cache.clear();
     }
 
-    fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+    fn render(&mut self, frame: &mut wgpu::SwapChainFrame, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         // todo!("clear rect {:?}", std::mem::size_of::<ClearRect>());
 
         // println!("render start");
@@ -510,12 +496,12 @@ impl Renderer for WGPU {
 
         // let texture_format = &self.swap_chain.format();
         // let format = texture_format.clone();
-        let swap_chain_format = self.swap_chain.format();
+        //let swap_chain_format = self.swap_chain.format();
         // println!("texture format {:?}", texture_format);
 
         let mut render_target = self.render_target;
 
-        // self.ctx.device().create_bind_group()
+        // self.device.create_bind_group()
         // let mut texture_format = target_texture.format();
 
         // let pass = new_render_pass(
@@ -657,27 +643,25 @@ impl Renderer for WGPU {
 
         // println!("verts len {:?}", verts.len());
         {
-            self.vertex_buffer.resize(verts.len());
+            self.vertex_buffer.resize(&self.device, verts.len());
             // println!("resized to {:?}", self.vertex_buffer.capacity());
-            self.ctx.queue().sync_buffer(self.vertex_buffer.as_ref(), verts);
+            self.queue.write_buffer(self.vertex_buffer.as_ref(), 0, as_u8_slice(verts));
         }
 
         // self.index_buffer.clear();
         // assert!()
         // self.temp_index_buffer.resize(verts.len() * 3, 0);
         {
-            self.index_buffer.resize(self.temp_index_buffer.len());
-            self.ctx
-                .queue()
-                .sync_buffer(self.index_buffer.as_ref(), &self.temp_index_buffer);
+            self.index_buffer.resize(&self.device, self.temp_index_buffer.len());
+
+            self.queue.write_buffer(self.index_buffer.as_ref(), 0, as_u8_slice(&self.temp_index_buffer));
         }
 
         // sync uniforms
         {
-            self.uniform_buffer.resize(self.temp_uniform_buffer.len());
-            self.ctx
-                .queue()
-                .sync_buffer(self.uniform_buffer.as_ref(), &self.temp_uniform_buffer);
+            self.uniform_buffer.resize(&self.device, self.temp_uniform_buffer.len());
+
+            self.queue.write_buffer(self.uniform_buffer.as_ref(), 0, as_u8_slice(&self.temp_uniform_buffer));
             // println!("index before");
         }
 
@@ -685,19 +669,17 @@ impl Renderer for WGPU {
         {
             if self
                 .clear_rect_buffer
-                .resize(self.temp_clear_rect_buffer.len())
+                .resize(&self.device, self.temp_clear_rect_buffer.len())
                 .resized()
             {
                 self.clear_rect_bind_group = self::create_clear_rect_bind_group(
-                    &self.ctx,
+                    &self.device,
                     &self.clear_rect_bind_group_layout,
                     &self.clear_rect_buffer,
                 );
             }
 
-            self.ctx
-                .queue()
-                .sync_buffer(self.clear_rect_buffer.as_ref(), &self.temp_clear_rect_buffer);
+            self.queue.write_buffer(self.clear_rect_buffer.as_ref(), 0, as_u8_slice(&self.temp_clear_rect_buffer));
         }
 
         let mut i = 0;
@@ -707,7 +689,6 @@ impl Renderer for WGPU {
         #[allow(unused_assignments)]
         let mut should_submit = true;
 
-        let frame = self.swap_chain.get_current_frame().unwrap();
         let view = &frame.output.view;
 
         #[derive(Default, Debug)]
@@ -746,10 +727,10 @@ impl Renderer for WGPU {
         'new_pass: while i < commands.len() {
             should_submit = true;
 
-            let mut encoder = self.ctx.create_command_encoder(None);
+            let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
             {
                 let (target_view, stencil_view, view_size, texture_format) = match render_target {
-                    RenderTarget::Screen => (view, self.stencil_texture.view(), self.view_size, swap_chain_format),
+                    RenderTarget::Screen => (view, self.stencil_texture.view(), self.view_size, self.sc_format),
                     RenderTarget::Image(id) => {
                         let tex = images.get(id).unwrap();
                         (tex.view(), tex.stencil_view(), tex.size(), tex.format())
@@ -778,7 +759,7 @@ impl Renderer for WGPU {
                 macro_rules! bind_group {
                     ($self_: expr, $images: expr, $img: expr, $alpha: expr) => {
                         $self_.bind_group_cache.get(
-                            &$self_.ctx,
+                            &self.device,
                             $images,
                             &$self_.bind_group_layout,
                             &$self_.uniform_buffer,
@@ -800,10 +781,10 @@ impl Renderer for WGPU {
                             if prev_states.matches(blend, texture_format) {
                                 prev_states
                             } else {
-                                self.pipeline_cache.get(blend, texture_format)
+                                self.pipeline_cache.get(&self.device, blend, texture_format)
                             }
                         } else {
-                            self.pipeline_cache.get(blend, texture_format)
+                            self.pipeline_cache.get(&self.device, blend, texture_format)
                         };
                         states
                     };
@@ -1077,7 +1058,7 @@ impl Renderer for WGPU {
                             if render_target != *target {
                                 render_target = *target;
                                 drop(pass);
-                                self.ctx.queue().submit(Some(encoder.finish()));
+                                self.queue.submit(Some(encoder.finish()));
 
                                 should_submit = false;
                                 continue 'new_pass;
@@ -1093,24 +1074,24 @@ impl Renderer for WGPU {
 
             // if there's a pending submit
             if should_submit {
-                self.ctx.queue().submit(Some(encoder.finish()));
+                self.queue.submit(Some(encoder.finish()));
             }
-
-            self.frame += 1;
-
-            // if self.frame == 4 {
-            //     exit(0);
-            // }
         }
+
+        self.frame += 1;
+
+        // if self.frame == 4 {
+        //     exit(0);
+            // }
     }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
         let label = format!("{:?}", info);
-        WGPUTexture::new(&self.ctx, info, &label)
+        WGPUTexture::new(&self.device, info, &label)
     }
 
     fn update_image(&mut self, image: &mut Self::Image, src: ImageSource, x: usize, y: usize) -> Result<(), ErrorKind> {
-        image.update(src, x, y)
+        image.update(&self.device, &self.queue, src, x, y)
     }
 
     fn delete_image(&mut self, image: Self::Image) {

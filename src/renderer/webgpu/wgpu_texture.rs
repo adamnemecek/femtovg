@@ -8,8 +8,6 @@ use crate::{
 };
 
 use super::{
-    WGPUContext,
-    WGPUDeviceExt,
     WGPUExtentExt,
     WGPUTextureExt,
 };
@@ -31,8 +29,6 @@ impl From<PixelFormat> for wgpu::TextureFormat {
 }
 
 pub struct WGPUTexture {
-    //
-    ctx: WGPUContext,
     info: ImageInfo,
     tex: wgpu::Texture,
     view: wgpu::TextureView,
@@ -45,14 +41,13 @@ pub struct WGPUTexture {
 }
 
 impl WGPUTexture {
-    pub fn new_pseudo_texture(ctx: &WGPUContext) -> Result<Self, ErrorKind> {
+    pub fn new_pseudo_texture(device: &wgpu::Device, ) -> Result<Self, ErrorKind> {
         let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
-        Self::new(ctx, info, "pseudo texture")
+        Self::new(device, info, "pseudo texture")
     }
 
-    pub fn new(ctx: &WGPUContext, info: ImageInfo, label: &str) -> Result<Self, ErrorKind> {
+    pub fn new(device: &wgpu::Device, info: ImageInfo, label: &str) -> Result<Self, ErrorKind> {
         assert!(info.format() != PixelFormat::Rgb8);
-        let ctx = ctx.clone();
 
         let generate_mipmaps = info.flags().contains(ImageFlags::GENERATE_MIPMAPS);
         let nearest = info.flags().contains(ImageFlags::NEAREST);
@@ -71,7 +66,7 @@ impl WGPUTexture {
 
         // let sample_count = if generate_mipmaps { } else { 1 };
         // todo: what's the difference between texture and texture_view
-        let tex = ctx.device().create_texture(&wgpu::TextureDescriptor {
+        let tex = device.create_texture(&wgpu::TextureDescriptor {
             label: Some(label),
             size,
             mip_level_count,
@@ -99,7 +94,7 @@ impl WGPUTexture {
         };
 
         if generate_mipmaps {
-            tex.generate_mipmaps(ctx.device());
+            tex.generate_mipmaps(device);
             sampler_desc.mipmap_filter = filter;
         }
 
@@ -115,13 +110,13 @@ impl WGPUTexture {
             wgpu::AddressMode::ClampToEdge
         };
 
-        let sampler = ctx.device().create_sampler(&sampler_desc);
+        let sampler = device.create_sampler(&sampler_desc);
 
         let stencil_label = format!("{:?} stencil", label);
         let stencil_desc = super::new_stencil_descriptor(info.size(), &stencil_label);
 
         // let (stencil, stencil_view) = if wants_stencil {
-        let stencil = ctx.device().create_texture(&stencil_desc);
+        let stencil = device.create_texture(&stencil_desc);
         let stencil_view = stencil.create_view(&Default::default());
         // (Some(stencil), Some(stencil_view))
         // }
@@ -132,7 +127,6 @@ impl WGPUTexture {
         Ok(Self {
             view,
             sampler,
-            ctx,
             info,
             tex,
             stencil,
@@ -155,7 +149,7 @@ impl WGPUTexture {
         todo!()
     }
 
-    pub fn update(&mut self, src: ImageSource, x: usize, y: usize) -> Result<(), ErrorKind> {
+    pub fn update(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, src: ImageSource, x: usize, y: usize) -> Result<(), ErrorKind> {
         let (width, height) = src.dimensions();
         if x + width > self.info.width() {
             return Err(ErrorKind::ImageUpdateOutOfBounds);
@@ -176,7 +170,7 @@ impl WGPUTexture {
             z: 0,
         };
 
-        let copy_view = wgpu::ImageCopyTexture {
+        let copy_view = wgpu::TextureCopyView {
             mip_level: 0,
             origin,
             texture: self.tex(),
@@ -184,24 +178,20 @@ impl WGPUTexture {
 
         match src {
             ImageSource::Gray(data) => {
-                let data_layout = wgpu::ImageDataLayout {
-                    bytes_per_row: Some(std::num::NonZeroU32::new(width as u32)).unwrap(),
+                let data_layout = wgpu::TextureDataLayout {
+                    bytes_per_row: width as u32,
                     ..Default::default()
                 };
 
-                self.ctx
-                    .queue()
-                    .write_texture(copy_view, data.buf().as_bytes(), data_layout, size.into())
+                queue.write_texture(copy_view, data.buf().as_bytes(), data_layout, size.into())
             }
             ImageSource::Rgba(data) => {
-                let data_layout = wgpu::ImageDataLayout {
-                    bytes_per_row: Some(std::num::NonZeroU32::new(4 * width as u32)).unwrap(),
+                let data_layout = wgpu::TextureDataLayout {
+                    bytes_per_row: 4 * width as u32,
                     ..Default::default()
                 };
 
-                self.ctx
-                    .queue()
-                    .write_texture(copy_view, data.buf().as_bytes(), data_layout, size.into())
+                queue.write_texture(copy_view, data.buf().as_bytes(), data_layout, size.into())
             }
             ImageSource::Rgb(_) => {
                 unimplemented!(
@@ -212,7 +202,7 @@ impl WGPUTexture {
         let generate_mipmaps = self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS);
         if generate_mipmaps {
             // self.tex.generate_mipmaps(&self.queue);
-            self.tex().generate_mipmaps(self.ctx.device());
+            self.tex().generate_mipmaps(device);
         }
 
         Ok(())
