@@ -146,7 +146,7 @@ fn main() {
                         canvas.delete_image(screenshot_image_id);
                     }
 
-                    if let Ok(image) = canvas.screenshot(None) {
+                    if let Ok(image) = canvas.screenshot(&()) {
                         screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
                     }
                 }
@@ -194,7 +194,7 @@ fn main() {
                 perf.render(&mut canvas, roboto_regular, roboto_light, 5.0, 5.0);
                 canvas.restore();
 
-                canvas.flush(None);
+                canvas.flush(&());
                 windowed_context.swap_buffers().unwrap();
             }
             Event::MainEventsCleared => windowed_context.window().request_redraw(),

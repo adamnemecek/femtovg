@@ -498,7 +498,7 @@ fn vert_range(start: usize, count: usize) -> std::ops::Range<u32> {
 
 impl Renderer for WGPU {
     type Image = WGPUTexture;
-    type Frame = wgpu::SwapChainFrame;
+    type ScreenTexture = wgpu::TextureView;
 
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
         let size = Size::new(width, height);
@@ -514,9 +514,7 @@ impl Renderer for WGPU {
         // self.pipeline_cache.clear();
     }
 
-    fn render(&mut self, frame: Option<&mut wgpu::SwapChainFrame>, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
-        let frame = frame.expect("The swapchain frame must be passed in with canvas.flush()/canvas.screenshot() when using the wgpu renderer`");
-
+    fn render(&mut self, screen_texture: &wgpu::TextureView, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         // todo!("clear rect {:?}", std::mem::size_of::<ClearRect>());
 
         // println!("render start");
@@ -718,8 +716,6 @@ impl Renderer for WGPU {
         #[allow(unused_assignments)]
         let mut should_submit = true;
 
-        let view = &frame.output.view;
-
         #[derive(Default, Debug)]
         struct Counter {
             convex_fill: usize,
@@ -759,7 +755,7 @@ impl Renderer for WGPU {
             let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
             {
                 let (target_view, stencil_view, view_size, texture_format) = match render_target {
-                    RenderTarget::Screen => (view, self.stencil_texture.view(), self.view_size, self.sc_format),
+                    RenderTarget::Screen => (screen_texture, self.stencil_texture.view(), self.view_size, self.sc_format),
                     RenderTarget::Image(id) => {
                         let tex = images.get(id).unwrap();
                         (tex.view(), tex.stencil_view(), tex.size(), tex.format())

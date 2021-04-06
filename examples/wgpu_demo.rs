@@ -444,10 +444,12 @@ mod demo {
 
                     //canvas.restore();
 
-                    canvas.flush(Some(&mut frame));
+                    let screen_texture = &frame.output.view;
+
+                    canvas.flush(screen_texture);
 
                     if do_screenshot {
-                        if let Ok(image) = canvas.screenshot(Some(&mut frame)) {
+                        if let Ok(image) = canvas.screenshot(screen_texture) {
                             screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
                         }
 

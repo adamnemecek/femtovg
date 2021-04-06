@@ -21,11 +21,11 @@ pub struct Void;
 
 impl Renderer for Void {
     type Image = VoidImage;
-    type Frame = ();
+    type ScreenTexture = ();
 
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {}
 
-    fn render(&mut self, frame: Option<&mut Self::Frame>, images: &ImageStore<VoidImage>, verts: &[Vertex], commands: &[Command]) {}
+    fn render(&mut self, screen_texture: &Self::ScreenTexture, images: &ImageStore<VoidImage>, verts: &[Vertex], commands: &[Command]) {}
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
         Ok(VoidImage { info })

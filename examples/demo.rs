@@ -228,7 +228,7 @@ fn main() {
                         canvas.delete_image(screenshot_image_id);
                     }
 
-                    if let Ok(image) = canvas.screenshot(None) {
+                    if let Ok(image) = canvas.screenshot(&()) {
                         screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
                     }
                 }
@@ -374,7 +374,7 @@ fn main() {
 
                 //canvas.restore();
 
-                canvas.flush(None);
+                canvas.flush(&());
                 #[cfg(not(target_arch = "wasm32"))]
                 windowed_context.swap_buffers().unwrap();
             }

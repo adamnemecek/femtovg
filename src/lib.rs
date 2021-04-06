@@ -405,16 +405,21 @@ where
     /// Tells the renderer to execute all drawing commands and clears the current internal state
     ///
     /// Call this at the end of each frame.
-    pub fn flush(&mut self, frame: Option<&mut T::Frame>) {
-        self.renderer.render(frame, &self.images, &self.verts, &self.commands);
+    ///
+    /// `screen_texture` - The texture to render to when `RenderTarget::Screen` is set as this canvas's render target.
+    /// This is only relevant when using a non-OpenGL renderer.
+    pub fn flush(&mut self, screen_texture: &T::ScreenTexture) {
+        self.renderer.render(screen_texture, &self.images, &self.verts, &self.commands);
         self.commands.clear();
         self.verts.clear();
         self.gradients
             .release_old_gradients(&mut self.images, &mut self.renderer);
     }
 
-    pub fn screenshot(&mut self, frame: Option<&mut T::Frame>) -> Result<ImgVec<RGBA8>, ErrorKind> {
-        self.flush(frame);
+    /// `screen_texture` - The texture to render to when `RenderTarget::Screen` is set as this canvas's render target.
+    /// This is only relevant when using a non-OpenGL renderer.
+    pub fn screenshot(&mut self, screen_texture: &T::ScreenTexture) -> Result<ImgVec<RGBA8>, ErrorKind> {
+        self.flush(screen_texture);
         self.renderer.screenshot()
     }
 
