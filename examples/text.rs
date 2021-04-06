@@ -215,7 +215,7 @@ fn main() {
                     canvas.restore();
                 }
 
-                canvas.flush(&());
+                canvas.flush(None);
                 windowed_context.swap_buffers().unwrap();
             }
             Event::MainEventsCleared => windowed_context.window().request_redraw(),

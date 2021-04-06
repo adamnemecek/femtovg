@@ -408,7 +408,10 @@ where
     ///
     /// `screen_texture` - The texture to render to when `RenderTarget::Screen` is set as this canvas's render target.
     /// This is only relevant when using a non-OpenGL renderer.
-    pub fn flush(&mut self, screen_texture: &T::ScreenTexture) {
+    ///
+    /// Note, when using the wgpu renderer, this will panic when `screen_texture` is `None` and this canvas's render target
+    /// is set to `RenderTarget::Screen`.
+    pub fn flush(&mut self, screen_texture: Option<&T::ScreenTexture>) {
         self.renderer.render(screen_texture, &self.images, &self.verts, &self.commands);
         self.commands.clear();
         self.verts.clear();
@@ -418,7 +421,10 @@ where
 
     /// `screen_texture` - The texture to render to when `RenderTarget::Screen` is set as this canvas's render target.
     /// This is only relevant when using a non-OpenGL renderer.
-    pub fn screenshot(&mut self, screen_texture: &T::ScreenTexture) -> Result<ImgVec<RGBA8>, ErrorKind> {
+    ///
+    /// Note, when using the wgpu renderer, this will panic when `screen_texture` is `None` and this canvas's render target
+    /// is set to `RenderTarget::Screen`.
+    pub fn screenshot(&mut self, screen_texture: Option<&T::ScreenTexture>) -> Result<ImgVec<RGBA8>, ErrorKind> {
         self.flush(screen_texture);
         self.renderer.screenshot()
     }

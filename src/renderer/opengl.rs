@@ -472,7 +472,7 @@ impl Renderer for OpenGl {
         }
     }
 
-    fn render(&mut self, _screen_texture: &(), images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+    fn render(&mut self, _screen_texture: Option<&()>, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         self.main_program.bind();
 
         unsafe {

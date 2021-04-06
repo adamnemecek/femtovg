@@ -514,7 +514,7 @@ impl Renderer for WGPU {
         // self.pipeline_cache.clear();
     }
 
-    fn render(&mut self, screen_texture: &wgpu::TextureView, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+    fn render(&mut self, screen_texture: Option<&wgpu::TextureView>, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         // todo!("clear rect {:?}", std::mem::size_of::<ClearRect>());
 
         // println!("render start");
@@ -755,7 +755,12 @@ impl Renderer for WGPU {
             let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
             {
                 let (target_view, stencil_view, view_size, texture_format) = match render_target {
-                    RenderTarget::Screen => (screen_texture, self.stencil_texture.view(), self.view_size, self.sc_format),
+                    RenderTarget::Screen => (
+                        screen_texture.expect("A screen texture must be passed into `canvas.flush()/canvas.screenshot()` when the canvas's render target is set to `RenderTarget::Screen`"),
+                        self.stencil_texture.view(),
+                        self.view_size,
+                        self.sc_format
+                    ),
                     RenderTarget::Image(id) => {
                         let tex = images.get(id).unwrap();
                         (tex.view(), tex.stencil_view(), tex.size(), tex.format())

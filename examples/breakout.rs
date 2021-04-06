@@ -1326,7 +1326,7 @@ fn main() {
                 game.update(dt);
                 game.draw(&mut canvas);
 
-                canvas.flush(&());
+                canvas.flush(None);
                 windowed_context.swap_buffers().unwrap();
             }
             Event::MainEventsCleared => windowed_context.window().request_redraw(),
