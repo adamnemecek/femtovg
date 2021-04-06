@@ -7,7 +7,7 @@
 Antialiased 2D vector drawing library written in Rust.
 Ported from https://github.com/memononen/nanovg
 
-Most of the implementation is the same as the original C code with some bug fixes, some features added and several parts have been made more Rust-y. Rendering is done via one OpenGl (ES) 3.0+ backend.
+Most of the implementation is the same as the original C code with some bug fixes, some features added and several parts have been made more Rust-y. FemtoVG has  rendering support via OpenGl (ES) 3.0+ backend and the wgpu backend.
 
 ## Screenshots
 ### Demo
@@ -15,6 +15,7 @@ Most of the implementation is the same as the original C code with some bug fixe
 Run with `cargo run --example demo --release`
 
 Run the wgpu demo with `cargo run --example wgpu_demo --no-default-features --features=image-loading,convert-rgb,wgpu-renderer --release`
+Run with `cargo run --example demo` for the `OpenGL` backend and run with `cargo run --example wgpu_demo` for the `wgpu` backend. Run with `--release` for best performance.
 
 ### Breakout
 ![breakout](assets/breakout.png)
