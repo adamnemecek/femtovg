@@ -659,10 +659,6 @@ impl Renderer for WGPU {
         // );
         // println!("index len {:?}", self.temp_index_buffer.len());
 
-        {
-            self.queue.write_buffer(self.u_viewsize_buffer.as_ref(), 0, as_u8_slice(&[self.view_size]));
-        }
-
         // println!("verts len {:?}", verts.len());
         {
             self.vertex_buffer.resize(&self.device, verts.len());
@@ -830,8 +826,10 @@ impl Renderer for WGPU {
 
                             for drawable in &cmd.drawables {
                                 pass.set_pipeline(s.fill_buffer());
-
-                                let _ = pass.set_vertex_value(0, &view_size);
+                                
+                                // TODO: make `viewSize` a push constant whenever the wgsl compiler is fixed
+                                //let _ = pass.set_vertex_value(0, &view_size);
+                                self.queue.write_buffer(self.u_viewsize_buffer.as_ref(), 0, as_u8_slice(&[view_size]));
 
                                 if let Some((start, count)) = drawable.fill_verts {
                                     // let offset = self.index_buffer.len();
