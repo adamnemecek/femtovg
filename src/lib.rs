@@ -552,6 +552,13 @@ where
         self.images.realloc(&mut self.renderer, id, info)
     }
 
+    pub fn raw_image(
+        &self,
+        id: ImageId
+    ) -> Option<&T::Image> {
+        self.images.get(id)
+    }
+
     /// Decode an image from file
     #[cfg(feature = "image-loading")]
     pub fn load_image_file<P: AsRef<FilePath>>(
