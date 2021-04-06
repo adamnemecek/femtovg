@@ -1,7 +1,7 @@
 // alias b="convert shader.wgsl shader.metal"
 // [[block]]
 // struct Vertex {
-//     pos: vec2<f32>;// [[attribute(0)]];
+//     pos: vec2<f32>; // [[attribute(0)]];
 //     // float2 tcoord [[attribute(1)]];
 //     tcoord: vec2<f32>;
 // };
@@ -66,10 +66,11 @@ struct ViewSize {
     y: u32;
 };
 
-var<push_constant> viewSize: ViewSize;
+// TODO: make viewSize a push constant whenever the wgsl compiler is fixed
+// var<push_constant> viewSize: ViewSize;
 
-// [[group(0), binding(0)]]
-// var viewSize: ViewSize;
+[[group(0), binding(0)]]
+var<uniform> viewSize: ViewSize;
 
 [[stage(vertex)]]
 fn vertex_shader(
@@ -93,16 +94,16 @@ fn vertex_shader(
 // [[group(0), binding(1)]]
 // var u: Uniforms;
 // var<push_constant> u: Uniforms;
-[[group(0), binding(0)]]
+[[group(0), binding(1)]]
 var<uniform> u: Uniforms;
 
-[[group(0), binding(1)]]
-var tex: texture_2d<f32>;
 [[group(0), binding(2)]]
-var samplr: sampler;
+var tex: texture_2d<f32>;
 [[group(0), binding(3)]]
-var alpha_tex: texture_2d<f32>;
+var samplr: sampler;
 [[group(0), binding(4)]]
+var alpha_tex: texture_2d<f32>;
+[[group(0), binding(5)]]
 var alpha_samplr: sampler;
 
 [[stage(fragment)]]

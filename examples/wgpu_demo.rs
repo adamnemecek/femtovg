@@ -4,6 +4,7 @@ use std::rc::Rc;
 use resource::resource;
 
 use instant::Instant;
+use wgpu::Features;
 use winit::event::{
     ElementState,
     Event,
@@ -64,11 +65,8 @@ async fn build_wgpu_device(window: &winit::window::Window) -> Option<(wgpu::Adap
     let (device, queue) = adapter
         .request_device(
             &wgpu::DeviceDescriptor {
-                features: wgpu::Features::PUSH_CONSTANTS,
-                limits: wgpu::Limits {
-                    max_push_constant_size: 8, // must be at-least 8
-                    ..wgpu::Limits::default()
-                },
+                features: wgpu::Features::empty(),
+                limits: wgpu::Limits::default(),
                 label: None,
             },
             None, // Trace path
