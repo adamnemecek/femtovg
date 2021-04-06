@@ -12,10 +12,8 @@ Most of the implementation is the same as the original C code with some bug fixe
 ## Screenshots
 ### Demo
 ![demo](assets/demo.png)
-Run with `cargo run --example demo --release`
-
-Run the wgpu demo with `cargo run --example wgpu_demo --no-default-features --features=image-loading,convert-rgb,wgpu-renderer --release`
-Run with `cargo run --example demo` for the `OpenGL` backend and run with `cargo run --example wgpu_demo` for the `wgpu` backend. Run with `--release` for best performance.
+Run with `cargo run --example demo`. Run with `--release` for best performance.
+Run the wgpu demo with `cargo run --example wgpu_demo --no-default-features --features=image-loading,convert-rgb,wgpu-renderer`. Run with `--release` for best performance.
 
 ### Breakout
 ![breakout](assets/breakout.png)
