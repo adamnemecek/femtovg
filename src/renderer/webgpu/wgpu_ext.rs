@@ -74,9 +74,18 @@ impl WGPUExtentExt for wgpu::Extent3d {
         let Self {
             width,
             height,
+            depth_or_array_layers,
+        } = self;
+        (*(width.max(height).max(depth_or_array_layers)) as u64 as f64).log2().ceil() as u32
+        
+        /* wgpu 0.7
+        let Self {
+            width,
+            height,
             depth,
         } = self;
         (*(width.max(height).max(depth)) as u64 as f64).log2().ceil() as u32
+        */
     }
 }
 

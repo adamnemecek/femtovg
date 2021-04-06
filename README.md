@@ -12,7 +12,9 @@ Most of the implementation is the same as the original C code with some bug fixe
 ## Screenshots
 ### Demo
 ![demo](assets/demo.png)
-Run with `cargo run --example demo`
+Run with `cargo run --example demo --release`
+
+Run the wgpu demo with `cargo run --example wgpu_demo --no-default-features --features=image-loading,convert-rgb,wgpu-renderer --release`
 
 ### Breakout
 ![breakout](assets/breakout.png)

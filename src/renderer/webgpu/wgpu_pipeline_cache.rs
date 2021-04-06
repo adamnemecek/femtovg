@@ -22,7 +22,8 @@ impl Vertex {
             attributes: &[wgpu::VertexAttribute {
                 offset: 0,
                 shader_location: 0,
-                format: wgpu::VertexFormat::Float4,
+                format: wgpu::VertexFormat::Float32x4,
+                // format: wgpu::VertexFormat::Float4, // wgpu 0.7
             }],
         }
     }
@@ -73,6 +74,24 @@ impl ClearRect {
     // }
 }
 
+// TODO: Remove this when updating to wgpu 0.7
+impl From<WGPUBlend> for wgpu::BlendState {
+    fn from(a: WGPUBlend) -> Self {
+        Self {
+            color: wgpu::BlendComponent {
+                src_factor: a.src_rgb,
+                dst_factor: a.dst_rgb,
+                operation: wgpu::BlendOperation::Add,
+            },
+            alpha: wgpu::BlendComponent {
+                src_factor: a.src_alpha,
+                dst_factor: a.dst_alpha,
+                operation: wgpu::BlendOperation::Add,
+            },
+        }
+    }
+}
+
 fn create_pipeline<'a>(
     device: &wgpu::Device,
     label: impl Into<Option<&'a str>>,
@@ -82,12 +101,44 @@ fn create_pipeline<'a>(
     blend_func: WGPUBlend,
     topology: wgpu::PrimitiveTopology,
     strip_index_format: impl Into<Option<wgpu::IndexFormat>>,
-    cull_mode: impl Into<Option<wgpu::CullMode>>,
+    cull_mode: impl Into<Option<wgpu::Face>>,
+    // cull_mode: impl Into<Option<wgpu::CullMode>>,  // wgpu 0.7
     depth_stencil: impl Into<Option<wgpu::DepthStencilState>>,
 ) -> wgpu::RenderPipeline {
     let label = label.into();
     let label = format!("{:?} {:?}", label, blend_func);
 
+    device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label: Some(&label),
+        layout: Some(layout),
+        vertex: wgpu::VertexState {
+            module: shader,
+            entry_point: "vertex_shader",
+            buffers: &[Vertex::desc()],
+        },
+        fragment: Some(wgpu::FragmentState {
+            module: shader,
+            entry_point: "fragment_shader_aa",
+            //todo!
+            targets: &[wgpu::ColorTargetState {
+                format,
+                blend: Some(blend_func.into()),
+                write_mask: wgpu::ColorWrite::all(),
+            }],
+        }),
+        // front_face is ccw by default
+        primitive: wgpu::PrimitiveState {
+            topology,
+            strip_index_format: strip_index_format.into(),
+
+            cull_mode: cull_mode.into(),
+            ..Default::default()
+        },
+        depth_stencil: depth_stencil.into(),
+        multisample: wgpu::MultisampleState::default(),
+    })
+
+    /* wgpu 0.7
     device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label: Some(&label),
         layout: Some(layout),
@@ -126,6 +177,7 @@ fn create_pipeline<'a>(
         depth_stencil: depth_stencil.into(),
         multisample: wgpu::MultisampleState::default(),
     })
+    */
 }
 
 fn create_stencil_only_pipeline<'a>(
@@ -137,9 +189,42 @@ fn create_stencil_only_pipeline<'a>(
     blend_func: WGPUBlend,
     topology: wgpu::PrimitiveTopology,
     strip_index_format: impl Into<Option<wgpu::IndexFormat>>,
-    cull_mode: impl Into<Option<wgpu::CullMode>>,
+    cull_mode: impl Into<Option<wgpu::Face>>,
+    // cull_mode: impl Into<Option<wgpu::CullMode>>,  // wgpu 0.7
     depth_stencil: impl Into<Option<wgpu::DepthStencilState>>,
 ) -> wgpu::RenderPipeline {
+    device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        label: label.into(),
+        layout: Some(layout),
+        vertex: wgpu::VertexState {
+            module: shader,
+            entry_point: "vertex_shader",
+            buffers: &[Vertex::desc()],
+        },
+        // fragment: None,
+        // todo: in the original this is not set
+        fragment: Some(wgpu::FragmentState {
+            module: shader,
+            entry_point: "passthrough",
+            //todo!
+            targets: &[wgpu::ColorTargetState {
+                format,
+                blend: Some(blend_func.into()),
+                write_mask: wgpu::ColorWrite::empty(),
+            }],
+        }),
+        primitive: wgpu::PrimitiveState {
+            topology,
+            strip_index_format: strip_index_format.into(),
+            // front_face: wgpu::FrontFace::Ccw,
+            cull_mode: cull_mode.into(),
+            ..Default::default()
+        },
+        depth_stencil: depth_stencil.into(),
+        multisample: wgpu::MultisampleState::default(),
+    })
+
+    /* wgpu 0.7
     device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label: label.into(),
         layout: Some(layout),
@@ -179,6 +264,7 @@ fn create_stencil_only_pipeline<'a>(
         depth_stencil: depth_stencil.into(),
         multisample: wgpu::MultisampleState::default(),
     })
+    */
 }
 fn create_clear_rect_pipeline(
     device: &wgpu::Device,
@@ -608,7 +694,8 @@ impl WGPUPipelineStates {
                 // None,
                 // wgpu::IndexFormat::Uint32,
                 None,
-                wgpu::CullMode::Back,
+                wgpu::Face::Back,
+                // wgpu::CullMode::Back,  // wgpu 0.7
                 default_stencil_state(stencil_format),
             ),
             stroke_buffer: create_pipeline(
@@ -620,7 +707,8 @@ impl WGPUPipelineStates {
                 blend_func,
                 wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::IndexFormat::Uint32,
-                wgpu::CullMode::Back,
+                wgpu::Face::Back,
+                // wgpu::CullMode::Back,  // wgpu 0.7
                 default_stencil_state(stencil_format),
             ),
         };
@@ -648,7 +736,8 @@ impl WGPUPipelineStates {
                 blend_func,
                 wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::IndexFormat::Uint32,
-                wgpu::CullMode::Back,
+                wgpu::Face::Back,
+                // wgpu::CullMode::Back,  // wgpu 0.7
                 fill_anti_alias_stencil_state_nonzero(stencil_format),
             ),
             fringes_evenodd: create_pipeline(
@@ -660,7 +749,8 @@ impl WGPUPipelineStates {
                 blend_func,
                 wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::IndexFormat::Uint32,
-                wgpu::CullMode::Back,
+                wgpu::Face::Back,
+                // wgpu::CullMode::Back,  // wgpu 0.7
                 fill_anti_alias_stencil_state_evenodd(stencil_format),
             ),
             fills_nonzero: create_pipeline(
@@ -672,7 +762,8 @@ impl WGPUPipelineStates {
                 blend_func,
                 wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::IndexFormat::Uint32,
-                wgpu::CullMode::Back,
+                wgpu::Face::Back,
+                // wgpu::CullMode::Back,  // wgpu 0.7
                 fill_stencil_state_nonzero(stencil_format),
             ),
             fills_evenodd: create_pipeline(
@@ -684,7 +775,8 @@ impl WGPUPipelineStates {
                 blend_func,
                 wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::IndexFormat::Uint32,
-                wgpu::CullMode::Back,
+                wgpu::Face::Back,
+                // wgpu::CullMode::Back,  // wgpu 0.7
                 fill_stencil_state_evenodd(stencil_format),
             ),
         };
@@ -698,7 +790,8 @@ impl WGPUPipelineStates {
             blend_func,
             wgpu::PrimitiveTopology::TriangleStrip,
             wgpu::IndexFormat::Uint32,
-            wgpu::CullMode::Back,
+            wgpu::Face::Back,
+            // wgpu::CullMode::Back,  // wgpu 0.7
             default_stencil_state(stencil_format),
         );
 
@@ -712,7 +805,8 @@ impl WGPUPipelineStates {
                 blend_func,
                 wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::IndexFormat::Uint32,
-                wgpu::CullMode::Back,
+                wgpu::Face::Back,
+                // wgpu::CullMode::Back,  // wgpu 0.7
                 stroke_shape_stencil_state(stencil_format),
             ),
             aa_pixels: create_pipeline(
@@ -724,7 +818,8 @@ impl WGPUPipelineStates {
                 blend_func,
                 wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::IndexFormat::Uint32,
-                wgpu::CullMode::Back,
+                wgpu::Face::Back,
+                // wgpu::CullMode::Back,  // wgpu 0.7
                 stroke_anti_alias_stencil_state(stencil_format),
             ),
             clear_stencil: create_stencil_only_pipeline(
@@ -736,7 +831,8 @@ impl WGPUPipelineStates {
                 blend_func,
                 wgpu::PrimitiveTopology::TriangleStrip,
                 wgpu::IndexFormat::Uint32,
-                wgpu::CullMode::Back,
+                wgpu::Face::Back,
+                // wgpu::CullMode::Back,  // wgpu 0.7
                 stroke_clear_stencil_state(stencil_format),
             ),
         };
@@ -750,7 +846,8 @@ impl WGPUPipelineStates {
             blend_func,
             wgpu::PrimitiveTopology::TriangleList,
             None,
-            wgpu::CullMode::Back,
+            wgpu::Face::Back,
+            // wgpu::CullMode::Back,  // wgpu 0.7
             default_stencil_state(stencil_format),
         );
 

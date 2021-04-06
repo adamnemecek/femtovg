@@ -100,6 +100,13 @@ pub fn create_clear_rect_bind_group(
                 offset: 0,
                 size: wgpu::BufferSize::new(std::mem::size_of::<ClearRect>() as _),
             },
+            /* wgpu 0.7
+            resource: wgpu::BindingResource::Buffer {
+                buffer: uniforms.as_ref(),
+                offset: 0,
+                size: wgpu::BufferSize::new(std::mem::size_of::<ClearRect>() as _),
+            },
+            */
         }],
     })
 }

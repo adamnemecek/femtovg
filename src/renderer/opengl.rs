@@ -459,6 +459,7 @@ impl OpenGl {
 
 impl Renderer for OpenGl {
     type Image = GlTexture;
+    type Frame = ();
 
     fn set_size(&mut self, width: u32, height: u32, _dpi: f32) {
         self.view[0] = width as f32;
@@ -471,7 +472,7 @@ impl Renderer for OpenGl {
         }
     }
 
-    fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+    fn render(&mut self, _frame: Option<&mut Self::Frame>, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         self.main_program.bind();
 
         unsafe {

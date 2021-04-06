@@ -170,26 +170,48 @@ impl WGPUTexture {
             z: 0,
         };
 
-        let copy_view = wgpu::TextureCopyView {
+        let copy_view = wgpu::ImageCopyTexture {
             mip_level: 0,
             origin,
             texture: self.tex(),
         };
 
+        /* wgpu 0.7
+        let copy_view = wgpu::TextureCopyView {
+            mip_level: 0,
+            origin,
+            texture: self.tex(),
+        };
+        */
+
         match src {
             ImageSource::Gray(data) => {
+                let data_layout = wgpu::ImageDataLayout {
+                    bytes_per_row: Some(std::num::NonZeroU32::new(width as u32)).unwrap(),
+                    ..Default::default()
+                };
+
+                /* wgpu 0.7
                 let data_layout = wgpu::TextureDataLayout {
                     bytes_per_row: width as u32,
                     ..Default::default()
                 };
+                */
 
                 queue.write_texture(copy_view, data.buf().as_bytes(), data_layout, size.into())
             }
             ImageSource::Rgba(data) => {
+                let data_layout = wgpu::ImageDataLayout {
+                    bytes_per_row: Some(std::num::NonZeroU32::new(4 * width as u32)).unwrap(),
+                    ..Default::default()
+                };
+
+                /* wgpu 0.7
                 let data_layout = wgpu::TextureDataLayout {
                     bytes_per_row: 4 * width as u32,
                     ..Default::default()
                 };
+                */
 
                 queue.write_texture(copy_view, data.buf().as_bytes(), data_layout, size.into())
             }

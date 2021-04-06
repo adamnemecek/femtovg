@@ -14,7 +14,7 @@ edition = "2018"
 debug = true
 
 [features]
-default = ["image-loading", "convert-rgb", "wgpu-renderer"]
+default = ["image-loading", "convert-rgb", "glow-renderer"]
 image-loading = ["image"]
 glow-renderer = ["glow"]
 wgpu-renderer = ["wgpu"]
@@ -38,16 +38,17 @@ pollster = "0.2"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 glow = { version = "0.7.0", default-features = false, optional = true }
-wgpu = { version = "0.7.1", optional = true }
+#wgpu = { version = "0.7.1", optional = true }
+wgpu = { git = "https://github.com/gfx-rs/wgpu-rs/", rev = "82b7068498864de44bbdf3e02d086c03d83a04e0", optional = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 glow = { version = "0.7.0", features = ["web-sys"], default-features = false }
-wgpu = { version = "0.7.1", features = ["wgc"], optional = true }
+#wgpu = { version = "0.7.1", features = ["wgc"], optional = true }
+wgpu = { git = "https://github.com/gfx-rs/wgpu-rs/", rev = "82b7068498864de44bbdf3e02d086c03d83a04e0", optional = true }
 web_sys = { version = "0.3", package = "web-sys", features = ["WebGlContextAttributes", "HtmlImageElement"] }
-wasm-bindgen = { version = "=0.2.69" }
+wasm-bindgen = { version = "=0.2.73" }
 
 [dev-dependencies]
-winit = "0.24.0"
 euclid = "0.20.13"
 rand = "0.7"
 svg = "0.8.0"
@@ -55,9 +56,9 @@ usvg = { version = "0.12.0", default-features = false }
 instant = { version = "0.1", features = [ "now" ] }
 resource = "0.5.0"
 image = { version = "0.23.6", default-features = false, features = ["jpeg", "png"] }
-futures = "0.3.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+winit = "0.24.0"
 glutin = "0.26.0"
 
 # [target.'cfg(target_arch = "wasm32")'.dev-dependencies]

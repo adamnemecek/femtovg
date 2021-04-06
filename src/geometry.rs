@@ -239,7 +239,8 @@ impl From<Size> for wgpu::Extent3d {
         Self {
             width: a.w as _,
             height: a.h as _,
-            depth: 1,
+            depth_or_array_layers: 1,
+            // depth: 1,  // wgpu 0.7
         }
     }
 }

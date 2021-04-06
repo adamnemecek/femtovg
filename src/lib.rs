@@ -405,7 +405,7 @@ where
     /// Tells the renderer to execute all drawing commands and clears the current internal state
     ///
     /// Call this at the end of each frame.
-    pub fn flush(&mut self, frame: &mut T::Frame) {
+    pub fn flush(&mut self, frame: Option<&mut T::Frame>) {
         self.renderer.render(frame, &self.images, &self.verts, &self.commands);
         self.commands.clear();
         self.verts.clear();
@@ -413,7 +413,7 @@ where
             .release_old_gradients(&mut self.images, &mut self.renderer);
     }
 
-    pub fn screenshot(&mut self, frame: &mut T::Frame) -> Result<ImgVec<RGBA8>, ErrorKind> {
+    pub fn screenshot(&mut self, frame: Option<&mut T::Frame>) -> Result<ImgVec<RGBA8>, ErrorKind> {
         self.flush(frame);
         self.renderer.screenshot()
     }

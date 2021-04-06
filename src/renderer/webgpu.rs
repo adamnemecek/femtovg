@@ -88,6 +88,37 @@ fn begin_render_pass<'a>(
 ) -> wgpu::RenderPass<'a> {
     let pass_desc = wgpu::RenderPassDescriptor {
         label: Some("render pass"),
+        color_attachments: &[wgpu::RenderPassColorAttachment {
+            view: target,
+            resolve_target: None, // todo! what's this?
+            ops: wgpu::Operations {
+                load: wgpu::LoadOp::Load,
+                store: true,
+            },
+        }],
+        depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+            view: stencil_view,
+            // depth_ops: None,
+            depth_ops: Some(wgpu::Operations {
+                load: wgpu::LoadOp::Clear(0.0),
+                store: true,
+            }),
+            // todo: what is this?
+            // stencil_ops: None,
+            stencil_ops: Some(wgpu::Operations {
+                load: wgpu::LoadOp::Clear(0),
+                store: true,
+            }), //Option<Operations<u32>>,
+                // stencil_ops: Some(wgpu::Operations {
+                //     load: wgpu::LoadOp::Clear(0),
+                //     store: true,
+                // }), //Option<Operations<u32>>,
+        }),
+    };
+
+    /* wgpu 0.7
+    let pass_desc = wgpu::RenderPassDescriptor {
+        label: Some("render pass"),
         color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
             attachment: target,
             resolve_target: None, // todo! what's this?
@@ -115,6 +146,7 @@ fn begin_render_pass<'a>(
                 // }), //Option<Operations<u32>>,
         }),
     };
+    */
 
     let mut pass = encoder.begin_render_pass(&pass_desc);
     pass.set_viewport(0.0, 0.0, view_size.w as _, view_size.h as _, 0.0, 1.0);
@@ -159,7 +191,6 @@ pub struct WGPU {
 
     uniform_buffer: WGPUVec<Params>,
     temp_uniform_buffer: Vec<Params>,
-    u_viewsize_buffer: WGPUVec<Size>,
 
     render_target: RenderTarget,
     pseudo_texture: WGPUTexture,
@@ -210,21 +241,9 @@ impl WGPU {
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("bind group layout"),
             entries: &[
-                //viewsize
-                // TODO: make `viewSize` a push constant whenever the wgsl compiler is fixed
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStage::VERTEX,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: wgpu::BufferSize::new(std::mem::size_of::<Size>() as _),
-                    },
-                    count: None,
-                },
                 // //uniforms
                 wgpu::BindGroupLayoutEntry {
-                    binding: 1,
+                    binding: 0,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Buffer {
                         ty: wgpu::BufferBindingType::Uniform,
@@ -235,7 +254,7 @@ impl WGPU {
                 },
                 // texture
                 wgpu::BindGroupLayoutEntry {
-                    binding: 2,
+                    binding: 1,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Texture {
                         sample_type: wgpu::TextureSampleType::Float { filterable: false },
@@ -246,7 +265,7 @@ impl WGPU {
                 },
                 // sampler
                 wgpu::BindGroupLayoutEntry {
-                    binding: 3,
+                    binding: 2,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Sampler {
                         filtering: false,
@@ -256,7 +275,7 @@ impl WGPU {
                 },
                 // alpha texture
                 wgpu::BindGroupLayoutEntry {
-                    binding: 4,
+                    binding: 3,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Texture {
                         sample_type: wgpu::TextureSampleType::Float { filterable: false },
@@ -267,7 +286,7 @@ impl WGPU {
                 },
                 //alpha sampler
                 wgpu::BindGroupLayoutEntry {
-                    binding: 5,
+                    binding: 4,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Sampler {
                         filtering: false,
@@ -285,9 +304,6 @@ impl WGPU {
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: None,
             bind_group_layouts: &[&bind_group_layout],
-            // TODO: make `viewSize` a push constant whenever the wgsl compiler is fixed
-            push_constant_ranges: &[],
-            /*
             push_constant_ranges: &[
                 wgpu::PushConstantRange {
                     stages: wgpu::ShaderStage::VERTEX,
@@ -302,7 +318,6 @@ impl WGPU {
                 //     range: (view_size_size + param_size)..(view_size_size + param_size),
                 // },
             ],
-            */
         });
 
         let clear_rect_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -362,28 +377,23 @@ impl WGPU {
         let index_buffer = WGPUVec::new_index(&device, 1024);
         let uniform_buffer = WGPUVec::new_uniform(&device, 32);
 
-        // TODO: make `viewSize` a push constant whenever the wgsl compiler is fixed
-        let mut u_viewsize_buffer = WGPUVec::new_uniform(&device, 1);
-        u_viewsize_buffer.resize(&device, 1);
-
         let mut flags = wgpu::ShaderFlags::VALIDATION;
         match adapter.get_info().backend {
             wgpu::Backend::Metal | wgpu::Backend::Vulkan => flags |= wgpu::ShaderFlags::EXPERIMENTAL_TRANSLATION,
             _ => (), //TODO
         }
         
-        // TODO: compile the wgsl file at runtime once the compiler is fixed in wgpu?
-        /*
         let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
             label: None,
             source: wgpu::ShaderSource::Wgsl(std::borrow::Cow::Borrowed(include_str!("webgpu/shader.wgsl"))),
             flags,
         });
-        */
 
+        /*
         let shader = device.create_shader_module(&wgpu::include_spirv!(
             "./webgpu/shader.spv"
         ));
+        */
 
         let clear_color = Color::rgba(0, 0, 0, 0);
         // let clear_color = Color::red();
@@ -411,7 +421,6 @@ impl WGPU {
 
             uniform_buffer,
             temp_uniform_buffer: vec![],
-            u_viewsize_buffer,
 
             render_target: RenderTarget::Screen,
             pseudo_texture,
@@ -505,7 +514,9 @@ impl Renderer for WGPU {
         // self.pipeline_cache.clear();
     }
 
-    fn render(&mut self, frame: &mut wgpu::SwapChainFrame, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+    fn render(&mut self, frame: Option<&mut wgpu::SwapChainFrame>, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+        let frame = frame.expect("The swapchain frame must be passed in with canvas.flush()/canvas.screenshot() when using the wgpu renderer`");
+
         // todo!("clear rect {:?}", std::mem::size_of::<ClearRect>());
 
         // println!("render start");
@@ -827,9 +838,7 @@ impl Renderer for WGPU {
                             for drawable in &cmd.drawables {
                                 pass.set_pipeline(s.fill_buffer());
                                 
-                                // TODO: make `viewSize` a push constant whenever the wgsl compiler is fixed
-                                //let _ = pass.set_vertex_value(0, &view_size);
-                                self.queue.write_buffer(self.u_viewsize_buffer.as_ref(), 0, as_u8_slice(&[view_size]));
+                                let _ = pass.set_vertex_value(0, &view_size);
 
                                 if let Some((start, count)) = drawable.fill_verts {
                                     // let offset = self.index_buffer.len();
