@@ -406,7 +406,7 @@ where
     ///
     /// Call this at the end of each frame.
     pub fn flush(&mut self) {
-        self.renderer.render(&self.images, &self.verts, &self.commands);
+        self.renderer.render(None, &self.images, &self.verts, &self.commands);
         self.commands.clear();
         self.verts.clear();
         self.gradients
@@ -552,10 +552,7 @@ where
         self.images.realloc(&mut self.renderer, id, info)
     }
 
-    pub fn raw_image(
-        &self,
-        id: ImageId
-    ) -> Option<&T::Image> {
+    pub fn raw_image(&self, id: ImageId) -> Option<&T::Image> {
         self.images.get(id)
     }
 

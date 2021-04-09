@@ -486,6 +486,7 @@ fn vert_range(start: usize, count: usize) -> std::ops::Range<u32> {
 
 impl Renderer for WGPU {
     type Image = WGPUTexture;
+    type Target = wgpu::TextureView;
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
         let size = Size::new(width, height);
         // println!("set size {:?}", size);
@@ -501,7 +502,13 @@ impl Renderer for WGPU {
         // self.pipeline_cache.clear();
     }
 
-    fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+    fn render(
+        &mut self,
+        target: Option<&Self::Target>,
+        images: &ImageStore<Self::Image>,
+        verts: &[Vertex],
+        commands: &[Command],
+    ) {
         // todo!("clear rect {:?}", std::mem::size_of::<ClearRect>());
 
         // println!("render start");

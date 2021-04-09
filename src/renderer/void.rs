@@ -21,10 +21,18 @@ pub struct Void;
 
 impl Renderer for Void {
     type Image = VoidImage;
+    type Target = ();
 
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {}
 
-    fn render(&mut self, images: &ImageStore<VoidImage>, verts: &[Vertex], commands: &[Command]) {}
+    fn render(
+        &mut self,
+        target: Option<&Self::Target>,
+        images: &ImageStore<VoidImage>,
+        verts: &[Vertex],
+        commands: &[Command],
+    ) {
+    }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
         Ok(VoidImage { info })
