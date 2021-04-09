@@ -170,7 +170,7 @@ pub struct WGPU {
     bind_group_cache: WGPUBindGroupCache,
     clear_color: Color,
     view_size: Size,
-    swap_chain: WGPUSwapChain,
+
     bind_group_layout: wgpu::BindGroupLayout,
     dpi: f32,
 
@@ -178,7 +178,7 @@ pub struct WGPU {
     clear_rect_buffer: WGPUVec<ClearRect>,
     clear_rect_bind_group: wgpu::BindGroup,
     clear_rect_bind_group_layout: wgpu::BindGroupLayout,
-
+    texture_format: wgpu::TextureFormat,
     frame: usize,
 }
 
@@ -197,7 +197,7 @@ impl From<IndexRange> for std::ops::Range<u32> {
 }
 
 impl WGPU {
-    pub fn new(ctx: &WGPUContext, view_size: Size) -> Self {
+    pub fn new(ctx: &WGPUContext, view_size: Size, texture_format: wgpu::TextureFormat) -> Self {
         let default_stencil_state = 0;
 
         // let clear_stencil_state = {
@@ -391,7 +391,7 @@ impl WGPU {
         // let clear_color = Color::red();
         let pipeline_cache = WGPUPipelineCache::new(ctx, pipeline_layout, clear_rect_pipeline_layout, shader);
         let bind_group_cache = WGPUBindGroupCache::new();
-        let swap_chain = WGPUSwapChain::new(ctx, view_size);
+
         let pseudo_texture = WGPUTexture::new_pseudo_texture(ctx).unwrap();
 
         Self {
@@ -417,12 +417,12 @@ impl WGPU {
             bind_group_cache,
             view_size,
             bind_group_layout,
-            swap_chain,
 
             clear_rect_buffer,
             temp_clear_rect_buffer: vec![],
             clear_rect_bind_group_layout,
             clear_rect_bind_group,
+            texture_format,
         }
     }
 }
@@ -496,7 +496,6 @@ impl Renderer for WGPU {
         self.stencil_texture.resize(size);
         // we need to flush all the bind groups since they are bound to particular
         self.bind_group_cache.clear();
-        self.swap_chain.resize(size);
 
         // self.stencil_texture = WGPUStencilTexture::new(&self.ctx, size);
         // self.pipeline_cache.clear();
@@ -517,7 +516,8 @@ impl Renderer for WGPU {
 
         // let texture_format = &self.swap_chain.format();
         // let format = texture_format.clone();
-        let swap_chain_format = self.swap_chain.format();
+        // let swap_chain_format = self.swap_chain.format();
+        let swap_chain_format = self.texture_format;
         // println!("texture format {:?}", texture_format);
 
         let mut render_target = self.render_target;

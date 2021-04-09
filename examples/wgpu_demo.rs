@@ -139,12 +139,13 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
     //     .await
     //     .expect("Failed to create device");
 
+    let size = Size::new(size.width as _, size.height as _);
+
     let instance = WGPUInstance::from_window(&window).await.unwrap();
     let ctx = WGPUContext::new(instance).await.unwrap();
-    let size = Size::new(size.width as _, size.height as _);
-    let renderer = WGPU::new(&ctx, size);
-
     let mut swap_chain = WGPUSwapChain::new(&ctx, size);
+
+    let renderer = WGPU::new(&ctx, size, swap_chain.format());
 
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
