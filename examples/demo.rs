@@ -374,7 +374,7 @@ fn main() {
 
                 //canvas.restore();
 
-                canvas.flush();
+                canvas.flush(None);
                 #[cfg(not(target_arch = "wasm32"))]
                 windowed_context.swap_buffers().unwrap();
             }

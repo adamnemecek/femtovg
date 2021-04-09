@@ -82,7 +82,7 @@ fn main() {
                 perf.render(&mut canvas, 5.0, 5.0);
                 canvas.restore();
 
-                canvas.flush();
+                canvas.flush(None);
                 windowed_context.swap_buffers().unwrap();
             }
             Event::MainEventsCleared => windowed_context.window().request_redraw(),

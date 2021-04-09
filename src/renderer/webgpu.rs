@@ -714,8 +714,8 @@ impl Renderer for WGPU {
         #[allow(unused_assignments)]
         let mut should_submit = true;
 
-        let frame = self.swap_chain.get_current_frame().unwrap();
-        let view = &frame.output.view;
+        // let frame = self.swap_chain.get_current_frame().unwrap();
+        // let view = &frame.output.view;
 
         #[derive(Default, Debug)]
         struct Counter {
@@ -756,7 +756,12 @@ impl Renderer for WGPU {
             let mut encoder = self.ctx.create_command_encoder(None);
             {
                 let (target_view, stencil_view, view_size, texture_format) = match render_target {
-                    RenderTarget::Screen => (view, self.stencil_texture.view(), self.view_size, swap_chain_format),
+                    RenderTarget::Screen => (
+                        target.expect("In order to render into the screen, you have to provice the render target from SwapChainFrame"),
+                        self.stencil_texture.view(),
+                        self.view_size,
+                        swap_chain_format,
+                    ),
                     RenderTarget::Image(id) => {
                         let tex = images.get(id).unwrap();
                         (tex.view(), tex.stencil_view(), tex.size(), tex.format())

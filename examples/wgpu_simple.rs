@@ -22,6 +22,7 @@ use femtovg::{
     renderer::{
         WGPUContext,
         WGPUInstance,
+        WGPUSwapChain,
         WGPU,
     },
     Align,
@@ -140,8 +141,9 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
     let instance = WGPUInstance::from_window(&window).await.unwrap();
     let ctx = WGPUContext::new(instance).await.unwrap();
     let renderer = WGPU::new(&ctx, Size::new(size.width as _, size.height as _));
-
+    let size = Size::new(size.width as _, size.height as _);
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
+    let mut swap_chain = WGPUSwapChain::new(&ctx, size);
 
     let fonts = Fonts {
         regular: canvas
@@ -230,8 +232,10 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
             Event::LoopDestroyed => return,
             Event::WindowEvent { ref event, .. } => match event {
                 #[cfg(not(target_arch = "wasm32"))]
-                WindowEvent::Resized(physical_size) => {
-                    canvas.set_size(physical_size.width as _, physical_size.height as _, 1.0);
+                WindowEvent::Resized(new_size) => {
+                    let new_size = Size::new(new_size.width as _, new_size.height as _);
+                    canvas.set_size(new_size.w as _, new_size.h as _, 1.0);
+                    swap_chain.resize(new_size);
                     // todo!("resize");
                 }
                 WindowEvent::CursorMoved {
@@ -282,9 +286,9 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                         canvas.delete_image(screenshot_image_id);
                     }
 
-                    if let Ok(image) = canvas.screenshot() {
-                        screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
-                    }
+                    // if let Ok(image) = canvas.screenshot() {
+                    //     screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
+                    // }
                 }
                 WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                 _ => (),
@@ -346,7 +350,9 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
 
                 // stroke_rect(&mut canvas, 200.0, 200.0, 100.0, 100.0);
 
-                canvas.flush();
+                let frame = swap_chain.get_current_frame().unwrap();
+                let target = &frame.output.view;
+                canvas.flush(Some(target));
 
                 frame_count += 1;
                 if frame_count == 2 {
