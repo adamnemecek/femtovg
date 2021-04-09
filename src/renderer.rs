@@ -22,6 +22,7 @@ pub use webgpu::{
     WGPUContext,
     WGPUInstance,
     WGPUSwapChain,
+    WGPUTexture,
     WGPU,
 };
 
