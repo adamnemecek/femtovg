@@ -563,8 +563,6 @@ where
         filename: P,
         flags: ImageFlags,
     ) -> Result<ImageId, ErrorKind> {
-        use ::image::DynamicImage;
-
         let image = ::image::open(filename)?.convert_rgb_if_needed();
         use std::convert::TryFrom;
 

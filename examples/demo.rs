@@ -228,7 +228,7 @@ fn main() {
                         canvas.delete_image(screenshot_image_id);
                     }
 
-                    if let Ok(image) = canvas.screenshot() {
+                    if let Ok(image) = canvas.screenshot(None) {
                         screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
                     }
                 }

@@ -757,7 +757,7 @@ impl Renderer for WGPU {
             {
                 let (target_view, stencil_view, view_size, texture_format) = match render_target {
                     RenderTarget::Screen => (
-                        target.expect("In order to render into the screen, you have to provice the render target from SwapChainFrame"),
+                        target.expect("In order to render into the screen, you have to provide the render target from wgpu::SwapChainFrame"),
                         self.stencil_texture.view(),
                         self.view_size,
                         swap_chain_format,

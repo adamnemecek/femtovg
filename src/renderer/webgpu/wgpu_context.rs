@@ -1,14 +1,17 @@
+use std::rc::Rc;
+
+use raw_window_handle::HasRawWindowHandle;
+
 use std::future::Future;
 #[derive(Clone)]
 pub struct WGPUInstance {
-    instance: std::rc::Rc<wgpu::Instance>,
-    adapter: std::rc::Rc<wgpu::Adapter>,
-    surface: Option<std::rc::Rc<wgpu::Surface>>,
+    pub instance: Rc<wgpu::Instance>,
+    pub adapter: Rc<wgpu::Adapter>,
+    pub surface: Option<Rc<wgpu::Surface>>,
 }
 
 impl WGPUInstance {
-    // pub fn from_window(window: &winit::window::Window) -> impl Future<Output = Result<Self, wgpu::RequestDeviceError>>  {
-    pub fn from_window(window: &winit::window::Window) -> impl Future<Output = Option<Self>> {
+    pub fn from_window(window: &impl HasRawWindowHandle) -> impl Future<Output = Option<Self>> {
         let instance = wgpu::Instance::new(wgpu::BackendBit::all());
         let surface = unsafe { instance.create_surface(window) };
         let adapter = instance.request_adapter(&wgpu::RequestAdapterOptions {
@@ -18,10 +21,22 @@ impl WGPUInstance {
         });
         async move {
             adapter.await.map(|adapter| Self {
-                instance: std::rc::Rc::new(instance),
-                adapter: std::rc::Rc::new(adapter),
-                surface: Some(std::rc::Rc::new(surface)),
+                instance: Rc::new(instance),
+                adapter: Rc::new(adapter),
+                surface: Some(Rc::new(surface)),
             })
+        }
+    }
+
+    pub fn from_instance(
+        instance: Rc<wgpu::Instance>,
+        adapter: Rc<wgpu::Adapter>,
+        surface: Option<Rc<wgpu::Surface>>,
+    ) -> Self {
+        Self {
+            instance,
+            adapter,
+            surface,
         }
     }
 
@@ -31,8 +46,8 @@ impl WGPUInstance {
 
         async move {
             adapter.await.map(|adapter| Self {
-                instance: std::rc::Rc::new(instance),
-                adapter: std::rc::Rc::new(adapter),
+                instance: Rc::new(instance),
+                adapter: Rc::new(adapter),
                 surface: None,
             })
         }
@@ -53,9 +68,9 @@ impl WGPUQueueExt for wgpu::Queue {
 
 #[derive(Clone)]
 pub struct WGPUContext {
-    instance: WGPUInstance,
-    device: std::rc::Rc<wgpu::Device>,
-    queue: std::rc::Rc<wgpu::Queue>,
+    pub instance: WGPUInstance,
+    pub device: Rc<wgpu::Device>,
+    pub queue: Rc<wgpu::Queue>,
 }
 
 impl WGPUContext {
@@ -77,9 +92,17 @@ impl WGPUContext {
         async move {
             f.await.map(|(device, queue)| Self {
                 instance: instance.clone(),
-                device: std::rc::Rc::new(device),
-                queue: std::rc::Rc::new(queue),
+                device: Rc::new(device),
+                queue: Rc::new(queue),
             })
+        }
+    }
+
+    pub fn from_device(instance: WGPUInstance, device: Rc<wgpu::Device>, queue: Rc<wgpu::Queue>) -> Self {
+        Self {
+            instance,
+            device,
+            queue
         }
     }
 }
@@ -114,5 +137,5 @@ impl WGPUContext {
 }
 // #[derive(Clone)]
 // pub struct WGPUDevice {
-//     inner: std::rc::Rc<wgpu::Device>
+//     inner: Rc<wgpu::Device>
 // }

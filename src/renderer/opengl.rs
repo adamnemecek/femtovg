@@ -474,7 +474,7 @@ impl Renderer for OpenGl {
 
     fn render(
         &mut self,
-        target: Option<&Self::Target>,
+        _target: Option<&Self::Target>,
         images: &ImageStore<Self::Image>,
         verts: &[Vertex],
         commands: &[Command],
