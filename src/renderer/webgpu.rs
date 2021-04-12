@@ -30,29 +30,11 @@ mod wgpu_var;
 pub use wgpu_var::*;
 
 use crate::{
-    renderer::{
-        ImageId,
-        Vertex,
-    },
-    BlendFactor,
-    Color,
-    CompositeOperationState,
-    ErrorKind,
-    FillRule,
-    ImageInfo,
-    ImageSource,
-    ImageStore,
-    Rect,
-    Size,
+    renderer::{ImageId, Vertex},
+    BlendFactor, Color, CompositeOperationState, ErrorKind, FillRule, ImageInfo, ImageSource, ImageStore, Rect, Size,
 };
 
-use super::{
-    Command,
-    CommandType,
-    Params,
-    RenderTarget,
-    Renderer,
-};
+use super::{Command, CommandType, Params, RenderTarget, Renderer};
 
 use self::VecExt;
 
@@ -1007,6 +989,7 @@ impl Renderer for WGPU {
                             // let bg = bind_group!(self, images, cmd.image, cmd.alpha_mask);
                             {
                                 pass.set_pipeline(s.aa_pixels());
+                                pass.set_stencil_reference(0);
                                 pass.set_bind_group(0, bg.as_ref(), &[uniforms_offset]);
                                 uniforms_offset += std::mem::size_of::<Params>() as u32;
                             }
