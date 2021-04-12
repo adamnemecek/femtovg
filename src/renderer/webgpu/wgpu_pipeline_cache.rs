@@ -2,13 +2,7 @@ use std::collections::HashMap;
 
 use crate::BlendFactor;
 
-use super::{
-    Color,
-    Rect,
-    Vertex,
-    WGPUBlend,
-    WGPUContext,
-};
+use super::{Color, Rect, Vertex, WGPUBlend, WGPUContext};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 struct PipelineCacheKey {
@@ -406,7 +400,7 @@ fn stroke_anti_alias_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthSt
         depth_compare: wgpu::CompareFunction::Always,
         stencil: wgpu::StencilState {
             front: wgpu::StencilFaceState {
-                // compare: wgpu::CompareFunction::NotEqual,
+                compare: wgpu::CompareFunction::Equal,
                 // fail_op: wgpu::StencilOperation::Zero,
                 // depth_fail_op: wgpu::StencilOperation::Zero,
                 // pass_op: wgpu::StencilOperation::Keep,
