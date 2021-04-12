@@ -71,6 +71,16 @@ var<push_constant> viewSize: ViewSize;
 // [[group(0), binding(0)]]
 // var viewSize: ViewSize;
 
+fn mix4(a: vec4<f32>, b: vec4<f32>, d: f32) -> vec4<f32> {
+    return vec4<f32>(
+        mix(a.x, b.x, d),
+        mix(a.y, b.y, d),
+        mix(a.z, b.z, d),
+        mix(a.w, b.w, d)
+    );
+}
+
+
 [[stage(vertex)]]
 fn vertex_shader(
     [[location(0)]] vert: vec4<f32>,
@@ -120,13 +130,7 @@ fn fragment_shader_aa(
         const d = clamp((sdroundrect(u, pt) + u.feather*0.5) / u.feather, 0.0, 1.0);
         // // float d = saturate((u.feather * 0.5 + sdroundrect(uniforms, pt))
         // //                    / u.feather);
-        // const color = mix(u.inner_col, u.outer_col, d);
-         const color = vec4<f32>(
-           mix(u.inner_col.r, u.outer_col.r, d),
-           mix(u.inner_col.g, u.outer_col.g, d),
-           mix(u.inner_col.b, u.outer_col.b, d),
-           mix(u.inner_col.a, u.outer_col.a, d)
-         );
+         const color = mix4(u.inner_col, u.outer_col, d);
         // // color *= scissor;
         // // color *= strokeAlpha;
         result = color;
