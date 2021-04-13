@@ -2,7 +2,13 @@ use std::collections::HashMap;
 
 use crate::BlendFactor;
 
-use super::{Color, Rect, Vertex, WGPUBlend, WGPUContext};
+use super::{
+    Color,
+    Rect,
+    Vertex,
+    WGPUBlend,
+    WGPUContext,
+};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 struct PipelineCacheKey {

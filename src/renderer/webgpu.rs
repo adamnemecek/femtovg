@@ -30,11 +30,29 @@ mod wgpu_var;
 pub use wgpu_var::*;
 
 use crate::{
-    renderer::{ImageId, Vertex},
-    BlendFactor, Color, CompositeOperationState, ErrorKind, FillRule, ImageInfo, ImageSource, ImageStore, Rect, Size,
+    renderer::{
+        ImageId,
+        Vertex,
+    },
+    BlendFactor,
+    Color,
+    CompositeOperationState,
+    ErrorKind,
+    FillRule,
+    ImageInfo,
+    ImageSource,
+    ImageStore,
+    Rect,
+    Size,
 };
 
-use super::{Command, CommandType, Params, RenderTarget, Renderer};
+use super::{
+    Command,
+    CommandType,
+    Params,
+    RenderTarget,
+    Renderer,
+};
 
 use self::VecExt;
 

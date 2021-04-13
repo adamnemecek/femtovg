@@ -329,6 +329,8 @@ pub struct Canvas<T: Renderer> {
     tess_tol: f32,
     dist_tol: f32,
     gradients: GradientStore,
+
+    render_target_stack: ngds::Stack<RenderTarget>,
 }
 
 impl<T> Canvas<T>
@@ -352,6 +354,7 @@ where
             tess_tol: 0.25,
             dist_tol: 0.01,
             gradients: GradientStore::new(),
+            render_target_stack: ngds::Stack::new(),
         };
 
         canvas.save();
@@ -488,6 +491,18 @@ where
             src_alpha,
             dst_rgb,
             dst_alpha,
+        }
+    }
+
+    pub fn push_render_target(&mut self, render_target: RenderTarget) {
+        self.render_target_stack.push(self.current_render_target);
+        self.set_render_target(render_target);
+    }
+
+    pub fn pop_render_target(&mut self) {
+        assert!(!self.render_target_stack.is_empty());
+        if let Some(render_target) = self.render_target_stack.pop() {
+            self.set_render_target(render_target);
         }
     }
 

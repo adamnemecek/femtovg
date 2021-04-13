@@ -156,7 +156,7 @@ fn main() {
             .unwrap(),
     ];
 
-    let mut screenshot_image_id = None;
+    // let mut screenshot_image_id = None;
 
     let start = Instant::now();
     let mut prevt = start;
@@ -224,13 +224,13 @@ fn main() {
                         },
                     ..
                 } => {
-                    if let Some(screenshot_image_id) = screenshot_image_id {
-                        canvas.delete_image(screenshot_image_id);
-                    }
+                    // if let Some(screenshot_image_id) = screenshot_image_id {
+                    //     canvas.delete_image(screenshot_image_id);
+                    // }
 
-                    if let Ok(image) = canvas.screenshot() {
-                        screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
-                    }
+                    // if let Ok(image) = canvas.screenshot() {
+                    //     screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
+                    // }
                 }
                 WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                 _ => (),
@@ -348,17 +348,17 @@ fn main() {
                 draw_spinner(&mut canvas, 15.0, 285.0, 10.0, t);
                 */
 
-                if let Some(image_id) = screenshot_image_id {
-                    let x = size.width as f32 - 512.0;
-                    let y = size.height as f32 - 512.0;
+                // if let Some(image_id) = screenshot_image_id {
+                //     let x = size.width as f32 - 512.0;
+                //     let y = size.height as f32 - 512.0;
 
-                    let paint = Paint::image(image_id, x, y, 512.0, 512.0, 0.0, 1.0);
+                //     let paint = Paint::image(image_id, x, y, 512.0, 512.0, 0.0, 1.0);
 
-                    let mut path = Path::new();
-                    path.rect(x, y, 512.0, 512.0);
-                    canvas.fill_path(&mut path, paint);
-                    canvas.stroke_path(&mut path, Paint::color(Color::hex("454545")));
-                }
+                //     let mut path = Path::new();
+                //     path.rect(x, y, 512.0, 512.0);
+                //     canvas.fill_path(&mut path, paint);
+                //     canvas.stroke_path(&mut path, Paint::color(Color::hex("454545")));
+                // }
 
                 // if true {
                 //     let paint = Paint::image(image_id, size.width as f32, 15.0, 1920.0, 1080.0, 0.0, 1.0);
