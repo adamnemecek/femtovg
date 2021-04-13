@@ -13,6 +13,14 @@ edition = "2018"
 [profile.release]
 debug = true
 
+[features]
+default = ["image-loading", "convert-rgb", "glow-renderer"]
+image-loading = ["image"]
+glow-renderer = ["glow"]
+wgpu-renderer = ["wgpu", "raw-window-handle"]
+debug_inspector = []
+convert-rgb = []
+
 [dependencies]
 fnv = "1.0.7"
 rgb = "0.8.20"
@@ -25,12 +33,8 @@ unicode-segmentation = "1.6.0"
 generational-arena = "0.2.8"
 lru = { version = "0.5.3", default-features = false }
 image = { version = "0.23.6", optional = true, default-features = false }
-serde = { version = "1.0", optional = true, features = ["derive"] }
-wgpu = { git = "https://github.com/gfx-rs/wgpu-rs/" , rev = "82b7068498864de44bbdf3e02d086c03d83a04e0" }
-#wgpu = { git = "https://github.com/gfx-rs/wgpu-rs/" , features = ["trace"], rev = "0f1b290af947d3cd16280c4eb3b48507f5e6c9fb" }
-pollster = "0.2"
-#winit = { version = "0.24", default-features = false }
-winit = { git = "https://github.com/adamnemecek/winit", rev = "8fb77892bdb785045396700391195b10eaf656d8" }
+wgpu = { git = "https://github.com/gfx-rs/wgpu-rs/" , rev = "82b7068498864de44bbdf3e02d086c03d83a04e0", optional = true }
+raw-window-handle = { version = "0.3.3", optional = true }
 #metal = { rev = "439c986eb7a9b91e88b61def2daa66e4043fcbef" }
 
 #git = "https://github.com/gfx-rs/gfx"
@@ -45,21 +49,14 @@ winit = { git = "https://github.com/adamnemecek/winit", rev = "8fb77892bdb785045
 # features = ["auto-capture"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-glow = { version = "0.7.0", default-features = false }
+glow = { version = "0.7.0", default-features = false, optional = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-glow = { version = "0.7.0", features = ["web-sys"], default-features = false }
+glow = { version = "0.7.0", features = ["web-sys"], default-features = false, optional = true }
 web_sys = { version = "0.3", package = "web-sys", features = ["WebGlContextAttributes", "HtmlImageElement"] }
 wasm-bindgen = { version = "=0.2.73" }
 
-[features]
-default = ["image-loading", "convert-rgb"]
-image-loading = ["image"]
-debug_inspector = []
-convert-rgb = []
-
 [dev-dependencies]
-
 euclid = "0.20.13"
 rand = "0.7"
 svg = "0.8.0"
@@ -69,7 +66,9 @@ resource = "0.5.0"
 image = { version = "0.23.6", default-features = false, features = ["jpeg", "png"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+winit = "0.24.0"
 glutin = "0.26.0"
+pollster = "0.2"
 
 # [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
 # winit = { version = "0.24", default-features = false, features = ["web-sys"] }

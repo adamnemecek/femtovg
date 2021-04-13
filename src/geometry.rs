@@ -233,6 +233,7 @@ pub struct Size {
     pub h: u32,
 }
 
+#[cfg(feature = "wgpu-renderer")]
 impl From<Size> for wgpu::Extent3d {
     fn from(a: Size) -> Self {
         Self {

@@ -1,3 +1,11 @@
+fn main() {
+    #[cfg(feature="wgpu-renderer")]
+    demo::demo_main();
+}
+
+#[cfg(feature="wgpu-renderer")]
+mod demo {
+
 use std::f32::consts::PI;
 
 use resource::resource;
@@ -15,8 +23,6 @@ use winit::event_loop::{
     ControlFlow,
     EventLoop,
 };
-use winit::window::WindowBuilder;
-//use glutin::{GlRequest, Api};
 
 use femtovg::{
     renderer::{
@@ -52,7 +58,7 @@ struct Fonts {
     icons: FontId,
 }
 
-fn main() {
+pub fn demo_main() {
     // This provides better error messages in debug mode.
     // It's disabled in release mode so it doesn't bloat up the file size.
     #[cfg(all(debug_assertions, target_arch = "wasm32"))]
@@ -115,36 +121,11 @@ fn main() {
 
 async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
     let size = window.inner_size();
-    // let instance = wgpu::Instance::new(wgpu::BackendBit::all());
-    // let surface = unsafe { instance.create_surface(&window) };
-    // let adapter = instance
-    //     .request_adapter(&wgpu::RequestAdapterOptions {
-    //         power_preference: wgpu::PowerPreference::default(),
-    //         // Request an adapter which can render to our surface
-    //         compatible_surface: Some(&surface),
-    //     })
-    //     .await
-    //     .expect("Failed to find an appropriate adapter");
-
-    // Create the logical device and command queue
-    // let (device, queue) = adapter
-    //     .request_device(
-    //         &wgpu::DeviceDescriptor {
-    //             label: None,
-    //             features: wgpu::Features::empty(),
-    //             limits: wgpu::Limits::default(),
-    //         },
-    //         None,
-    //     )
-    //     .await
-    //     .expect("Failed to create device");
-
-    let size = Size::new(size.width as _, size.height as _);
-
+    
     let instance = WGPUInstance::from_window(&window).await.unwrap();
     let ctx = WGPUContext::new(instance).await.unwrap();
+    let size = Size::new(size.width as _, size.height as _);
     let mut swap_chain = WGPUSwapChain::new(&ctx, size);
-
     let renderer = WGPU::new(&ctx, size, swap_chain.format());
 
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
@@ -291,6 +272,15 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 _ => (),
             },
             Event::RedrawRequested(_) => {
+                let frame = match swap_chain.get_current_frame() {
+                    Ok(frame) => frame,
+                    Err(_) => {
+                        // The swapchain is outdated. Try again next frame.
+                        window.request_redraw();
+                        return;
+                    }
+                };
+
                 let now = Instant::now();
                 let dt = (now - prevt).as_secs_f32();
                 prevt = now;
@@ -302,7 +292,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
 
                 let t = start.elapsed().as_secs_f32();
 
-                canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
+                // canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
                 canvas.clear_rect(0, 0, size.width as u32, size.height as u32, Color::rgbf(0.3, 0.3, 0.32));
 
                 let height = size.height as f32;
@@ -428,9 +418,10 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 });
 
                 //canvas.restore();
-                let frame = swap_chain.get_current_frame().unwrap();
+
                 let target = &frame.output.view;
                 canvas.flush(Some(target));
+
                 // #[cfg(not(target_arch = "wasm32"))]
                 // windowed_context.swap_buffers().unwrap();
                 // todo!("swap buffers");
@@ -1628,4 +1619,6 @@ fn draw_spinner<T: Renderer>(canvas: &mut Canvas<T>, cx: f32, cy: f32, r: f32, t
     canvas.fill_path(&mut path, paint);
 
     canvas.restore();
+}
+
 }

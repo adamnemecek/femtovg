@@ -14,10 +14,14 @@ use crate::{
     ImageStore,
 };
 
+#[cfg(feature = "glow-renderer")]
 mod opengl;
+#[cfg(feature = "glow-renderer")]
 pub use opengl::OpenGl;
 
+#[cfg(feature = "wgpu-renderer")]
 mod webgpu;
+#[cfg(feature = "wgpu-renderer")]
 pub use webgpu::{
     WGPUContext,
     WGPUInstance,

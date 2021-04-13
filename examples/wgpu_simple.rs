@@ -1,4 +1,10 @@
-use std::f32::consts::PI;
+fn main() {
+    #[cfg(feature="wgpu-renderer")]
+    simple::simple_main();
+}
+
+#[cfg(feature="wgpu-renderer")]
+mod simple {
 
 use resource::resource;
 
@@ -15,8 +21,6 @@ use winit::event_loop::{
     ControlFlow,
     EventLoop,
 };
-use winit::window::WindowBuilder;
-//use glutin::{GlRequest, Api};
 
 use femtovg::{
     renderer::{
@@ -52,7 +56,7 @@ struct Fonts {
     icons: FontId,
 }
 
-fn main() {
+pub fn simple_main() {
     // This provides better error messages in debug mode.
     // It's disabled in release mode so it doesn't bloat up the file size.
     #[cfg(all(debug_assertions, target_arch = "wasm32"))]
@@ -140,9 +144,9 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
 
     let instance = WGPUInstance::from_window(&window).await.unwrap();
     let ctx = WGPUContext::new(instance).await.unwrap();
-    let mut swap_chain = WGPUSwapChain::new(&ctx, size);
-    let renderer = WGPU::new(&ctx, Size::new(size.width as _, size.height as _), swap_chain.format());
     let size = Size::new(size.width as _, size.height as _);
+    let mut swap_chain = WGPUSwapChain::new(&ctx, size);
+    let renderer = WGPU::new(&ctx, size, swap_chain.format());
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
     let fonts = Fonts {
@@ -294,6 +298,15 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 _ => (),
             },
             Event::RedrawRequested(_) => {
+                let frame = match swap_chain.get_current_frame() {
+                    Ok(frame) => frame,
+                    Err(_) => {
+                        // The swapchain is outdated. Try again next frame.
+                        window.request_redraw();
+                        return;
+                    }
+                };
+
                 let now = Instant::now();
                 let dt = (now - prevt).as_secs_f32();
                 prevt = now;
@@ -305,7 +318,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
 
                 // let t = start.elapsed().as_secs_f32();
 
-                canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
+                // canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
                 let bg_color = Color::rgbf(0.3, 0.3, 0.3);
                 canvas.clear_rect(0, 0, size.width as u32, size.height as u32, bg_color);
 
@@ -350,7 +363,6 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
 
                 // stroke_rect(&mut canvas, 200.0, 200.0, 100.0, 100.0);
 
-                let frame = swap_chain.get_current_frame().unwrap();
                 let target = &frame.output.view;
                 canvas.flush(Some(target));
 
@@ -1701,3 +1713,5 @@ fn draw_graph<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f3
 
 //     canvas.restore();
 // }
+
+}
