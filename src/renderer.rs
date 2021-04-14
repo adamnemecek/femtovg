@@ -65,6 +65,13 @@ pub enum CommandType {
     Triangles {
         params: Params,
     },
+    InsertDebugGroup {
+        label: String,
+    },
+    PushDebugGroup {
+        label: String,
+    },
+    PopDebugGroup,
 }
 
 pub struct Command {

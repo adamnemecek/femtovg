@@ -645,6 +645,9 @@ impl Renderer for WGPU {
                     })
                 }
                 CommandType::SetRenderTarget(_) => {}
+                CommandType::InsertDebugGroup { .. } => {}
+                CommandType::PushDebugGroup { .. } => {}
+                CommandType::PopDebugGroup => {}
             }
         }
 
@@ -1097,6 +1100,15 @@ impl Renderer for WGPU {
                             } else {
                                 continue 'continued;
                             }
+                        }
+                        CommandType::InsertDebugGroup { ref label } => {
+                            pass.insert_debug_marker(label);
+                        }
+                        CommandType::PushDebugGroup { ref label } => {
+                            pass.push_debug_group(label);
+                        }
+                        CommandType::PopDebugGroup => {
+                            pass.pop_debug_group();
                         }
                     }
                 }

@@ -552,6 +552,9 @@ impl Renderer for OpenGl {
                     self.set_target(images, *target);
                     self.main_program.set_view(self.view);
                 }
+                CommandType::InsertDebugGroup { .. } => {}
+                CommandType::PushDebugGroup { .. } => {}
+                CommandType::PopDebugGroup => {}
             }
         }
 

@@ -506,6 +506,22 @@ where
         }
     }
 
+    pub fn insert_debug_group(&mut self, label: &str) {
+        self.append_cmd(Command::new(CommandType::InsertDebugGroup {
+            label: label.to_owned(),
+        }));
+    }
+
+    pub fn push_debug_group(&mut self, label: &str) {
+        self.append_cmd(Command::new(CommandType::PushDebugGroup {
+            label: label.to_owned(),
+        }));
+    }
+
+    pub fn pop_debug_marker(&mut self) {
+        self.append_cmd(Command::new(CommandType::PopDebugGroup));
+    }
+
     /// Sets a new render target. All drawing operations after this call will happen on the provided render target
     pub fn set_render_target(&mut self, target: RenderTarget) {
         if self.current_render_target != target {

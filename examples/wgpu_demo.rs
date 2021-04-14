@@ -327,7 +327,9 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                     mousey,
                 );
 
+                canvas.push_debug_group("color wheel");
                 draw_colorwheel(&mut canvas, width - 300.0, height - 350.0, 250.0, 250.0, t);
+                canvas.pop_debug_group();
 
                 draw_lines(&mut canvas, 120.0, height - 50.0, 600.0, 50.0, t);
                 draw_widths(&mut canvas, 10.0, 50.0, 30.0);
