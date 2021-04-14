@@ -94,6 +94,9 @@ pub use path::{
 mod gradient_store;
 use gradient_store::GradientStore;
 
+#[macro_use]
+extern crate static_assertions;
+
 /// The fill rule used when filling paths: `EvenOdd`, `NonZero` (default).
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]

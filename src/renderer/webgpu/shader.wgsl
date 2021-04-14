@@ -31,7 +31,7 @@ struct Uniforms {
     tex_type: f32;                                  // 4
     shader_type: f32;                               // 4
     has_mask: f32;                                  // 4
-    padding: [[stride(4)]] array<f32, 19>;          // 19 * 4
+    padding: [[stride(16)]] array<f32, 19>;          // 19 * 4
 };
 
 fn scissor_mask(u: Uniforms, p: vec2<f32>) -> f32 {
@@ -251,7 +251,7 @@ fn rect_vert_cw(
 struct ClearRectIn {
     rect: vec4<f32>;
     color: vec4<f32>;
-    padding: [[stride(4)]] array<f32, 56>;
+    padding: [[stride(16)]] array<f32, 56>;
 };
 
 // [[block]]

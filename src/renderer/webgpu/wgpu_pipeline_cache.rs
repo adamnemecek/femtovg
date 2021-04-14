@@ -262,7 +262,6 @@ fn create_clear_rect_pipeline(
 //             write_mask: 0xff,
 //         },
 //         bias: wgpu::DepthBiasState::default(),
-//         clamp_depth: false,
 //     }
 // }
 
@@ -287,7 +286,6 @@ fn fill_shape_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencilSt
             write_mask: 0xff,
         },
         bias: wgpu::DepthBiasState::default(),
-        clamp_depth: false,
     }
 }
 
@@ -310,7 +308,6 @@ fn fill_anti_alias_stencil_state_nonzero(format: wgpu::TextureFormat) -> wgpu::D
             write_mask: 0xff,
         },
         bias: wgpu::DepthBiasState::default(),
-        clamp_depth: false,
     }
 }
 
@@ -332,7 +329,6 @@ fn fill_anti_alias_stencil_state_evenodd(format: wgpu::TextureFormat) -> wgpu::D
             write_mask: 0xff,
         },
         bias: wgpu::DepthBiasState::default(),
-        clamp_depth: false,
     }
 }
 
@@ -353,7 +349,6 @@ fn fill_stencil_state_nonzero(format: wgpu::TextureFormat) -> wgpu::DepthStencil
             write_mask: 0xff,
         },
         bias: wgpu::DepthBiasState::default(),
-        clamp_depth: false,
     }
 }
 
@@ -374,7 +369,6 @@ fn fill_stencil_state_evenodd(format: wgpu::TextureFormat) -> wgpu::DepthStencil
             write_mask: 0xff,
         },
         bias: wgpu::DepthBiasState::default(),
-        clamp_depth: false,
     }
 }
 
@@ -395,7 +389,6 @@ fn stroke_shape_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencil
             write_mask: 0xff,
         },
         bias: wgpu::DepthBiasState::default(),
-        clamp_depth: false,
     }
 }
 
@@ -417,7 +410,6 @@ fn stroke_anti_alias_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthSt
             write_mask: 0xff,
         },
         bias: wgpu::DepthBiasState::default(),
-        clamp_depth: false,
     }
 }
 
@@ -438,7 +430,6 @@ fn stroke_clear_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencil
             write_mask: 0xff,
         },
         bias: wgpu::DepthBiasState::default(),
-        clamp_depth: false,
     }
 }
 
@@ -449,7 +440,6 @@ fn default_stencil_state(format: wgpu::TextureFormat) -> wgpu::DepthStencilState
         depth_compare: wgpu::CompareFunction::Always,
         stencil: Default::default(),
         bias: wgpu::DepthBiasState::default(),
-        clamp_depth: false,
     }
 }
 

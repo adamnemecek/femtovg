@@ -31,6 +31,8 @@ pub struct Params {
     pub(crate) padding: [f32; 19],
 }
 
+static_assertions::const_assert!(std::mem::size_of::<Params>() == 256);
+
 impl Params {
     pub(crate) fn new<T>(
         images: &ImageStore<T>,
