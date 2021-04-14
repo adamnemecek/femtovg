@@ -518,7 +518,7 @@ where
         }));
     }
 
-    pub fn pop_debug_marker(&mut self) {
+    pub fn pop_debug_group(&mut self) {
         self.append_cmd(Command::new(CommandType::PopDebugGroup));
     }
 
