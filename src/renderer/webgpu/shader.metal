@@ -89,6 +89,14 @@ type3 sdroundrect(
     return ((metal::min(metal::max(_expr8.x, _expr8.y), const_0f) + metal::length(metal::float2(metal::max(_expr8.x, const_0f), metal::max(_expr8.y, const_0f)))) - u4.radius);
 }
 
+type mix4_(
+    type a,
+    type b,
+    type3 d
+) {
+    return metal::float4(metal::mix(a.x, b.x, d), metal::mix(a.y, b.y, d), metal::mix(a.z, b.z, d), metal::mix(a.w, b.w, d));
+}
+
 type1 rect_vert_cw(
     type rect1,
     type9 vid
@@ -163,16 +171,16 @@ fragment fragment_shader_aaOutput fragment_shader_aa(
     if ((u.shader_type == const_0f)) {
         metal::float4 _expr23 = (u.paint_mat * metal::float3(in.fpos, const_1f));
         type3 _expr28 = sdroundrect(u, metal::float2(_expr23.x, _expr23.y));
-        type3 _expr39 = metal::clamp(((_expr28 + (u.feather * const_0_50f)) / u.feather), const_0f, const_1f);
-        result = metal::float4(metal::mix(u.inner_col.x, u.outer_col.x, _expr39), metal::mix(u.inner_col.y, u.outer_col.y, _expr39), metal::mix(u.inner_col.z, u.outer_col.z, _expr39), metal::mix(u.inner_col.w, u.outer_col.w, _expr39));
+        type _expr44 = mix4_(u.inner_col, u.outer_col, metal::clamp(((_expr28 + (u.feather * const_0_50f)) / u.feather), const_0f, const_1f));
+        result = _expr44;
     } else {
         if ((u.shader_type == const_1f)) {
-            metal::float4 _expr78 = (u.paint_mat * metal::float3(in.fpos, const_1f));
-            metal::float4 _expr86 = tex.sample(samplr, (metal::float2(_expr78.x, _expr78.y) / u.extent));
-            color2 = _expr86;
+            metal::float4 _expr54 = (u.paint_mat * metal::float3(in.fpos, const_1f));
+            metal::float4 _expr62 = tex.sample(samplr, (metal::float2(_expr54.x, _expr54.y) / u.extent));
+            color2 = _expr62;
             if ((u.tex_type == const_1f)) {
-                type _expr91 = color2;
-                color2 = metal::float4((metal::float3(_expr91.x, _expr91.y, _expr91.z) * color2.w), color2.w);
+                type _expr67 = color2;
+                color2 = metal::float4((metal::float3(_expr67.x, _expr67.y, _expr67.z) * color2.w), color2.w);
             } else {
                 if ((u.tex_type == const_2f)) {
                     color2 = metal::float4(color2.x, color2.x, color2.x, color2.x);
@@ -184,8 +192,8 @@ fragment fragment_shader_aaOutput fragment_shader_aa(
         }
     }
     if ((u.has_mask == const_1f)) {
-        metal::float4 _expr135 = alpha_tex.sample(alpha_samplr, metal::float2(in.ftcoord.x, (const_1f - in.ftcoord.y)));
-        mask = metal::float4(_expr135.x, _expr135.x, _expr135.x, _expr135.x);
+        metal::float4 _expr111 = alpha_tex.sample(alpha_samplr, metal::float2(in.ftcoord.x, (const_1f - in.ftcoord.y)));
+        mask = metal::float4(_expr111.x, _expr111.x, _expr111.x, _expr111.x);
         mask = (mask * _expr10);
         result = (result * mask);
     } else {
