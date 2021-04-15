@@ -140,9 +140,10 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
 
     let instance = WGPUInstance::from_window(&window).await.unwrap();
     let ctx = WGPUContext::new(instance).await.unwrap();
-    let mut swap_chain = WGPUSwapChain::new(&ctx, size);
-    let renderer = WGPU::new(&ctx, Size::new(size.width as _, size.height as _), swap_chain.format());
     let size = Size::new(size.width as _, size.height as _);
+    let mut swap_chain = WGPUSwapChain::new(&ctx, size);
+    let renderer = WGPU::new(&ctx, size, swap_chain.format());
+    // let size = Size::new(size.h as _, size.h as _);
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
     let fonts = Fonts {
@@ -216,7 +217,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
     let mut mousey = 0.0;
     let mut dragging = false;
 
-    ctx.device().start_capture();
+    // ctx.device().start_capture();
 
     // let mut perf = PerfGraph::new();
 
@@ -325,7 +326,10 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 // clear_rect(&mut canvas, 200, 200, 100, 100);
                 // fill_rect(&mut canvas, 100.0, 100.0, 100.0, 100.0);
                 // draw_text(&mut canvas, &fonts, "tea", 0.0, 0.0, 100.0, 100.0);
+                // canvas.insert_debug_group("stuff");
+                canvas.push_debug_group("debug group");
                 draw_text(&mut canvas, &fonts, "qwe", 200.0, 0.0, 100.0, 300.0);
+                canvas.pop_debug_group();
                 draw_image(&mut canvas, 30.0, 30.0, &[image]);
                 // draw_text( mut canvas, &fonts, "poi", 0.0, 0.0, 100.0, 500.0);
 
@@ -355,9 +359,9 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
                 canvas.flush(Some(target));
 
                 frame_count += 1;
-                if frame_count == 2 {
-                    ctx.device().stop_capture();
-                }
+                // if frame_count == 2 {
+                //     ctx.device().stop_capture();
+                // }
                 // #[cfg(not(target_arch = "wasm32"))]
                 // windowed_context.swap_buffers().unwrap();
                 // todo!("swap buffers");

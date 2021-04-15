@@ -752,6 +752,9 @@ impl Renderer for WGPU {
         //     _ => false,
         // };
         // println!("first command is set render target {:?}", z);
+        // let debug_groups = vec![];
+        // let mut debug_groups = 0;
+        let mut debug_groups: Vec<String> = vec![];
 
         'new_pass: while i < commands.len() {
             should_submit = true;
@@ -787,6 +790,10 @@ impl Renderer for WGPU {
                     &self.index_buffer,
                     // &self.uniform_buffer,
                 );
+
+                for label in debug_groups.iter() {
+                    pass.push_debug_group(label);
+                }
 
                 let mut offset = 0;
 
@@ -1092,6 +1099,11 @@ impl Renderer for WGPU {
 
                             if render_target != *target {
                                 render_target = *target;
+
+                                for _ in debug_groups.iter() {
+                                    pass.pop_debug_group();
+                                }
+
                                 drop(pass);
                                 self.ctx.queue().submit(Some(encoder.finish()));
 
@@ -1101,14 +1113,16 @@ impl Renderer for WGPU {
                                 continue 'continued;
                             }
                         }
-                        CommandType::InsertDebugGroup { ref label } => {
-                            pass.insert_debug_marker(label);
+                        CommandType::InsertDebugGroup { label } => {
+                            pass.insert_debug_marker(&label);
                         }
-                        CommandType::PushDebugGroup { ref label } => {
-                            pass.push_debug_group(label);
+                        CommandType::PushDebugGroup { label } => {
+                            pass.push_debug_group(&label);
+                            debug_groups.push(label.to_owned());
                         }
                         CommandType::PopDebugGroup => {
                             pass.pop_debug_group();
+                            let _ = debug_groups.pop();
                         }
                     }
                 }

@@ -332,7 +332,6 @@ pub struct Canvas<T: Renderer> {
     tess_tol: f32,
     dist_tol: f32,
     gradients: GradientStore,
-
     render_target_stack: ngds::Stack<RenderTarget>,
 }
 
