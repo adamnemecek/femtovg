@@ -97,6 +97,7 @@ impl From<CompositeOperationState> for WGPUBlend {
 fn begin_render_pass<'a>(
     // ctx: WGPUContext,
     encoder: &'a mut wgpu::CommandEncoder,
+    label: Option<&'a str>,
     target: &'a wgpu::TextureView,
     stencil_view: &'a wgpu::TextureView,
     view_size: Size,
@@ -104,8 +105,9 @@ fn begin_render_pass<'a>(
     vertex_buffer: &'a WGPUVec<Vertex>,
     index_buffer: &'a WGPUVec<u32>,
 ) -> wgpu::RenderPass<'a> {
+    let label = label.unwrap_or("render pass");
     let pass_desc = wgpu::RenderPassDescriptor {
-        label: Some("render pass"),
+        label: Some(label),
         color_attachments: &[wgpu::RenderPassColorAttachment {
             view: target,
             resolve_target: None, // todo! what's this?
@@ -773,9 +775,10 @@ impl Renderer for WGPU {
 
                 // println!("view_size {:?}", view_size);
                 // println!("render target {:?}", render_target);
-
+                let label = debug_groups.last().map(|x| x.to_owned());
                 let mut pass = begin_render_pass(
                     &mut encoder,
+                    label.as_deref(),
                     // target_texture_view.view(),
                     // &frame.output.view,
                     target_view,
