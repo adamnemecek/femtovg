@@ -29,8 +29,8 @@ serde = { version = "1.0", optional = true, features = ["derive"] }
 wgpu = { git = "https://github.com/gfx-rs/wgpu-rs/" , rev = "1f8e411a8b1a6b8ec70487a9dcfbb1ecb576df34" }
 #wgpu = { git = "https://github.com/gfx-rs/wgpu-rs/" , features = ["trace"], rev = "0f1b290af947d3cd16280c4eb3b48507f5e6c9fb" }
 pollster = "0.2"
-winit = { version = "0.24", default-features = false }
-#winit = { git = "https://github.com/adamnemecek/winit", rev = "8fb77892bdb785045396700391195b10eaf656d8" }
+#winit = { version = "0.24", default-features = false }
+winit = { git = "https://github.com/adamnemecek/winit", rev = "8fb77892bdb785045396700391195b10eaf656d8" }
 #metal = { rev = "439c986eb7a9b91e88b61def2daa66e4043fcbef" }
 ngds = { git = "https://github.com/adamnemecek/ngds", branch = "main" }
 mem_align = { git = "https://github.com/adamnemecek/mem_align/", branch = "main" }
