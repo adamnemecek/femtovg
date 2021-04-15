@@ -17,9 +17,6 @@ pub use wgpu_ext::*;
 mod wgpu_pipeline_cache;
 pub use wgpu_pipeline_cache::*;
 
-mod mem_align;
-pub use mem_align::*;
-
 mod wgpu_swap_chain;
 pub use wgpu_swap_chain::*;
 

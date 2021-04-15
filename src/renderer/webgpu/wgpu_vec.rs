@@ -1,7 +1,8 @@
 use wgpu::util::DeviceExt;
 
+use mem_align::MemAlign;
+
 use super::{
-    MemAlign,
     WGPUContext,
     WGPUInstance,
     // WGPUVar,
@@ -59,7 +60,7 @@ fn create_buffer<T: Copy>(
         // pub label: L,
         /// Size of a buffer.
         // pub size: BufferAddress,
-        size: mem_align.byte_size as _,
+        size: mem_align.byte_size() as _,
         /// Usages of a buffer. If the buffer is used in any way that isn't specified here, the operation
         /// will panic.
         // pub usage: BufferUsage,
@@ -261,7 +262,7 @@ impl<T: Copy> WGPUVec<T> {
     // }
 
     pub fn capacity(&self) -> usize {
-        self.mem_align.capacity
+        self.mem_align.capacity()
     }
 
     // pub fn view_mut<'a>(&'a self) -> wgpu::BufferViewMut<'a> {
