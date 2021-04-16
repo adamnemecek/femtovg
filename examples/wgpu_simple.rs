@@ -138,7 +138,7 @@ async fn run(event_loop: EventLoop<()>, window: winit::window::Window) {
     //     .await
     //     .expect("Failed to create device");
 
-    let instance = WGPUInstance::from_window(&window).await.unwrap();
+    let instance = WGPUInstance::from_window(&window, Some(wgpu::Backend::Vulkan)).await.unwrap();
     let ctx = WGPUContext::new(instance).await.unwrap();
     let size = Size::new(size.width as _, size.height as _);
     let mut swap_chain = WGPUSwapChain::new(&ctx, size);

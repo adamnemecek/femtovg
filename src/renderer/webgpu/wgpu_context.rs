@@ -8,8 +8,15 @@ pub struct WGPUInstance {
 
 impl WGPUInstance {
     // pub fn from_window(window: &winit::window::Window) -> impl Future<Output = Result<Self, wgpu::RequestDeviceError>>  {
-    pub fn from_window(window: &winit::window::Window) -> impl Future<Output = Option<Self>> {
-        let instance = wgpu::Instance::new(wgpu::BackendBit::all());
+    pub fn from_window(window: &winit::window::Window, backend: Option<wgpu::Backend>) -> impl Future<Output = Option<Self>> {
+        let bits = match backend {
+            None => { wgpu::BackendBit::all() }
+            Some(b) => {
+                wgpu::BackendBit::from(b)
+            }
+        };
+
+        let instance = wgpu::Instance::new(bits); 
         let surface = unsafe { instance.create_surface(window) };
         let adapter = instance.request_adapter(&wgpu::RequestAdapterOptions {
             power_preference: wgpu::PowerPreference::default(),
@@ -25,8 +32,15 @@ impl WGPUInstance {
         }
     }
 
-    pub fn new() -> impl Future<Output = Option<Self>> {
-        let instance = wgpu::Instance::new(wgpu::BackendBit::all());
+    pub fn new(backend: Option<wgpu::Backend>) -> impl Future<Output = Option<Self>> {
+        let bits = match backend {
+            None => { wgpu::BackendBit::all() }
+            Some(b) => {
+                wgpu::BackendBit::from(b)
+            }
+        };
+
+        let instance = wgpu::Instance::new(bits);        
         let adapter = instance.request_adapter(&wgpu::RequestAdapterOptions::default());
 
         async move {
