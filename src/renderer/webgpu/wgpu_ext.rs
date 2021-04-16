@@ -36,13 +36,15 @@ pub trait RenderPassExt {
 impl<'a> RenderPassExt for wgpu::RenderPass<'a> {
     #[inline]
     fn cfg_push_debug_group(&mut self, label: &str) {
-        // #[cfg(debug_assertions)]
+        // #[cfg(feature = "debug_group")]
+        #[cfg(debug_assertions)]
         self.push_debug_group(label)
     }
 
     #[inline]
     fn cfg_pop_debug_group(&mut self) {
-        // #[cfg(debug_assertions)]
+        // #[cfg(feature = "debug_group")]
+        #[cfg(debug_assertions)]
         self.pop_debug_group();
     }
 

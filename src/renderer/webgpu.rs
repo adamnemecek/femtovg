@@ -373,11 +373,13 @@ impl WGPU {
         let index_buffer = WGPUVec::new_index(ctx, 1024);
         let uniform_buffer = WGPUVec::new_uniform(ctx, 32);
 
+        // #[cfg(debug_assertions)]
         let mut flags = wgpu::ShaderFlags::VALIDATION;
-        match ctx.adapter().get_info().backend {
-            wgpu::Backend::Metal | wgpu::Backend::Vulkan => flags |= wgpu::ShaderFlags::EXPERIMENTAL_TRANSLATION,
-            _ => (), //TODO
-        }
+        // match ctx.adapter().get_info().backend {
+        //     wgpu::Backend::Metal | wgpu::Backend::Vulkan => flags |= wgpu::ShaderFlags::EXPERIMENTAL_TRANSLATION,
+        //     _ => (), //TODO
+        // }
+        // let mut flags = wgpu::ShaderFlags::empty();
 
         let shader = ctx.device().create_shader_module(&wgpu::ShaderModuleDescriptor {
             label: None,
