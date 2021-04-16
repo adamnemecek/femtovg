@@ -29,6 +29,7 @@ pub enum PixelFormat {
     Rgb8,
     Rgba8,
     Gray8,
+    Bgra8,
 }
 
 bitflags! {

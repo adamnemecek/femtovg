@@ -82,6 +82,9 @@ impl GlTexture {
                     //data.buf().as_ptr() as *const GLvoid
                 );
             },
+            PixelFormat::Bgra8 => {
+                todo!("bgra8 is not supported for opengl");
+            }
         }
 
         let flags = texture.info.flags();
