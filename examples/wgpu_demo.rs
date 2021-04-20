@@ -1337,6 +1337,7 @@ fn draw_thumbnails<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, 
         Color::rgba(0, 0, 0, 32),
         Color::rgba(0, 0, 0, 92),
     );
+    // draws track
     let mut path = Path::new();
     path.rounded_rect(x + w - 12.0, y + 4.0, 8.0, h - 8.0, 3.0);
     canvas.fill_path(&mut path, shadow_paint);

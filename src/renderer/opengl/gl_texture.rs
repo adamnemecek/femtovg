@@ -23,7 +23,7 @@ impl GlTexture {
         let mut texture = Self {
             context: context.clone(),
             id: Default::default(),
-            info: info,
+            info,
         };
 
         unsafe {

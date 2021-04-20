@@ -15,12 +15,12 @@ pub struct Atlas {
 impl Atlas {
     pub fn new(width: usize, height: usize) -> Self {
         Self {
-            width: width,
-            height: height,
+            width,
+            height,
             nodes: vec![Node {
                 x: 0,
                 y: 0,
-                width: width,
+                width,
             }],
         }
     }

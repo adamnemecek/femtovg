@@ -137,11 +137,11 @@ impl Game {
                 on_paddle: true,
             }],
             logo_image_id: image_id,
-            fonts: fonts,
-            paddle_rect: paddle_rect,
+            fonts,
+            paddle_rect,
             size: Size::new(canvas.width(), canvas.height()),
             bricks: Vec::new(),
-            levels: levels,
+            levels,
             powerups: Vec::new(),
             current_level: 0,
             lives: 3,
@@ -841,9 +841,9 @@ impl Brick {
         };
 
         Self {
-            brick_type: brick_type,
+            brick_type,
             destroyed: false,
-            rect: rect,
+            rect,
         }
     }
 

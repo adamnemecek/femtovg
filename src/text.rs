@@ -511,9 +511,9 @@ fn shape_word(
             let mut g = ShapedGlyph {
                 x: 0.0,
                 y: 0.0,
-                c: c,
+                c,
                 byte_index: info.cluster as usize,
-                font_id: font_id,
+                font_id,
                 codepoint: info.codepoint,
                 width: 0.0,
                 height: 0.0,

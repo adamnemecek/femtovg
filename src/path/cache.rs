@@ -1176,7 +1176,7 @@ impl<'a, T: 'a> MutStridedChunks<'a, T> {
     pub fn new(buffer: &'a mut [T]) -> Self {
         buffer.rotate_right(1);
         Self {
-            buffer: buffer,
+            buffer,
             rotated: false,
             pos: 0
         }
