@@ -54,8 +54,8 @@ fn sdroundrect(u: Uniforms, pt: vec2<f32>) -> f32 {
     // float2 d = abs(pt) - ext2;
     // return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - uniforms.radius;
     // return 0.0;
-    const ext2 = u.extent - vec2<f32>(u.radius, u.radius);
-    const d = abs(pt) - ext2;
+    let ext2 = u.extent - vec2<f32>(u.radius, u.radius);
+    let d = abs(pt) - ext2;
     // return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - u.radius;
     return min(max(d.x, d.y), 0.0) + length(vec2<f32>(max(d.x, 0.0), max(d.y, 0.0))) - u.radius;
 }
@@ -85,8 +85,8 @@ fn mix4(a: vec4<f32>, b: vec4<f32>, d: f32) -> vec4<f32> {
 fn vertex_shader(
     [[location(0)]] vert: vec4<f32>,
 ) -> RasterizerData {
-    const pos = vert.xy;
-    const tcoord = vert.zw;
+    let pos = vert.xy;
+    let tcoord = vert.zw;
 
     var ret: RasterizerData;
     ret.ftcoord = tcoord;
@@ -120,24 +120,24 @@ fn fragment_shader_aa(
     in: RasterizerData,
 ) -> [[location(0)]] vec4<f32> {
     var result: vec4<f32>;
-    const scissor = scissor_mask(u, in.fpos);
-    const stroke_alpha = stroke_mask(u, in.ftcoord);
+    let scissor = scissor_mask(u, in.fpos);
+    let stroke_alpha = stroke_mask(u, in.ftcoord);
 
     if (u.shader_type == 0.0) {
         // // MNVG_SHADER_FILLGRAD
-        const pt = (u.paint_mat * vec3<f32>(in.fpos, 1.0)).xy;
+        let pt = (u.paint_mat * vec3<f32>(in.fpos, 1.0)).xy;
         // // revisit d
-        const d = clamp((sdroundrect(u, pt) + u.feather*0.5) / u.feather, 0.0, 1.0);
+        let d = clamp((sdroundrect(u, pt) + u.feather*0.5) / u.feather, 0.0, 1.0);
         // // float d = saturate((u.feather * 0.5 + sdroundrect(uniforms, pt))
         // //                    / u.feather);
-         const color = mix4(u.inner_col, u.outer_col, d);
+        let color = mix4(u.inner_col, u.outer_col, d);
         // // color *= scissor;
         // // color *= strokeAlpha;
         result = color;
     } elseif (u.shader_type == 1.0) {
         // MNVG_SHADER_IMG
         // this has to be fpos
-        const pt = (u.paint_mat * vec3<f32>(in.fpos, 1.0)).xy / u.extent;
+        let pt = (u.paint_mat * vec3<f32>(in.fpos, 1.0)).xy / u.extent;
 
         var color: vec4<f32>;
         color = textureSample(tex, samplr, pt);
@@ -157,12 +157,12 @@ fn fragment_shader_aa(
 
     if (u.has_mask == 1.0) {
     //     // revisit ftcoord
-        const ftcoord = vec2<f32>(in.ftcoord.x, 1.0 - in.ftcoord.y);
-        const r = textureSample(alpha_tex, alpha_samplr, ftcoord).x;
+        let ftcoord = vec2<f32>(in.ftcoord.x, 1.0 - in.ftcoord.y);
+        let r = textureSample(alpha_tex, alpha_samplr, ftcoord).x;
         var mask: vec4<f32>;
         mask = vec4<f32>(r, r, r, r);
-        // const mask = vec4<f32>(alpha_tex.sample(samplr, ftcoord).r);
-        // const mask = textureSample(alpha_tex, samplr, vec2<u32>(0,0));
+        // let mask = vec4<f32>(alpha_tex.sample(samplr, ftcoord).r);
+        // let mask = textureSample(alpha_tex, samplr, vec2<u32>(0,0));
 
         mask = mask * scissor;
         result = result * mask;
@@ -205,15 +205,15 @@ fn rect_vert_cw(
     vid: i32
 ) -> vec2<f32> {
     var pos: vec2<f32>;
-    const x = rect.x;
-    const y = rect.y;
-    const w = rect.z;
-    const h = rect.w;
+    let x = rect.x;
+    let y = rect.y;
+    let w = rect.z;
+    let h = rect.w;
 
-    const left: f32 = x;
-    const right: f32 = x + w;
-    const bottom: f32 = y;
-    const top: f32 = y + h;
+    let left: f32 = x;
+    let right: f32 = x + w;
+    let bottom: f32 = y;
+    let top: f32 = y + h;
 
     // switch (vid) {
     //     case 0: {
@@ -268,7 +268,7 @@ var<uniform> u: ClearRectIn;
 fn vertex_clear_rect(
     [[builtin(vertex_index)]] vid: u32,
 ) -> ClearRectOut {
-    const pos = rect_vert_cw(u.rect, i32(vid));
+    let pos = rect_vert_cw(u.rect, i32(vid));
 
     var out: ClearRectOut;
     out.pos = vec4<f32>(pos, 0.0, 1.0);
