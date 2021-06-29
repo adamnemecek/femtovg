@@ -70,10 +70,10 @@ impl From<BlendFactor> for wgpu::BlendFactor {
         match a {
             BlendFactor::Zero => Self::Zero,
             BlendFactor::One => Self::One,
-            BlendFactor::SrcColor => Self::SrcColor,
-            BlendFactor::OneMinusSrcColor => Self::OneMinusSrcColor,
-            BlendFactor::DstColor => Self::DstColor,
-            BlendFactor::OneMinusDstColor => Self::OneMinusDstColor,
+            BlendFactor::SrcColor => Self::Src,
+            BlendFactor::OneMinusSrcColor => Self::OneMinusSrc,
+            BlendFactor::DstColor => Self::Dst,
+            BlendFactor::OneMinusDstColor => Self::OneMinusDst,
             BlendFactor::SrcAlpha => Self::SrcAlpha,
             BlendFactor::OneMinusSrcAlpha => Self::OneMinusSrcAlpha,
             BlendFactor::DstAlpha => Self::DstAlpha,
@@ -262,7 +262,7 @@ impl WGPU {
                     binding: 2,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Sampler {
-                        filtering: false,
+                        filtering: true,
                         comparison: false,
                     },
                     count: None,
@@ -283,7 +283,7 @@ impl WGPU {
                     binding: 4,
                     visibility: wgpu::ShaderStage::FRAGMENT,
                     ty: wgpu::BindingType::Sampler {
-                        filtering: false,
+                        filtering: true,
                         comparison: false,
                     },
                     count: None,
