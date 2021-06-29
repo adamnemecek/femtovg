@@ -26,7 +26,7 @@ generational-arena = "0.2.8"
 lru = { version = "0.5.3", default-features = false }
 image = { version = "0.23.6", optional = true, default-features = false }
 serde = { version = "1.0", optional = true, features = ["derive"] }
-wgpu = { git = "https://github.com/gfx-rs/wgpu-rs/" , rev = "5d2e88c6c8942e546b9b7da89be9408a6cd6b31c" }
+wgpu = "0.9"
 #wgpu = { git = "https://github.com/gfx-rs/wgpu-rs/" , features = ["trace"], rev = "0f1b290af947d3cd16280c4eb3b48507f5e6c9fb" }
 pollster = "0.2"
 winit = { version = "0.24", default-features = false }
