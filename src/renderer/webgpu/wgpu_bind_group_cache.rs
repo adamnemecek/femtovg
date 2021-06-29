@@ -67,11 +67,11 @@ fn create_bind_group(
             //uniforms
             wgpu::BindGroupEntry {
                 binding: 0,
-                resource: wgpu::BindingResource::Buffer {
+                resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding{
                     buffer: uniforms.as_ref(),
                     offset: 0,
                     size: wgpu::BufferSize::new(std::mem::size_of::<Params>() as _),
-                },
+                }),
             },
             // texture
             wgpu::BindGroupEntry {
@@ -109,11 +109,11 @@ pub fn create_clear_rect_bind_group(
         layout,
         entries: &[wgpu::BindGroupEntry {
             binding: 0,
-            resource: wgpu::BindingResource::Buffer {
+            resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
                 buffer: uniforms.as_ref(),
                 offset: 0,
                 size: wgpu::BufferSize::new(std::mem::size_of::<ClearRect>() as _),
-            },
+            }),
         }],
     })
 }
